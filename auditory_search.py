@@ -9,7 +9,6 @@ auditory_search = Blueprint('auditory_search', __name__)
 @bot.message_handler(commands=['aud'])
 def search_aud(message):
     # Audience.add_aud()
-
     auds = ' '.join(i.number for i in Audience.get_all_aud())
     bot.send_message(message.from_user.id, f'Какая нада аудитория?\n{auds}')
 

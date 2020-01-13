@@ -10,19 +10,24 @@ registration = Blueprint('registration', __name__)
 @registration.route('/registration')
 @bot.message_handler(commands=['reg'])
 def register(message):
-    Group.add_groups()
+    # Group.add_groups()
 
     group_keyboard = InlineKeyboardMarkup()
+    group_list = []
     for group in Group.get_groups():
-        group_keyboard.add(InlineKeyboardButton(text=group.group, callback_data=group.id))
+        if len(group_list) != 7:
+            group_list.append(InlineKeyboardButton(text=group.group, callback_data=group.group))
+        else:
+            group_keyboard.row(*group_list)
+            group_list.clear()
 
     bot.send_message(message.from_user.id, text='Группа', reply_markup=group_keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: True)
-def callback_worker(call):
+@bot.callback_query_handler(func=lambda call: call.data in [group.group for group in Group.get_groups()])
+def group_callback(call):
     Student.add_user(call.from_user.id)
-    Student.update_user(id=call.from_user.id, group_id=call.data)
+    Student.update_user(id=call.from_user.id, group_id=Group.get_id_by_group(call.data))
 
     message = bot.send_message(call.from_user.id, 'ФИО')
     bot.register_next_step_handler(message, get_name)

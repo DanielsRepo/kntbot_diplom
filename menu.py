@@ -1,8 +1,7 @@
-from flask import Blueprint
+from flask import Blueprint, session
 from credentials import *
 from keyboard import keyboard
 from db.db import db
-
 
 menu = Blueprint('menu', __name__)
 
@@ -23,7 +22,7 @@ def delete(message):
 def start_message(message):
     bot.send_message(message.from_user.id, "я не знаю как тебе помочь")
 
-#
+
 # @bot.message_handler(content_types=['text'])
 # def get_text_messages(message):
 #     if message.text == "Привет":

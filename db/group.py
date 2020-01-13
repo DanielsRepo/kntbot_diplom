@@ -1,4 +1,5 @@
 from db.db import *
+import random
 
 
 class Group(Base):
@@ -9,7 +10,7 @@ class Group(Base):
 
     @staticmethod
     def add_groups():
-        group_list = ['116', '126', '216-a', '416', '616', '716']
+        group_list = [random.randint(100,300) for _ in range(83)]
         for g in group_list:
             group = Group(group=g)
             session.add(group)

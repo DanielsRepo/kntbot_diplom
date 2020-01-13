@@ -6,10 +6,12 @@ from event_organize import event_organize
 from credentials import *
 
 app = Flask(__name__)
+
 app.register_blueprint(menu)
 app.register_blueprint(auditory_search)
 app.register_blueprint(registration)
 app.register_blueprint(event_organize)
+app.secret_key = 'JxDZ55iMgTIF71BBn_jhaA'
 
 
 @app.route("/", methods=['POST'])
@@ -20,3 +22,4 @@ def webhook():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
