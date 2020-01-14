@@ -1,6 +1,18 @@
 from db.db import *
 
 
+class EventVisitor(Base):
+    __tablename__ = 'eventvisitor'
+
+    id = sa.Column(sa.Integer, primary_key=True)
+
+    event_id = sa.Column(sa.Integer, sa.ForeignKey('event.id'))
+    event = relationship('Event')
+
+    student_id = sa.Column(sa.Integer, sa.ForeignKey('student.id'))
+    student = relationship('Student')
+
+
 class Event(Base):
     __tablename__ = 'event'
 
@@ -9,6 +21,13 @@ class Event(Base):
     place = sa.Column(sa.String)
     time = sa.Column(sa.String)
     poster = sa.Column(sa.String)
+
+    @staticmethod
+    def add_visitor(event_id, student_id):
+        event_visit = EventVisitor(event_id=event_id, student_id=student_id)
+        session.add(event_visit)
+        session.commit()
+        return event_visit
 
     @staticmethod
     def add_event(name):

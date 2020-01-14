@@ -11,12 +11,11 @@ registration = Blueprint('registration', __name__)
 @bot.message_handler(commands=['reg'])
 def register(message):
     # Group.add_groups()
-
     group_keyboard = InlineKeyboardMarkup()
     group_list = []
     for group in Group.get_groups():
         if len(group_list) != 7:
-            group_list.append(InlineKeyboardButton(text=group.group, callback_data=group.group))
+            group_list.append(InlineKeyboardButton(text=group.group, callback_data='group_' + group.group))
         else:
             group_keyboard.row(*group_list)
             group_list.clear()
@@ -24,10 +23,11 @@ def register(message):
     bot.send_message(message.from_user.id, text='Группа', reply_markup=group_keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data in [group.group for group in Group.get_groups()])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('group_'))
 def group_callback(call):
+    group = call.data.split('_')[1]
     Student.add_user(call.from_user.id)
-    Student.update_user(id=call.from_user.id, group_id=Group.get_id_by_group(call.data))
+    Student.update_user(id=call.from_user.id, group_id=Group.get_id_by_group(group))
 
     message = bot.send_message(call.from_user.id, 'ФИО')
     bot.register_next_step_handler(message, get_name)
