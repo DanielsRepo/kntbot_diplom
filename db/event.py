@@ -23,13 +23,6 @@ class Event(Base):
     poster = sa.Column(sa.String)
 
     @staticmethod
-    def add_visitor(event_id, student_id):
-        event_visit = EventVisitor(event_id=event_id, student_id=student_id)
-        session.add(event_visit)
-        session.commit()
-        return event_visit
-
-    @staticmethod
     def add_event(name):
         event = Event(name=name)
         session.add(event)
@@ -37,9 +30,9 @@ class Event(Base):
         return event
 
     @staticmethod
-    def update_event(id, name='', place='', time='', poster=''):
-        event = session.query(Event).get(id)
-
+    def update_event(event_id, name='', place='', time='', poster=''):
+        event = session.query(Event).get(event_id)
+        print(event.name)
         if name != '':
             event.name = name
         elif place != '':
@@ -52,21 +45,29 @@ class Event(Base):
         session.commit()
 
     @staticmethod
-    def get_id_by_name(name):
+    def add_visitor(event_id, student_id):
+        event_visit = EventVisitor(event_id=event_id, student_id=student_id)
+        session.add(event_visit)
+        session.commit()
+        return event_visit
+
+    @staticmethod
+    def get_event_id_by_name(name):
         event = session.query(Event).filter(Event.name == name).one()
         return event.id
 
     @staticmethod
-    def get_event(id):
-        return session.query(Event).get(id)
+    def get_event(event_id):
+        return session.query(Event).get(event_id)
 
     @staticmethod
     def get_all_events():
-        return session.query(Event).all()
+        return [event.name for event in session.query(Event).all()]
 
     @staticmethod
-    def delete_event(id):
-        session.delete(session.query(Event).get(id))
+    def delete_event(event_id):
+        session.delete(session.query(EventVisitor).filter(EventVisitor.event_id == event_id).one())
+        session.delete(session.query(Event).get(event_id))
         session.commit()
 
 

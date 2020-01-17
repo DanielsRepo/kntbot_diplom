@@ -1,7 +1,13 @@
 from flask import Blueprint, session
 from credentials import *
-from keyboard import keyboard
-from db.db import db
+from keyboard import menu_keyboard
+from db.db import db, conn
+
+from db.audience import Audience
+from db.event import Event, EventVisitor
+from db.student import Student, Headman, Debtor
+from db.group import Group
+
 
 menu = Blueprint('menu', __name__)
 
@@ -9,11 +15,13 @@ menu = Blueprint('menu', __name__)
 @menu.route('/menu')
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    bot.send_message(message.from_user.id, 'LETS GO', reply_markup=keyboard)
+    bot.send_message(message.from_user.id, 'LETS GO', reply_markup=menu_keyboard)
 
 
 @bot.message_handler(commands=['del'])
 def delete(message):
+    # Audience.__table__.drop()
+
     print("DELETED")
     db.delete()
 

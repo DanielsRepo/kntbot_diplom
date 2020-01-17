@@ -15,18 +15,21 @@ class Audience(Base):
 
     @staticmethod
     def add_aud():
-        buildings_list = [1, 2, 3, 4, 5]
-        for n in buildings_list:
-            session.add(Building(number=n))
+        if len(Audience.get_all_aud()) > 0:
+            return
+        else:
+            buildings_list = [1, 2, 3, 4, 5]
+            for n in buildings_list:
+                session.add(Building(number=n))
 
-        floors_list = [1, 2, 3, 4, 5]
-        for n in floors_list:
-            session.add(Floor(number=n))
+            floors_list = [1, 2, 3, 4, 5]
+            for n in floors_list:
+                session.add(Floor(number=n))
 
-        aud_list = [random.randint(100, 300) for _ in range(30)]
-        for i in aud_list:
-            aud = Audience(number=i, building_id=random.randint(1, 4), floor_id=random.randint(1, 4))
-            session.add(aud)
+            aud_list = [random.randint(100, 300) for _ in range(30)]
+            for i in aud_list:
+                aud = Audience(number=i, building_id=random.randint(1, 4), floor_id=random.randint(1, 4))
+                session.add(aud)
 
         session.commit()
 

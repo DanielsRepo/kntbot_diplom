@@ -1,35 +1,37 @@
 from db.db import *
-import random
 
 
 class Group(Base):
     __tablename__ = 'group'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    group = sa.Column(sa.String)
+    name = sa.Column(sa.String)
 
     @staticmethod
     def add_groups():
-        group_list = [random.randint(100,300) for _ in range(83)]
-        for g in group_list:
-            group = Group(group=g)
-            session.add(group)
+        if len(Group.get_groups()) > 0:
+            return
+        else:
+            group_list = [str(i+1) for i in range(61)]
+            for g in group_list:
+                group = Group(name=g)
+                session.add(group)
 
-        session.commit()
+            session.commit()
 
     @staticmethod
     def get_id_by_group(group):
-        group = session.query(Group).filter(Group.group == group).one()
+        group = session.query(Group).filter(Group.name == group).one()
         return group.id
 
     @staticmethod
     def get_group_by_id(group_id):
         group = session.query(Group).get(group_id)
-        return group.group
+        return group.name
 
     @staticmethod
     def get_groups():
-        return session.query(Group).all()
+        return [group.name for group in session.query(Group).all()]
 
 
 Base.metadata.create_all(conn)

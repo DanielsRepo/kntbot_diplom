@@ -2,7 +2,6 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, Session
 
-
 Base = declarative_base()
 
 
@@ -22,9 +21,10 @@ class Database:
         return conn, metadata
 
     def delete(self):
-        Base.metadata.reflect(conn)
         Base.metadata.drop_all(conn)
-        session.rollback()
+        # for table in metadata.sorted_tables:
+        #     conn.execute(table.delete())
+        # session.commit()
 
 
 db = Database('postgres', 'admin', 'localhost', '5432', 'postgres')
