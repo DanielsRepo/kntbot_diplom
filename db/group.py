@@ -19,10 +19,10 @@ class Group(Base):
 
             session.commit()
 
-    @staticmethod
-    def get_id_by_group(group):
-        group = session.query(Group).filter(Group.name == group).one()
-        return group.id
+    # @staticmethod
+    # def get_id_by_group(group):
+    #     group = session.query(Group).filter(Group.name == group).one()
+    #     return group.id
 
     @staticmethod
     def get_group_by_id(group_id):
@@ -31,7 +31,7 @@ class Group(Base):
 
     @staticmethod
     def get_groups():
-        return [group.name for group in session.query(Group).all()]
+        return [group for group in session.query(Group).all()]
 
 
 Base.metadata.create_all(conn)

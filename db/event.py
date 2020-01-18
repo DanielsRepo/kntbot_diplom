@@ -54,6 +54,7 @@ class Event(Base):
     @staticmethod
     def get_event_id_by_name(name):
         event = session.query(Event).filter(Event.name == name).one()
+        print(event)
         return event.id
 
     @staticmethod
@@ -62,10 +63,11 @@ class Event(Base):
 
     @staticmethod
     def get_all_events():
-        return [event.name for event in session.query(Event).all()]
+        return [event for event in session.query(Event).all()]
 
     @staticmethod
     def delete_event(event_id):
+        # try ! catch!
         session.delete(session.query(EventVisitor).filter(EventVisitor.event_id == event_id).one())
         session.delete(session.query(Event).get(event_id))
         session.commit()

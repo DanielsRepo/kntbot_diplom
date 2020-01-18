@@ -11,7 +11,7 @@ class Headman(Base):
 
     @staticmethod
     def add_headman(headman_id):
-        session.add_headman(Headman(student_id=headman_id))
+        session.add(Headman(student_id=headman_id))
         session.commit()
 
 
@@ -35,13 +35,8 @@ class Debtor(Base):
     
     @staticmethod
     def get_all_debtors():
-        for debtor in session.query(Debtor).all()
-            session.query(Debtor).filter(Debtor.student_id == debtor_id)
+        return [Student.get_student_by_id(debtor.student_id) for debtor in session.query(Debtor).all()]
 
-        Student.get_student_by_id(Debtor.)
-
-        return [debtor.name for debtor in session.query(Debtor).all()]
-        
 
 class Student(Base):
     __tablename__ = 'student'
@@ -56,7 +51,6 @@ class Student(Base):
     @staticmethod
     def add_students():
         if len(Student.get_all_students()) > 0:
-            print(len(Student.get_all_students()))
             return
         else:
             group_ids = [1, 2]
@@ -105,7 +99,7 @@ class Student(Base):
 
     @staticmethod
     def get_all_students():
-        return [student.name for student in session.query(Student).all()]
+        return [student for student in session.query(Student).all()]
 
 
 Base.metadata.create_all(conn)

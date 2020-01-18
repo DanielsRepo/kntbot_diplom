@@ -4,7 +4,7 @@ from db.event import Event
 from db.student import Student
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, Poll, PollOption
 import schedule
-from keyboard import make_event_keyboard
+from keyboard import make_keyboard
 
 event_organize = Blueprint('event_organize', __name__)
 
@@ -20,7 +20,6 @@ def create_event(message):
 def name_event(message):
     name = message.text
     event = Event.add_event(name=name)
-    print(event.id)
     message = bot.send_message(message.from_user.id, "Место проведения")
     bot.register_next_step_handler(message, place_event, event.id)
 
@@ -58,30 +57,30 @@ def picture_event(message, event_id):
 # deleting
 @bot.message_handler(commands=['edel'])
 def delete_event(message):
-    keys_list, event_keyboard = make_event_keyboard(Event.get_all_events(), 'edel_')
+    event_keyboard = make_keyboard('event', Event.get_all_events(), 'edel_')
 
     bot.send_message(message.from_user.id, text='Какое мероприятие удалить?', reply_markup=event_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('edel_') == True)
 def del_event_callback(call):
-    event_name = call.data.split('_')[1]
-    bot.send_message(call.from_user.id, text=f'Мероприятие {event_name} удалено')
-    Event.delete_event(Event.get_event_id_by_name(event_name))
+    event_id = call.data.split('_')[1]
+    bot.send_message(call.from_user.id, text=f'Мероприятие {Event.get_event(event_id).name} удалено')
+    Event.delete_event(event_id)
 
 
 # changing
 @bot.message_handler(commands=['ech'])
 def change_event(message):
-    keys_list, event_keyboard = make_event_keyboard(Event.get_all_events(), 'ech_')
+    event_keyboard = make_keyboard('event', Event.get_all_events(), 'ech_')
 
     bot.send_message(message.from_user.id, text='Какое мероприятие изменить?', reply_markup=event_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('ech_') == True)
 def event_callback(call):
-    event_name = call.data.split('_')[1]
-    event_id = str(Event.get_event_id_by_name(event_name))
+    event_id = call.data.split('_')[1]
+    event_name = Event.get_event(event_id).name
 
     change_event_keyboard = InlineKeyboardMarkup()
     change_event_keyboard.add(InlineKeyboardButton(text='Название', callback_data='name_' + event_id))
@@ -172,15 +171,15 @@ def change_event_poster(message, event_id):
 # registration
 @bot.message_handler(commands=['regon'])
 def register_on_event(message):
-    keys_list, event_keyboard = make_event_keyboard(Event.get_all_events(), 'regon_')
+    event_keyboard = make_keyboard('event', Event.get_all_events(), 'regon_')
 
     bot.send_message(message.from_user.id, text='На какое мероприятие идешь?', reply_markup=event_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('regon_'))
 def register_on_event_callback(call):
-    event_name = call.data.split('_')[1]
-    event_id = Event.get_event_id_by_name(event_name)
+    event_id = call.data.split('_')[1]
+    event_name = Event.get_event(event_id).name
 
     student = Student.get_student_by_id(call.from_user.id)
 
@@ -213,14 +212,15 @@ def send_poll(message, poll):
 # notification
 @bot.message_handler(commands=['alarm'])
 def notification(message):
-    keys_list, event_keyboard = make_event_keyboard(Event.get_all_events(), 'alarm_')
+    event_keyboard = make_keyboard('event', Event.get_all_events(), 'alarm_')
 
     bot.send_message(message.from_user.id, text='Какое мероприятие высветить?', reply_markup=event_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('alarm_') == True)
 def notification_callback(call):
-    event = Event.get_event(Event.get_event_id_by_name(call.data.split('_')[1]))
+    event_id = call.data.split('_')[1]
+    event = Event.get_event(event_id)
 
     message = f'''
         {event.place} {event.time} будет {event.name}

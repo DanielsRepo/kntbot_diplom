@@ -2,7 +2,7 @@ from flask import Blueprint
 from credentials import *
 from db.group import Group
 from db.student import Student
-from keyboard import make_group_keyboard
+from keyboard import make_keyboard
 
 registration = Blueprint('registration', __name__)
 
@@ -13,16 +13,16 @@ def register(message):
     Group.add_groups()
     Student.add_students()
 
-    group_keyboard = make_group_keyboard(Group.get_groups(), 'group_')
+    group_keyboard = make_keyboard('group', Group.get_groups(), 'group_')
 
     bot.send_message(message.from_user.id, text='Группа', reply_markup=group_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('group_'))
 def group_callback(call):
-    group = call.data.split('_')[1]
+    group_id = call.data.split('_')[1]
     Student.add_student(call.from_user.id)
-    Student.update_student(student_id=call.from_user.id, group_id=Group.get_id_by_group(group))
+    Student.update_student(student_id=call.from_user.id, group_id=group_id)
 
     message = bot.send_message(call.from_user.id, 'ФИО')
     bot.register_next_step_handler(message, get_name)

@@ -3,7 +3,7 @@ from credentials import *
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from db.group import Group
 from db.student import Student, Headman
-from keyboard import make_group_keyboard
+from keyboard import make_keyboard
 
 headmans = Blueprint('headmans', __name__)
 
@@ -13,22 +13,16 @@ headmans = Blueprint('headmans', __name__)
 def star(message):
     group_list = Group.get_groups()
 
-    group_keyboard = make_group_keyboard(group_list, 'headmangroup_')
+    group_keyboard = make_keyboard('group', group_list, 'headmangroup_')
 
     bot.send_message(message.from_user.id, text='Группа', reply_markup=group_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('headmangroup_'))
 def group_callback(call):
-    group = call.data.split('_')[1]
+    group_id = call.data.split('_')[1]
 
-    student_keyboard = InlineKeyboardMarkup(row_width=1)
-    student_keyboard_list = []
-
-    for i in Student.get_students_by_group(Group.get_id_by_group(group)):
-        student_keyboard_list.append(InlineKeyboardButton(text=i.name, callback_data=f'headman_{group}_' + str(i.id)))
-
-    student_keyboard.add(*student_keyboard_list)
+    student_keyboard = make_keyboard('student', Student.get_students_by_group(group_id), f'headman_{Group.get_group_by_id(group_id)}_')
 
     bot.send_message(call.from_user.id, text='Кто староста', reply_markup=student_keyboard)
 
