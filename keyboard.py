@@ -3,11 +3,13 @@ from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeybo
 buttons = [
     'Расписание звонков',
     'Сайт НУЗП',
-    'Поиск аудиторий'
+    'Поиск аудиторий',
+    'Мероприятия'
 ]
 
-menu_keyboard = ReplyKeyboardMarkup(True, True)
-menu_keyboard.row(*buttons)
+menu_keyboard = ReplyKeyboardMarkup(True, False)
+for button in buttons:
+    menu_keyboard.add(button)
 
 
 def make_keyboard(keyboard_type, elem_list, marker):

@@ -19,6 +19,7 @@ class Event(Base):
     id = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String)
     place = sa.Column(sa.String)
+    date = sa.Column(sa.String)
     time = sa.Column(sa.String)
     poster = sa.Column(sa.String)
 
@@ -30,13 +31,28 @@ class Event(Base):
         return event
 
     @staticmethod
-    def update_event(event_id, name='', place='', time='', poster=''):
+    def add_events():
+        if len(Event.get_all_events()) > 0:
+            return
+        else:
+            session.add(Event(name='Мистер ЗНТУ', place='ауд. 366', date='12.08.20', time='10:00'))
+            session.add(Event(name='КВН', place='акт зал', date='20.12.20', time='18:00'))
+            session.add(Event(name='Мисс ЗНТУ', place='ауд. 266', date='22.09.20', time='11:00'))
+            session.add(Event(name='Ярмарка', place='ауд. 366', date='12.08.20', time='10:00'))
+            session.add(Event(name='Бал выпускников', place='ауд. 777', date='12.12.12', time='12:12'))
+
+            session.commit()
+
+    @staticmethod
+    def update_event(event_id, name='', place='', date='', time='', poster=''):
         event = session.query(Event).get(event_id)
-        print(event.name)
+
         if name != '':
             event.name = name
         elif place != '':
             event.place = place
+        elif date != '':
+            event.date = date
         elif time != '':
             event.time = time
         elif poster != '':
@@ -67,8 +83,11 @@ class Event(Base):
 
     @staticmethod
     def delete_event(event_id):
-        # try ! catch!
-        session.delete(session.query(EventVisitor).filter(EventVisitor.event_id == event_id).one())
+        event_visitors = session.query(EventVisitor).filter(EventVisitor.event_id == event_id)
+
+        if len(event_visitors.all()) > 0:
+            event_visitors.delete()
+
         session.delete(session.query(Event).get(event_id))
         session.commit()
 

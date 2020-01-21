@@ -5,6 +5,8 @@ from db.student import Student
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, Poll, PollOption
 import schedule
 from keyboard import make_keyboard
+from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
+
 
 event_organize = Blueprint('event_organize', __name__)
 
@@ -27,6 +29,13 @@ def name_event(message):
 def place_event(message, event_id):
     Event.update_event(event_id=event_id, place=message.text)
 
+    message = bot.send_message(message.from_user.id, "Дата проведения")
+    bot.register_next_step_handler(message, date_event, event_id)
+
+
+def date_event(message, event_id):
+    Event.update_event(event_id=event_id, place=message.text)
+
     message = bot.send_message(message.from_user.id, "Время проведения")
     bot.register_next_step_handler(message, time_event, event_id)
 
@@ -47,8 +56,7 @@ def picture_event(message, event_id):
 
     success_message = f'''
         Организация мероприятия {event.name}
-        в {event.place}
-        на {event.time}
+        в {event.place} {event.date} {event.time}
         на удивление прошла успешно
     '''
     bot.send_photo(message.from_user.id, photo=file_id, caption=success_message)
@@ -85,6 +93,7 @@ def event_callback(call):
     change_event_keyboard = InlineKeyboardMarkup()
     change_event_keyboard.add(InlineKeyboardButton(text='Название', callback_data='name_' + event_id))
     change_event_keyboard.add(InlineKeyboardButton(text='Место проведения', callback_data='place_' + event_id))
+    change_event_keyboard.add(InlineKeyboardButton(text='Дата проведения', callback_data='date_' + event_id))
     change_event_keyboard.add(InlineKeyboardButton(text='Время проведения', callback_data='time_' + event_id))
     change_event_keyboard.add(InlineKeyboardButton(text='Постер', callback_data='poster_' + event_id))
 
@@ -93,7 +102,7 @@ def event_callback(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('name_') or call.data.startswith('place_') or
-                                              call.data.startswith('time_') or call.data.startswith('poster_'))
+                    call.data.startswith('date_') or call.data.startswith('time_') or call.data.startswith('poster_'))
 def change_event_callback(call):
     event_id = call.data.split('_')[1]
 
@@ -103,6 +112,9 @@ def change_event_callback(call):
     elif call.data.startswith('place_'):
         message = bot.send_message(call.from_user.id, "Новое место")
         bot.register_next_step_handler(message, change_event_place, event_id)
+    elif call.data.startswith('date_'):
+        message = bot.send_message(call.from_user.id, "Новая дата")
+        bot.register_next_step_handler(message, change_event_date, event_id)
     elif call.data.startswith('time_'):
         message = bot.send_message(call.from_user.id, "Новое время")
         bot.register_next_step_handler(message, change_event_time, event_id)
@@ -127,6 +139,20 @@ def change_event_name(message, event_id):
 
 def change_event_place(message, event_id):
     Event.update_event(event_id, place=message.text)
+
+    event = Event.get_event(event_id)
+
+    success_message = f'''
+        Изменение инфо про мероприятие {event.name}
+        в {event.place}
+        на {event.time}
+        на удивление прошло успешно
+    '''
+    bot.send_message(message.from_user.id, text=success_message)
+
+
+def change_event_date(message, event_id):
+    Event.update_event(event_id, date=message.text)
 
     event = Event.get_event(event_id)
 
@@ -187,28 +213,6 @@ def register_on_event_callback(call):
     bot.send_message(call.from_user.id, text=f'Ты {student.name} на мероприятие {event_name} зарегистрирован')
 
 
-@bot.message_handler(commands=['poll'])
-def create_poll(message):
-    message = bot.send_message(message.from_user.id, text='Вопрос опроса')
-    bot.register_next_step_handler(message, add_poll_options)
-
-
-def add_poll_options(message):
-    poll = Poll(message.text)
-
-    message = bot.send_message(message.from_user.id, text='Пункты опроса')
-    bot.register_next_step_handler(message, send_poll, poll)
-
-
-def send_poll(message, poll):
-    options = message.text.split('\n')
-    for i in options:
-        poll.add(PollOption(i))
-
-    channel_id = '-1001104545927'
-    bot.send_poll(channel_id, poll)
-
-
 # notification
 @bot.message_handler(commands=['alarm'])
 def notification(message):
@@ -228,6 +232,37 @@ def notification_callback(call):
     channel_id = '-1001104545927'
     bot.send_photo(channel_id, photo=event.poster, caption=message)
 
+
+@bot.message_handler(commands=['sch'])
+def schelude(message):
+    Event.add_events()
+
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    keys_list = []
+
+    for event in Event.get_all_events():
+        keys_list.append(InlineKeyboardButton(text=event.name, callback_data=f'schelude_{event.id}'))
+        keys_list.append(InlineKeyboardButton(text=str(event.date), callback_data=f'schelude_{event.id}'))
+
+    keyboard.add(*keys_list)
+
+    bot.send_message(message.from_user.id, text=f'Расписание мероприятий', reply_markup=keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('schelude_') == True)
+def schelude_callback(call):
+    event_id = call.data.split('_')[1]
+    event = Event.get_event(event_id)
+
+    message = f'''
+        {event.name} {event.place} {event.date} {event.time}
+    '''
+
+    keyboard = InlineKeyboardMarkup()
+    keyboard.add(InlineKeyboardButton(text='Зарегистрироваться', callback_data=f'regon_{event.id}'))
+
+    bot.send_message(call.from_user.id, text=message, reply_markup=keyboard)
+    # bot.send_photo(channel_id, photo=event.poster, caption=message)
 
 
 # scheduler = schedule.Scheduler()

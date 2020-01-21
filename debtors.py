@@ -9,6 +9,7 @@ debtors = Blueprint('debtors', __name__)
 
 @debtors.route('/debtors')
 @bot.message_handler(commands=['debt'])
+# add debtor
 def debt(message):
     group_list = Group.get_groups()
 
@@ -38,6 +39,7 @@ def group_callback(call):
     bot.send_message(call.from_user.id, text=f'Студент {Student.get_student_by_id(debtor_id).name} группы {group} занесен в должники')
 
 
+# delete debtor
 @bot.message_handler(commands=['deldebt'])
 def delete_debt(message):
     debtor_keyboard = make_keyboard('student', Debtor.get_all_debtors(), f'deldebt_')
@@ -53,4 +55,23 @@ def group_callback(call):
 
     Debtor.delete_debtor(debtor_id)
 
+
+# get debtors
+@bot.message_handler(commands=['grdebt'])
+def get_debtors_by_group(message):
+    group_list = Group.get_groups()
+
+    group_keyboard = make_keyboard('group', group_list, 'grdebt_')
+
+    bot.send_message(message.from_user.id, text='Должники какой группы', reply_markup=group_keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('grdebt_'))
+def group_callback(call):
+    group_id = call.data.split('_')[1]
+    debtors = ''
+    for debtor in Debtor.get_debtors_by_group(group_id):
+        debtors += debtor + '\n'
+
+    bot.send_message(call.from_user.id, text=f'Должники группы {Group.get_group_by_id(group_id)}:\n{debtors}')
 
