@@ -1,16 +1,29 @@
 from flask import Blueprint
 from credentials import *
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from db.group import Group
 from db.student import Student, Headman
 from keyboard import make_keyboard
+from helpers import restricted
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 headmans = Blueprint('headmans', __name__)
 
 
 @headmans.route('/headmans')
+def star_keyboard(message):
+    keyboard = InlineKeyboardMarkup(row_width=1)
+
+    keyboard.add(InlineKeyboardButton(text='Назначить старосту', callback_data='assign_headman'))
+    keyboard.add(InlineKeyboardButton(text='Изменить старосту', callback_data='change_headman'))
+    keyboard.add(InlineKeyboardButton(text='Глянуть старосту', callback_data='get_headman'))
+
+    bot.send_message(message.from_user.id, text='Выбери', reply_markup=keyboard)
+
+
 # add headman
 @bot.message_handler(commands=['star'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('assign_headman'))
+@restricted
 def star(message):
     group_list = Group.get_groups()
 
@@ -40,6 +53,8 @@ def student_callback(call):
 
 # change headman
 @bot.message_handler(commands=['chstar'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('change_headman'))
+@restricted
 def change_star(message):
     group_list = Group.get_groups()
 
@@ -69,6 +84,8 @@ def student_callback(call):
 
 # get headman
 @bot.message_handler(commands=['getstar'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('get_headman'))
+@restricted
 def get_star(message):
     group_list = Group.get_groups()
 
@@ -83,5 +100,5 @@ def group_callback(call):
 
     headman = Headman.get_headman_by_group(group_id)
 
-    bot.send_message(call.from_user.id, text=f'{Student.get_student_by_id(headman.id).name}')
+    bot.send_message(call.from_user.id, text=f'{Student.get_student_by_id(headman.student_id).name}')
 

@@ -31,7 +31,7 @@ class Group(Base):
 
     @staticmethod
     def get_groups():
-        return [group for group in session.query(Group).all()]
+        return [group for group in session.query(Group).all()][0:10]
 
 
 Base.metadata.create_all(conn)

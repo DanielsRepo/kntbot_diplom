@@ -2,18 +2,29 @@ from flask import Blueprint
 from credentials import *
 from db.event import Event
 from db.student import Student
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, Poll, PollOption
-import schedule
 from keyboard import make_keyboard
-from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
-
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from helpers import restricted
 
 event_organize = Blueprint('event_organize', __name__)
 
 
 @event_organize.route('/event_organize')
+def events_keyboard(message):
+    keyboard = InlineKeyboardMarkup()
+
+    keyboard.add(InlineKeyboardButton(text='Создать мероприятие', callback_data='new_event'))
+    keyboard.add(InlineKeyboardButton(text='Удалить мероприятие', callback_data='delete_event'))
+    keyboard.add(InlineKeyboardButton(text='Изменить мероприятие', callback_data='change_event'))
+    keyboard.add(InlineKeyboardButton(text='Обьявить мероприятие', callback_data='alarm_event'))
+
+    bot.send_message(message.from_user.id, text='Выбери', reply_markup=keyboard)
+
+
 # creating
 @bot.message_handler(commands=['org'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('new_event'))
+@restricted
 def create_event(message):
     message = bot.send_message(message.from_user.id, "Название мероприятия")
     bot.register_next_step_handler(message, name_event)
@@ -34,7 +45,7 @@ def place_event(message, event_id):
 
 
 def date_event(message, event_id):
-    Event.update_event(event_id=event_id, place=message.text)
+    Event.update_event(event_id=event_id, date=message.text)
 
     message = bot.send_message(message.from_user.id, "Время проведения")
     bot.register_next_step_handler(message, time_event, event_id)
@@ -64,6 +75,8 @@ def picture_event(message, event_id):
 
 # deleting
 @bot.message_handler(commands=['edel'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('delete_event'))
+@restricted
 def delete_event(message):
     event_keyboard = make_keyboard('event', Event.get_all_events(), 'edel_')
 
@@ -79,6 +92,8 @@ def del_event_callback(call):
 
 # changing
 @bot.message_handler(commands=['ech'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('change_event'))
+@restricted
 def change_event(message):
     event_keyboard = make_keyboard('event', Event.get_all_events(), 'ech_')
 
@@ -194,27 +209,10 @@ def change_event_poster(message, event_id):
     bot.send_photo(message.from_user.id, photo=file_id, caption=success_message)
 
 
-# registration
-@bot.message_handler(commands=['regon'])
-def register_on_event(message):
-    event_keyboard = make_keyboard('event', Event.get_all_events(), 'regon_')
-
-    bot.send_message(message.from_user.id, text='На какое мероприятие идешь?', reply_markup=event_keyboard)
-
-
-@bot.callback_query_handler(func=lambda call: call.data.startswith('regon_'))
-def register_on_event_callback(call):
-    event_id = call.data.split('_')[1]
-    event_name = Event.get_event(event_id).name
-
-    student = Student.get_student_by_id(call.from_user.id)
-
-    Event.add_visitor(event_id, call.from_user.id)
-    bot.send_message(call.from_user.id, text=f'Ты {student.name} на мероприятие {event_name} зарегистрирован')
-
-
 # notification
 @bot.message_handler(commands=['alarm'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('alarm_event'))
+@restricted
 def notification(message):
     event_keyboard = make_keyboard('event', Event.get_all_events(), 'alarm_')
 
@@ -263,6 +261,26 @@ def schelude_callback(call):
 
     bot.send_message(call.from_user.id, text=message, reply_markup=keyboard)
     # bot.send_photo(channel_id, photo=event.poster, caption=message)
+
+
+# registration
+@bot.message_handler(commands=['regon'])
+def register_on_event(message):
+    event_keyboard = make_keyboard('event', Event.get_all_events(), 'regon_')
+
+    bot.send_message(message.from_user.id, text='На какое мероприятие идешь?', reply_markup=event_keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('regon_'))
+def register_on_event_callback(call):
+    event_id = call.data.split('_')[1]
+    event_name = Event.get_event(event_id).name
+
+    student = Student.get_student_by_id(call.from_user.id)
+
+    Event.add_visitor(event_id, call.from_user.id)
+    bot.send_message(call.from_user.id, text=f'Ты {student.name} на мероприятие {event_name} зарегистрирован')
+
 
 
 # scheduler = schedule.Scheduler()

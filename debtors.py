@@ -3,12 +3,26 @@ from credentials import *
 from db.group import Group
 from db.student import Student, Debtor
 from keyboard import make_keyboard
+from helpers import restricted
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 debtors = Blueprint('debtors', __name__)
 
 
 @debtors.route('/debtors')
+def debtor_keyboard(message):
+    keyboard = InlineKeyboardMarkup()
+
+    keyboard.add(InlineKeyboardButton(text='Добавить должника', callback_data='add_debtor'))
+    keyboard.add(InlineKeyboardButton(text='Удалить должника', callback_data='delete_debtor'))
+    keyboard.add(InlineKeyboardButton(text='Должники по группе', callback_data='debtors_of_group'))
+
+    bot.send_message(message.from_user.id, text='Выбери', reply_markup=keyboard)
+
+
 @bot.message_handler(commands=['debt'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('add_debtor'))
+@restricted
 # add debtor
 def debt(message):
     group_list = Group.get_groups()
@@ -41,13 +55,15 @@ def group_callback(call):
 
 # delete debtor
 @bot.message_handler(commands=['deldebt'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('delete_debtor'))
+@restricted
 def delete_debt(message):
-    debtor_keyboard = make_keyboard('student', Debtor.get_all_debtors(), f'deldebt_')
+    debtor_keyboard = make_keyboard('student', Debtor.get_all_debtors(), f'deldebtor_')
 
     bot.send_message(message.from_user.id, text='Кого убрать', reply_markup=debtor_keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('deldebt_'))
+@bot.callback_query_handler(func=lambda call: call.data.startswith('deldebtor_'))
 def group_callback(call):
     debtor_id = call.data.split('_')[1]
 
@@ -58,15 +74,17 @@ def group_callback(call):
 
 # get debtors
 @bot.message_handler(commands=['grdebt'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('debtors_of_group'))
+@restricted
 def get_debtors_by_group(message):
     group_list = Group.get_groups()
 
-    group_keyboard = make_keyboard('group', group_list, 'grdebt_')
+    group_keyboard = make_keyboard('group', group_list, 'grdebtor_')
 
     bot.send_message(message.from_user.id, text='Должники какой группы', reply_markup=group_keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('grdebt_'))
+@bot.callback_query_handler(func=lambda call: call.data.startswith('grdebtor_'))
 def group_callback(call):
     group_id = call.data.split('_')[1]
     debtors = ''

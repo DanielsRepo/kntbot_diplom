@@ -48,7 +48,7 @@ class Debtor(Base):
     @staticmethod
     def get_debtors_by_group(group_id):
         debtors = session.query(Debtor, Student).filter(Student.group_id == group_id).filter(Debtor.student_id == Student.id).all()
-
+        print(debtors)
         return [Student.get_student_by_id(debtor[0].student_id).name for debtor in debtors]
 
     @staticmethod

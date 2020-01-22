@@ -1,9 +1,13 @@
 from flask import Blueprint, session
-from credentials import *
-from keyboard import menu_keyboard, buttons
+from keyboard import make_menu_keyboard, buttons, studdekan_keyboard, studdekan_buttons
 from db.db import db, conn
 from auditory_search import search_aud
 from event_organize import schelude
+from headmans import star_keyboard
+from debtors import debtor_keyboard
+from event_organize import events_keyboard
+from credentials import *
+from helpers import restricted
 
 menu = Blueprint('menu', __name__)
 
@@ -11,7 +15,42 @@ menu = Blueprint('menu', __name__)
 @menu.route('/menu')
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    bot.send_message(message.from_user.id, 'LETS GO', reply_markup=menu_keyboard)
+    bot.send_message(message.from_user.id, 'Выберите пункт меню:', reply_markup=make_menu_keyboard(message))
+
+
+@bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in buttons)
+def get_text_messages(message):
+    if message.text == buttons[0]:
+        bot.send_photo(message.from_user.id, "https://image.winudf.com/v2/image1/Y29tLnJ1c2xhbnRlcmVzaGNoZW5rby5zdHVkZHlfc2NyZWVuXzJfMTU1NDAwODQzN18wNjU/screen-2.jpg?fakeurl=1&type=.jpg")
+    elif message.text == buttons[1]:
+        bot.send_message(message.from_user.id, "http://www.zntu.edu.ua")
+    elif message.text == buttons[2]:
+        search_aud(message)
+    elif message.text == buttons[3]:
+        schelude(message)
+    elif message.text == buttons[4]:
+        bot.send_message(message.from_user.id, "Пока ниче")
+    elif message.text == buttons[5]:
+        studdekan(message)
+
+
+@bot.message_handler(commands=['studdekan'])
+@restricted
+def studdekan(message):
+    bot.send_message(message.from_user.id, 'Выберите пункт меню:', reply_markup=studdekan_keyboard)
+
+
+@bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in studdekan_buttons)
+@restricted
+def get_text_messages(message):
+    if message.text == studdekan_buttons[0]:
+        star_keyboard(message)
+    elif message.text == studdekan_buttons[1]:
+        debtor_keyboard(message)
+    elif message.text == studdekan_buttons[2]:
+        events_keyboard(message)
+    elif message.text == studdekan_buttons[3]:
+        start_message(message)
 
 
 @bot.message_handler(commands=['del'])
@@ -21,21 +60,12 @@ def delete(message):
 
 
 @bot.message_handler(commands=['help'])
-def start_message(message):
+def help_message(message):
     bot.send_message(message.from_user.id, "я не знаю как тебе помочь")
 
 
-@bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in buttons)
+@bot.message_handler(func=lambda message: message.content_type == 'text')
 def get_text_messages(message):
-    if message.text == "Привет":
-        bot.send_message(message.from_user.id, "Пока")
-    elif message.text == buttons[0]:
-        bot.send_photo(message.from_user.id, "https://image.winudf.com/v2/image1/Y29tLnJ1c2xhbnRlcmVzaGNoZW5rby5zdHVkZHlfc2NyZWVuXzJfMTU1NDAwODQzN18wNjU/screen-2.jpg?fakeurl=1&type=.jpg")
-    elif message.text == buttons[1]:
-        bot.send_message(message.from_user.id, "http://www.zntu.edu.ua")
-    elif message.text == buttons[2]:
-        search_aud(message)
-    elif message.text == buttons[3]:
-        schelude(message)
-    # else:
-    #     bot.send_message(message.from_user.id, "Отвали или обратись за помощью /help.")
+    bot.send_message(message.from_user.id, "Отвали или обратись за помощью /help.")
+
+
