@@ -1,5 +1,5 @@
 from db.db import *
-
+from db.student import Student
 
 class EventVisitor(Base):
     __tablename__ = 'eventvisitor'
@@ -44,6 +44,14 @@ class Event(Base):
             session.commit()
 
     @staticmethod
+    def add_visitors():
+        for e in Event.get_all_events():
+            for s in Student.get_all_students():
+                event_visit = EventVisitor(event_id=e.id, student_id=s.id)
+                session.add(event_visit)
+                session.commit()
+
+    @staticmethod
     def update_event(event_id, name='', place='', date='', time='', poster=''):
         event = session.query(Event).get(event_id)
 
@@ -66,6 +74,10 @@ class Event(Base):
         session.add(event_visit)
         session.commit()
         return event_visit
+
+    @staticmethod
+    def get_visitors(event_id):
+        return [visitor.student_id for visitor in session.query(EventVisitor).filter(EventVisitor.event_id == event_id)]
 
     @staticmethod
     def get_event_id_by_name(name):

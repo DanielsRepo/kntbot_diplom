@@ -2,14 +2,76 @@ from flask import Blueprint
 from credentials import *
 from db.event import Event
 from db.student import Student
+from db.group import Group
 from keyboard import make_keyboard
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from helpers import restricted
+import xlsxwriter
+import time
 
 event_organize = Blueprint('event_organize', __name__)
 
 
 @event_organize.route('/event_organize')
+def get_fio(s):
+    return f"{s.split(' ')[0]} {s.split(' ')[1][0]}. {s.split(' ')[2][0]}."
+    # res = []
+    # for s in students:
+    #     try:
+    #         s = f"{s.split(' ')[0]} {s.split(' ')[1][0]}. {s.split(' ')[2][0]}."
+    #         res.append(s)
+    #     except IndexError:
+    #         continue
+    #
+    # return res
+
+
+def doit(stud_dict, worksheet, workbook):
+    col_counter = 0
+
+    for group, students in stud_dict.items():
+        col = col_counter
+
+        cell_format = workbook.add_format({'bold': True, 'align': 'center'})
+        worksheet.write(0, col, group, cell_format)
+
+        col_width = max([len(s) for s in students])
+
+        stud_list = stud_dict[group]
+
+        for i in range(len(stud_list)):
+            worksheet.set_column(i + 1, col, col_width)
+            worksheet.write(i + 1, col, stud_list[i])
+
+        col_counter += 1
+
+
+@bot.message_handler(commands=['exc'])
+def excel(message):
+    # Event.add_visitors()
+    visitor_ids = Event.get_visitors(1)
+    stud_dict = {}
+
+    for visitor_id in visitor_ids:
+        if visitor_id != 374464076:
+            s = Student.get_student_by_id(visitor_id)
+
+            s_name = get_fio(s.name)
+            s_group = f'КНТ-{Group.get_group_by_id(s.group_id)}'
+
+            if s_group in stud_dict:
+                stud_dict[s_group].append(s_name)
+            else:
+                stud_dict[s_group] = [s_name]
+
+    workbook = xlsxwriter.Workbook('EVENT.xlsx')
+    worksheet = workbook.add_worksheet()
+    doit(stud_dict, worksheet, workbook)
+    workbook.close()
+
+    bot.send_message(message.from_user.id, text='added')
+
+
 def events_keyboard(message):
     keyboard = InlineKeyboardMarkup()
 
