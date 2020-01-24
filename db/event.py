@@ -1,6 +1,8 @@
 from db.db import *
 from db.student import Student
 
+import random
+
 class EventVisitor(Base):
     __tablename__ = 'eventvisitor'
 
@@ -38,18 +40,21 @@ class Event(Base):
             session.add(Event(name='Мистер ЗНТУ', place='ауд. 366', date='12.08.20', time='10:00'))
             session.add(Event(name='КВН', place='акт зал', date='20.12.20', time='18:00'))
             session.add(Event(name='Мисс ЗНТУ', place='ауд. 266', date='22.09.20', time='11:00'))
-            session.add(Event(name='Ярмарка', place='ауд. 366', date='12.08.20', time='10:00'))
             session.add(Event(name='Бал выпускников', place='ауд. 777', date='12.12.12', time='12:12'))
 
             session.commit()
 
     @staticmethod
-    def add_visitors():
-        for e in Event.get_all_events():
-            for s in Student.get_all_students():
-                event_visit = EventVisitor(event_id=e.id, student_id=s.id)
+    def add_visitors(event_id):
+        if len(Event.get_visitors(event_id)) > 0:
+            return
+        else:
+            s_id_list = random.sample(range(1, 60), random.randint(20, 40))
+            for s_id in s_id_list:
+                event_visit = EventVisitor(event_id=event_id, student_id=s_id)
                 session.add(event_visit)
-                session.commit()
+
+            session.commit()
 
     @staticmethod
     def update_event(event_id, name='', place='', date='', time='', poster=''):
@@ -82,7 +87,6 @@ class Event(Base):
     @staticmethod
     def get_event_id_by_name(name):
         event = session.query(Event).filter(Event.name == name).one()
-        print(event)
         return event.id
 
     @staticmethod

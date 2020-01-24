@@ -1,6 +1,6 @@
 from db.db import *
 
-import time
+from helpers import students
 
 class Headman(Base):
     __tablename__ = 'headman'
@@ -71,19 +71,19 @@ class Student(Base):
         if len(Student.get_all_students()) > 0:
             return
         else:
-            group_ids = [1, 2]
+            group_ids = [1, 2, 3, 4]
 
-            session.add(Student(name=f'Цветков Флор Ярославович', phone='21323523', group_id=group_ids[0]))
-            session.add(Student(name=f'Селезнёв Мартин Альбертович', phone='325634', group_id=group_ids[0]))
-            session.add(Student(name=f'Ковалёв Бронислав Игоревич', phone='456547', group_id=group_ids[0]))
-            session.add(Student(name=f'Назаров Гурий Адольфович', phone='2345231', group_id=group_ids[0]))
-            session.add(Student(name=f'Белов Ян Созонович', phone='2345231', group_id=group_ids[0]))
+            for s in students[:10]:
+                session.add(Student(name=s, phone='111111111', group_id=group_ids[0]))
 
-            session.add(Student(name=f'Овчинников Корнелий Вадимович', phone='21323523', group_id=group_ids[1]))
-            session.add(Student(name=f'Фомичёв Феликс Григорьевич', phone='325634', group_id=group_ids[1]))
-            session.add(Student(name=f'Князев Модест Мэлорович', phone='456547', group_id=group_ids[1]))
-            session.add(Student(name=f'Козлов Иван Федорович', phone='2345231', group_id=group_ids[1]))
-            session.add(Student(name=f'Фёдоров Альберт Германнович', phone='2345231', group_id=group_ids[1]))
+            for s in students[10:25]:
+                session.add(Student(name=s, phone='222222222', group_id=group_ids[1]))
+
+            for s in students[25:40]:
+                session.add(Student(name=s, phone='333333333', group_id=group_ids[2]))
+
+            for s in students[40:60]:
+                session.add(Student(name=s, phone='444444444', group_id=group_ids[3]))
 
             session.commit()
 

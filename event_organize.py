@@ -5,73 +5,16 @@ from db.student import Student
 from db.group import Group
 from keyboard import make_keyboard
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from helpers import restricted
+from helpers import restricted, get_fio, doit
 import xlsxwriter
+from pprint import pprint
 import time
+
 
 event_organize = Blueprint('event_organize', __name__)
 
 
 @event_organize.route('/event_organize')
-def get_fio(s):
-    return f"{s.split(' ')[0]} {s.split(' ')[1][0]}. {s.split(' ')[2][0]}."
-    # res = []
-    # for s in students:
-    #     try:
-    #         s = f"{s.split(' ')[0]} {s.split(' ')[1][0]}. {s.split(' ')[2][0]}."
-    #         res.append(s)
-    #     except IndexError:
-    #         continue
-    #
-    # return res
-
-
-def doit(stud_dict, worksheet, workbook):
-    col_counter = 0
-
-    for group, students in stud_dict.items():
-        col = col_counter
-
-        cell_format = workbook.add_format({'bold': True, 'align': 'center'})
-        worksheet.write(0, col, group, cell_format)
-
-        col_width = max([len(s) for s in students])
-
-        stud_list = stud_dict[group]
-
-        for i in range(len(stud_list)):
-            worksheet.set_column(i + 1, col, col_width)
-            worksheet.write(i + 1, col, stud_list[i])
-
-        col_counter += 1
-
-
-@bot.message_handler(commands=['exc'])
-def excel(message):
-    # Event.add_visitors()
-    visitor_ids = Event.get_visitors(1)
-    stud_dict = {}
-
-    for visitor_id in visitor_ids:
-        if visitor_id != 374464076:
-            s = Student.get_student_by_id(visitor_id)
-
-            s_name = get_fio(s.name)
-            s_group = f'КНТ-{Group.get_group_by_id(s.group_id)}'
-
-            if s_group in stud_dict:
-                stud_dict[s_group].append(s_name)
-            else:
-                stud_dict[s_group] = [s_name]
-
-    workbook = xlsxwriter.Workbook('EVENT.xlsx')
-    worksheet = workbook.add_worksheet()
-    doit(stud_dict, worksheet, workbook)
-    workbook.close()
-
-    bot.send_message(message.from_user.id, text='added')
-
-
 def events_keyboard(message):
     keyboard = InlineKeyboardMarkup()
 
@@ -79,8 +22,52 @@ def events_keyboard(message):
     keyboard.add(InlineKeyboardButton(text='Удалить мероприятие', callback_data='delete_event'))
     keyboard.add(InlineKeyboardButton(text='Изменить мероприятие', callback_data='change_event'))
     keyboard.add(InlineKeyboardButton(text='Обьявить мероприятие', callback_data='alarm_event'))
+    keyboard.add(InlineKeyboardButton(text='Учасники мероприятия', callback_data='visit_event'))
 
     bot.send_message(message.from_user.id, text='Выбери', reply_markup=keyboard)
+
+
+# table of participants
+@bot.message_handler(commands=['visits'])
+@bot.callback_query_handler(func=lambda call: call.data.startswith('visit_event'))
+@restricted
+def visit_event(message):
+    Event.add_events()
+
+    event_keyboard = make_keyboard('event', Event.get_all_events(), 'evisit_')
+
+    bot.send_message(message.from_user.id, text='Учасники какого мероприятия?', reply_markup=event_keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('evisit_') == True)
+def visit_event_callback(call):
+    event_id = call.data.split('_')[1]
+    Event.add_visitors(event_id)
+    excel(event_id)
+
+    doc = open(f'./tmp/{Event.get_event(event_id).name}.xlsx', 'rb')
+    bot.send_document(call.from_user.id, doc)
+
+
+def excel(event_id):
+    visitor_ids = Event.get_visitors(event_id)
+    stud_dict = {}
+
+    for visitor_id in visitor_ids:
+        s = Student.get_student_by_id(visitor_id)
+
+        s_name = get_fio(s.name)
+        s_group = f'КНТ-{Group.get_group_by_id(s.group_id)}' # временно
+
+        if s_group in stud_dict:
+            stud_dict[s_group].append(s_name)
+        else:
+            stud_dict[s_group] = [s_name]
+
+    workbook = xlsxwriter.Workbook(f'./tmp/{Event.get_event(event_id).name}.xlsx')
+    worksheet = workbook.add_worksheet()
+    doit(stud_dict, worksheet, workbook)
+    workbook.close()
 
 
 # creating
@@ -293,9 +280,9 @@ def notification_callback(call):
     bot.send_photo(channel_id, photo=event.poster, caption=message)
 
 
+# schelude
 @bot.message_handler(commands=['sch'])
 def schelude(message):
-    Event.add_events()
 
     keyboard = InlineKeyboardMarkup(row_width=2)
     keys_list = []
@@ -342,20 +329,3 @@ def register_on_event_callback(call):
 
     Event.add_visitor(event_id, call.from_user.id)
     bot.send_message(call.from_user.id, text=f'Ты {student.name} на мероприятие {event_name} зарегистрирован')
-
-
-
-# scheduler = schedule.Scheduler()
-#     def my_job(message):
-#         bot.send_message(message.from_user.id, text='ЗАПОЛНИТЬ ЖУРНАЛЫ')
-
-    # scheduler.every(1).seconds.do(my_job, message=message)
-
-#     while True:
-#         scheduler.run_pending()
-#         time.sleep(1)
-#
-#
-# @bot.message_handler(commands=['stop'])
-# def stop(message):
-#     scheduler.jobs.clear()
