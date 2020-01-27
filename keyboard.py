@@ -28,6 +28,7 @@ studdekan_buttons = [
     f'{emojize(":poop:", use_aliases=True)} Старосты',
     f'{emojize(":skull:", use_aliases=True)} Должники',
     f'{emojize(":fire:", use_aliases=True)} Организация мероприятий',
+    f'{emojize(":fire:", use_aliases=True)} Посещения мероприятий',
     f'{emojize(":back:", use_aliases=True)} Назад'
 ]
 
@@ -37,7 +38,7 @@ for button in studdekan_buttons:
 
 
 def make_keyboard(keyboard_type, elem_list, marker):
-    keyboard = InlineKeyboardMarkup()
+    keyboard = InlineKeyboardMarkup(row_width=1)
     keys_list = []
 
     for elem in elem_list:

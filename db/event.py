@@ -1,5 +1,6 @@
 from db.db import *
 from db.student import Student
+from pprint import pprint
 
 import random
 
@@ -83,6 +84,10 @@ class Event(Base):
     @staticmethod
     def get_visitors(event_id):
         return [visitor.student_id for visitor in session.query(EventVisitor).filter(EventVisitor.event_id == event_id)]
+
+    @staticmethod
+    def get_visitor_students(group_id):
+        return session.query(Student, EventVisitor).filter(Student.group_id == group_id).filter(EventVisitor.student_id == Student.id).all()
 
     @staticmethod
     def get_event_id_by_name(name):
