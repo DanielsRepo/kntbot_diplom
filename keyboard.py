@@ -1,5 +1,5 @@
 from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
-from helpers import LIST_OF_ADMINS
+from helpers import LIST_OF_ADMINS, LIST_OF_HEADMANS, LIST_OF_DEKANAT
 from emoji import emojize
 
 
@@ -9,7 +9,29 @@ buttons = [
     f'{emojize(":mag_right:", use_aliases=True)} Поиск аудиторий',
     f'{emojize(":tada:", use_aliases=True)} Мероприятия',
     f'{emojize(":moneybag:", use_aliases=True)} Преподаватели',
-    f'{emojize(":beer:", use_aliases=True)} Меню студдекана'
+    f'{emojize(":beer:", use_aliases=True)} Меню студдекана',
+    f'{emojize(":beer:", use_aliases=True)} Меню старосты',
+    f'{emojize(":beer:", use_aliases=True)} Меню деканата'
+]
+
+studdekan_buttons = [
+    f'{emojize(":poop:", use_aliases=True)} Старосты',
+    f'{emojize(":skull:", use_aliases=True)} Должники',
+    f'{emojize(":fire:", use_aliases=True)} Организация мероприятий',
+    f'{emojize(":fire:", use_aliases=True)} Посещения мероприятий',
+    f'{emojize(":back:", use_aliases=True)} Назад'
+]
+
+headman_buttons = [
+    f'{emojize(":computer:", use_aliases=True)} headman command 1',
+    f'{emojize(":computer:", use_aliases=True)} headman command 2',
+    f'{emojize(":back:", use_aliases=True)} Наазад'
+]
+
+dekanat_buttons = [
+    f'{emojize(":computer:", use_aliases=True)} dekanat command 1',
+    f'{emojize(":computer:", use_aliases=True)} dekanat command 2',
+    f'{emojize(":back:", use_aliases=True)} Назаад'
 ]
 
 
@@ -21,20 +43,21 @@ def make_menu_keyboard(message):
     if message.from_user.id in LIST_OF_ADMINS:
         menu_keyboard.add(buttons[5])
 
+    if message.from_user.id in LIST_OF_HEADMANS:
+        menu_keyboard.add(buttons[6])
+
+    if message.from_user.id in LIST_OF_DEKANAT:
+        menu_keyboard.add(buttons[7])
+
     return menu_keyboard
 
 
-studdekan_buttons = [
-    f'{emojize(":poop:", use_aliases=True)} Старосты',
-    f'{emojize(":skull:", use_aliases=True)} Должники',
-    f'{emojize(":fire:", use_aliases=True)} Организация мероприятий',
-    f'{emojize(":fire:", use_aliases=True)} Посещения мероприятий',
-    f'{emojize(":back:", use_aliases=True)} Назад'
-]
+def make_role_keyboard(buttons):
+    role_keyboard = ReplyKeyboardMarkup(True, False)
+    for button in buttons:
+        role_keyboard.add(button)
 
-studdekan_keyboard = ReplyKeyboardMarkup(True, False)
-for button in studdekan_buttons:
-    studdekan_keyboard.add(button)
+    return role_keyboard
 
 
 def make_keyboard(keyboard_type, elem_list, marker):
