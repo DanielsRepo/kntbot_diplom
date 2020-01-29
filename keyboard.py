@@ -29,7 +29,7 @@ headman_buttons = [
 ]
 
 dekanat_buttons = [
-    f'{emojize(":computer:", use_aliases=True)} dekanat command 1',
+    f'{emojize(":computer:", use_aliases=True)} Рейтинг старосты',
     f'{emojize(":computer:", use_aliases=True)} dekanat command 2',
     f'{emojize(":back:", use_aliases=True)} Назаад'
 ]

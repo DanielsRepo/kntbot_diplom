@@ -7,6 +7,7 @@ from roles.studdekan.headmans import headman_keyboard
 from roles.studdekan.debtors import debtor_keyboard
 from roles.studdekan.event_organize import event_organize_keyboard
 from roles.studdekan.event_visits import event_visits_keyboard
+from roles.dekanat.headman_management import rate_headman
 from credentials import *
 from helpers import restricted_studdekan, restricted_headman
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -88,7 +89,7 @@ def show_dekanat_keyboard(message):
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in dekanat_buttons)
 def get_dekanat_messages(message):
     if message.text == dekanat_buttons[0]:
-        print('1')
+        rate_headman(message)
     elif message.text == dekanat_buttons[1]:
         print('2')
     elif message.text == dekanat_buttons[2]:

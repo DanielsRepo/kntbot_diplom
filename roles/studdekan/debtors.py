@@ -1,7 +1,8 @@
 from flask import Blueprint
 from credentials import *
 from db.group import Group
-from db.student import Student, Debtor
+from db.student import Student
+from db.debtor import Debtor
 from keyboard import make_keyboard
 from helpers import restricted_studdekan
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton

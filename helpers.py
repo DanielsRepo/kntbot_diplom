@@ -1,5 +1,5 @@
 from functools import wraps
-from db.student import Headman
+from db.headman import Headman
 
 
 def get_fio(s):
@@ -23,8 +23,8 @@ def make_student_events_table(stud_dict, group, worksheet, workbook):
         worksheet.write(row + 1, 0, students)
 
         events = ', '.join(stud_dict[students])
-        col_width = max([len(', '.join(events)) for events in stud_dict.values()])
-        worksheet.set_column(row + 1, 1, col_width)
+        # col_width = max([len(', '.join(events)) for events in stud_dict.values()])
+        worksheet.set_column(row + 1, 1)
         worksheet.write(row + 1, 1, events)
 
         row_counter += 1

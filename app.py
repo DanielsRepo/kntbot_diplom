@@ -7,6 +7,7 @@ from roles.studdekan.event_visits import event_visits
 from roles.student.events import events
 from roles.studdekan.headmans import headmans
 from roles.studdekan.debtors import debtors
+from roles.dekanat.headman_management import headman_management
 from credentials import *
 
 app = Flask(__name__)
@@ -25,6 +26,7 @@ app.register_blueprint(debtors)
 
 
 # for dekanat
+app.register_blueprint(headman_management)
 
 
 @app.route("/", methods=['POST'])
