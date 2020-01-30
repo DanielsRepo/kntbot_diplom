@@ -7,7 +7,7 @@ from roles.studdekan.headmans import headman_keyboard
 from roles.studdekan.debtors import debtor_keyboard
 from roles.studdekan.event_organize import event_organize_keyboard
 from roles.studdekan.event_visits import event_visits_keyboard
-from roles.dekanat.headman_management import rate_headman
+from roles.dekanat.headman_management import rate_headman, remind_journal, send_file
 from credentials import *
 from helpers import restricted_studdekan, restricted_headman
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -91,8 +91,10 @@ def get_dekanat_messages(message):
     if message.text == dekanat_buttons[0]:
         rate_headman(message)
     elif message.text == dekanat_buttons[1]:
-        print('2')
+        remind_journal(message)
     elif message.text == dekanat_buttons[2]:
+        send_file(message)
+    elif message.text == dekanat_buttons[3]:
         start_message(message)
 
 

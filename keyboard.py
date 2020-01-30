@@ -9,16 +9,16 @@ buttons = [
     f'{emojize(":mag_right:", use_aliases=True)} Поиск аудиторий',
     f'{emojize(":tada:", use_aliases=True)} Мероприятия',
     f'{emojize(":moneybag:", use_aliases=True)} Преподаватели',
-    f'{emojize(":beer:", use_aliases=True)} Меню студдекана',
+    f'{emojize(":iphone:", use_aliases=True)} Меню студдекана',
     f'{emojize(":beer:", use_aliases=True)} Меню старосты',
-    f'{emojize(":beer:", use_aliases=True)} Меню деканата'
+    f'{emojize(":clipboard:", use_aliases=True)} Меню деканата'
 ]
 
 studdekan_buttons = [
     f'{emojize(":poop:", use_aliases=True)} Старосты',
-    f'{emojize(":skull:", use_aliases=True)} Должники',
+    f'{emojize(":dollar:", use_aliases=True)} Должники',
     f'{emojize(":fire:", use_aliases=True)} Организация мероприятий',
-    f'{emojize(":fire:", use_aliases=True)} Посещения мероприятий',
+    f'{emojize(":busts_in_silhouette:", use_aliases=True)} Посещения мероприятий',
     f'{emojize(":back:", use_aliases=True)} Назад'
 ]
 
@@ -29,8 +29,9 @@ headman_buttons = [
 ]
 
 dekanat_buttons = [
-    f'{emojize(":computer:", use_aliases=True)} Рейтинг старосты',
-    f'{emojize(":computer:", use_aliases=True)} dekanat command 2',
+    f'{emojize(":chart_with_upwards_trend:", use_aliases=True)} Рейтинг старосты',
+    f'{emojize(":sound:", use_aliases=True)} Напомнить про журналы',
+    f'{emojize(":envelope:", use_aliases=True)} Отправить файл',
     f'{emojize(":back:", use_aliases=True)} Назаад'
 ]
 
@@ -58,6 +59,16 @@ def make_role_keyboard(buttons):
         role_keyboard.add(button)
 
     return role_keyboard
+
+
+def make_headman_rate_keyboard(group_id, rating):
+    headman_rate_keyboard = InlineKeyboardMarkup()
+    headman_rate_keyboard.row(
+        InlineKeyboardButton(text='-', callback_data=f'rateminus_{group_id}'),
+        InlineKeyboardButton(text=f'{rating}', callback_data=f'{rating}'),
+        InlineKeyboardButton(text='+', callback_data=f'rateplus_{group_id}')
+    )
+    return headman_rate_keyboard
 
 
 def make_keyboard(keyboard_type, elem_list, marker):
