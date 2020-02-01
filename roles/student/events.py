@@ -12,6 +12,8 @@ events = Blueprint('events', __name__)
 # get_events_schelude
 @bot.message_handler(commands=['sch'])
 def get_events_schelude(message):
+    Event.add_events()
+
     keyboard = InlineKeyboardMarkup(row_width=2)
     keys_list = []
 
@@ -21,7 +23,7 @@ def get_events_schelude(message):
 
     keyboard.add(*keys_list)
 
-    bot.send_message(message.from_user.id, text=f'Расписание мероприятий', reply_markup=keyboard)
+    bot.send_message(message.from_user.id, text=f'Розклад заходів', reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('schelude_') == True)
@@ -34,7 +36,7 @@ def get_events_schelude_callback(call):
     '''
 
     keyboard = InlineKeyboardMarkup()
-    keyboard.add(InlineKeyboardButton(text='Зарегистрироваться', callback_data=f'regon_{event.id}'))
+    keyboard.add(InlineKeyboardButton(text='Зареєструватися', callback_data=f'regon_{event.id}'))
 
     bot.send_message(call.from_user.id, text=message, reply_markup=keyboard)
 
@@ -50,12 +52,9 @@ def register_on_event(message):
 @bot.callback_query_handler(func=lambda call: call.data.startswith('regon_'))
 def register_on_event_callback(call):
     event_id = call.data.split('_')[1]
-    event_name = Event.get_event(event_id).name
-
-    student = Student.get_student_by_id(call.from_user.id)
 
     Event.add_visitor(event_id, call.from_user.id)
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'Ты {student.name} на мероприятие {event_name} зарегистрирован')
+                          text=f'Реєстрація пройшла успішно')

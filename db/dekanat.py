@@ -17,3 +17,6 @@ class Dekanat(Base):
             headman.rating += 1
 
         session.commit()
+
+
+Base.metadata.create_all(conn)

@@ -30,3 +30,6 @@ class Headman(Base):
     @staticmethod
     def get_all_headmans():
         return [headman.student_id for headman in session.query(Headman).all()]
+
+
+Base.metadata.create_all(conn)

@@ -3,6 +3,7 @@ from credentials import *
 from db.group import Group
 from db.student import Student
 from keyboard import make_keyboard
+import re
 
 registration = Blueprint('registration', __name__)
 
@@ -10,12 +11,15 @@ registration = Blueprint('registration', __name__)
 @registration.route('/registration')
 @bot.message_handler(commands=['reg'])
 def register(message):
-    Group.add_groups()
-    Student.add_students()
+    if Student.get_student_by_id(message.from_user.id) is None:
+        Group.add_groups()
+        Student.add_students()
 
-    group_keyboard = make_keyboard('group', Group.get_groups(), 'group_')
+        group_keyboard = make_keyboard('group', Group.get_groups(), 'group_')
 
-    bot.send_message(message.from_user.id, text='Группа', reply_markup=group_keyboard)
+        bot.send_message(message.from_user.id, text='Вибери свою групу', reply_markup=group_keyboard)
+    else:
+        bot.send_message(message.from_user.id, text='Ти вже зареєстрований.')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('group_'))
@@ -24,30 +28,38 @@ def group_callback(call):
     Student.add_student(call.from_user.id)
     Student.update_student(student_id=call.from_user.id, group_id=group_id)
 
-    message = bot.send_message(call.from_user.id, 'ФИО')
+    message = bot.send_message(call.from_user.id, 'Введи Ф.I.O. українською мовою')
     bot.register_next_step_handler(message, get_name)
 
 
 def get_name(message):
     name = message.text
 
-    Student.update_student(student_id=message.from_user.id, name=name)
+    if bool(re.search("[^А-ЯҐЄІЇа-яієїґ' -]+", name)):
+        message = bot.send_message(message.from_user.id, 'Неккоректний ввід. Введи Ф.I.O. українською мовою')
+        bot.register_next_step_handler(message, get_name)
+    else:
+        Student.update_student(student_id=message.from_user.id, name=name)
 
-    message = bot.send_message(message.from_user.id, 'номер телефона')
-    bot.register_next_step_handler(message, get_phone)
+        message = bot.send_message(message.from_user.id, 'Введи свій номер телефону')
+        bot.register_next_step_handler(message, get_phone)
 
 
 def get_phone(message):
     phone = message.text
 
-    Student.update_student(student_id=message.from_user.id, phone=phone)
+    if bool(re.search("[^0-9]+", phone)):
+        message = bot.send_message(message.from_user.id, 'Неккоректний ввід. Введи свій номер телефону')
+        bot.register_next_step_handler(message, get_phone)
+    else:
+        Student.update_student(student_id=message.from_user.id, phone=phone)
 
-    user = Student.get_student_by_id(message.from_user.id)
+        success_message = 'Вітаю, ти зареєстрований'
+        bot.send_message(message.from_user.id, success_message)
 
-    success_message = f'''
-        Регистрация студента {user.name}
-        с мобилой {user.phone}
-        группы {Group.get_group_by_id(user.group_id)}
-        на удивление прошла успешно
-    '''
-    bot.send_message(message.from_user.id, success_message)
+    # success_message = f'''
+    #     Регистрация студента {user.name}
+    #     с мобилой {user.phone}
+    #     группы {Group.get_group_by_id(user.group_id)}
+    #     на удивление прошла успешно
+    # '''

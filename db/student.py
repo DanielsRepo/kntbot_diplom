@@ -1,4 +1,5 @@
 from db.db import *
+from sqlalchemy.exc import ProgrammingError
 
 
 class Student(Base):
@@ -54,7 +55,10 @@ class Student(Base):
 
     @staticmethod
     def get_student_by_id(student_id):
-        return session.query(Student).get(student_id)
+        try:
+            return session.query(Student).get(student_id)
+        except ProgrammingError:
+            return None
 
     @staticmethod
     def get_students_by_group(group_id):

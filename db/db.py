@@ -21,10 +21,9 @@ class Database:
         return conn, metadata
 
     def delete(self):
-        Base.metadata.drop_all(conn)
-        # for table in metadata.sorted_tables:
-        #     conn.execute(table.delete())
-        # session.commit()
+        for _ in range(20):
+            print('clean')
+            Base.metadata.drop_all(conn)
 
 
 db = Database('postgres', 'admin', 'localhost', '5432', 'postgres')

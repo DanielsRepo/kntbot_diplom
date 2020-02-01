@@ -28,3 +28,6 @@ class Debtor(Base):
     @staticmethod
     def get_all_debtors():
         return [Student.get_student_by_id(debtor.student_id) for debtor in session.query(Debtor).all()]
+
+
+Base.metadata.create_all(conn)

@@ -14,11 +14,11 @@ headmans = Blueprint('headmans', __name__)
 def headman_keyboard(message):
     keyboard = InlineKeyboardMarkup(row_width=1)
 
-    keyboard.add(InlineKeyboardButton(text='Назначить старосту', callback_data='assign_headman'))
-    keyboard.add(InlineKeyboardButton(text='Изменить старосту', callback_data='change_headman'))
-    keyboard.add(InlineKeyboardButton(text='Глянуть старосту', callback_data='get_headman'))
+    keyboard.add(InlineKeyboardButton(text='Призначити старосту', callback_data='assign_headman'))
+    keyboard.add(InlineKeyboardButton(text='Змінити старосту', callback_data='change_headman'))
+    keyboard.add(InlineKeyboardButton(text='Переглянути старосту', callback_data='get_headman'))
 
-    bot.send_message(message.from_user.id, text='Выбери', reply_markup=keyboard)
+    bot.send_message(message.from_user.id, text='Вибери дію:', reply_markup=keyboard)
 
 
 # add headman
@@ -32,7 +32,7 @@ def add_headman(message):
 
     bot.edit_message_text(chat_id=message.from_user.id,
                           message_id=message.message.message_id,
-                          text='Группа', reply_markup=group_keyboard)
+                          text='Вибери групу:', reply_markup=group_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('headmangroup_'))
@@ -43,7 +43,7 @@ def headman_group_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text='Кто староста', reply_markup=student_keyboard)
+                          text='Вибери старосту:', reply_markup=student_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('headman_'))
@@ -55,7 +55,7 @@ def add_headman_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'{Student.get_student_by_id(headman_id).name} назначен старостой группы {group}')
+                          text=f'{Student.get_student_by_id(headman_id).name} призначений старостою групи {group}')
 
 
 # change headman
@@ -106,7 +106,7 @@ def get_headman(message):
 
     bot.edit_message_text(chat_id=message.from_user.id,
                           message_id=message.message.message_id,
-                          text='Глянуть старосту группы', reply_markup=group_keyboard)
+                          text='Вибери группу:', reply_markup=group_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('getheadgroup_'))
@@ -117,4 +117,4 @@ def headman_group_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'{Student.get_student_by_id(headman.student_id).name}')
+                          text=f'Староста групи {Group.get_group_by_id(group_id)} {Student.get_student_by_id(headman.student_id).name}')

@@ -1,5 +1,6 @@
 from db.db import *
 import random
+from sqlalchemy.orm.exc import NoResultFound
 
 
 class Audience(Base):
@@ -35,11 +36,15 @@ class Audience(Base):
 
     @staticmethod
     def get_aud(number):
-        aud = session.query(Audience).filter(Audience.number == number).one()
-        building = session.query(Building).get(aud.building_id)
-        floor = session.query(Floor).get(aud.floor_id)
+        try:
+            aud = session.query(Audience).filter(Audience.number == number).one()
+            building = session.query(Building).get(aud.building_id)
+            floor = session.query(Floor).get(aud.floor_id)
 
-        return building.number, floor.number
+            return building.number, floor.number
+
+        except NoResultFound:
+            return None
 
     @staticmethod
     def get_all_aud():

@@ -14,11 +14,11 @@ debtors = Blueprint('debtors', __name__)
 def debtor_keyboard(message):
     keyboard = InlineKeyboardMarkup()
 
-    keyboard.add(InlineKeyboardButton(text='Добавить должника', callback_data='add_debtor'))
-    keyboard.add(InlineKeyboardButton(text='Удалить должника', callback_data='delete_debtor'))
-    keyboard.add(InlineKeyboardButton(text='Должники по группе', callback_data='debtors_of_group'))
+    keyboard.add(InlineKeyboardButton(text='Додати боржника', callback_data='add_debtor'))
+    keyboard.add(InlineKeyboardButton(text='Видалити боржника', callback_data='delete_debtor'))
+    keyboard.add(InlineKeyboardButton(text='Боржники за групою', callback_data='debtors_of_group'))
 
-    bot.send_message(message.from_user.id, text='Выбери', reply_markup=keyboard)
+    bot.send_message(message.from_user.id, text='Вибери дію:', reply_markup=keyboard)
 
 
 @bot.message_handler(commands=['addebt'])
@@ -32,7 +32,7 @@ def add_debtor(message):
 
     bot.edit_message_text(chat_id=message.from_user.id,
                           message_id=message.message.message_id,
-                          text='Группа', reply_markup=group_keyboard)
+                          text='Вибери групу:', reply_markup=group_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('debtorgroup_'))
@@ -45,7 +45,7 @@ def debtor_group_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text='Группа', reply_markup=student_keyboard)
+                          text='Вибери студента:', reply_markup=student_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('debtor_'))
@@ -57,7 +57,7 @@ def add_debtor_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'Студент {Student.get_student_by_id(debtor_id).name} группы {group} занесен в должники')
+                          text=f'Студент {Student.get_student_by_id(debtor_id).name} групи {group} занесений до боржників')
 
 
 # delete debtor
@@ -69,7 +69,7 @@ def delete_debtor(message):
 
     bot.edit_message_text(chat_id=message.from_user.id,
                           message_id=message.message.message_id,
-                          text='Кого убрать', reply_markup=debtor_keyboard)
+                          text='Вибери боржника:', reply_markup=debtor_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('deldebtor_'))
@@ -78,8 +78,8 @@ def delete_debtor_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'Студент {Student.get_student_by_id(debtor_id).name} группы'
-                               f' {Group.get_group_by_id(Student.get_student_by_id(debtor_id).group_id)} удален из должников')
+                          text=f'Студент {Student.get_student_by_id(debtor_id).name} групи'
+                               f' {Group.get_group_by_id(Student.get_student_by_id(debtor_id).group_id)} видалений з боржників')
 
     Debtor.delete_debtor(debtor_id)
 
@@ -95,7 +95,7 @@ def get_debtors_by_group(message):
 
     bot.edit_message_text(chat_id=message.from_user.id,
                           message_id=message.message.message_id,
-                          text='Должники какой группы', reply_markup=group_keyboard)
+                          text='Вибери групу:', reply_markup=group_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('grdebtor_'))
@@ -107,5 +107,5 @@ def get_debtors_by_group_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'Должники группы {Group.get_group_by_id(group_id)}:\n{debtors}')
+                          text=f'Боржники групи {Group.get_group_by_id(group_id)}:\n{debtors}')
 
