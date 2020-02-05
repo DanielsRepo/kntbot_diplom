@@ -3,7 +3,7 @@ from helpers import LIST_OF_ADMINS, LIST_OF_HEADMANS, LIST_OF_DEKANAT
 from emoji import emojize
 
 
-buttons = [
+menu_buttons = [
     f'{emojize(":bell:", use_aliases=True)} Расписание звонков',
     f'{emojize(":computer:", use_aliases=True)} Сайт НУЗП',
     f'{emojize(":mag_right:", use_aliases=True)} Поиск аудиторий',
@@ -38,22 +38,22 @@ dekanat_buttons = [
 
 def make_menu_keyboard(message):
     menu_keyboard = ReplyKeyboardMarkup(True, False)
-    for button in buttons[:5]:
+    for button in menu_buttons[:5]:
         menu_keyboard.add(button)
 
     if message.from_user.id in LIST_OF_ADMINS:
-        menu_keyboard.add(buttons[5])
+        menu_keyboard.add(menu_buttons[5])
 
     if message.from_user.id in LIST_OF_HEADMANS:
-        menu_keyboard.add(buttons[6])
+        menu_keyboard.add(menu_buttons[6])
 
     if message.from_user.id in LIST_OF_DEKANAT:
-        menu_keyboard.add(buttons[7])
+        menu_keyboard.add(menu_buttons[7])
 
     return menu_keyboard
 
 
-def make_role_keyboard(buttons):
+def make_role_replykeyboard(buttons):
     role_keyboard = ReplyKeyboardMarkup(True, False)
     for button in buttons:
         role_keyboard.add(button)
@@ -90,3 +90,11 @@ def make_keyboard(keyboard_type, elem_list, marker):
 
     return keyboard
 
+
+# def make_studdekan_inlinekeyboard(keys_dict):
+#     keyboard = InlineKeyboardMarkup(row_width=1)
+#
+#     for key, value in keys_dict.items():
+#         keyboard.add(InlineKeyboardButton(text=key, callback_data=value))
+#
+#     return keyboard

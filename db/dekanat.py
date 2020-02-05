@@ -3,7 +3,7 @@ from db.headman import Headman
 
 
 class Dekanat(Base):
-    __tablename__ = 'Dekanat'
+    __tablename__ = 'dekanat'
 
     id = sa.Column(sa.Integer, primary_key=True)
 

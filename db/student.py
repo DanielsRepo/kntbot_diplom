@@ -6,6 +6,7 @@ class Student(Base):
     __tablename__ = 'student'
 
     id = sa.Column(sa.Integer, primary_key=True)
+    username = sa.Column(sa.String)
     name = sa.Column(sa.String)
     phone = sa.Column(sa.String)
     group_id = sa.Column(sa.Integer, sa.ForeignKey('group.id'))
@@ -20,22 +21,22 @@ class Student(Base):
             group_ids = [1, 2, 3, 4]
 
             for s in students[:10]:
-                session.add(Student(name=s, phone='111111111', group_id=group_ids[0]))
+                session.add(Student(name=s, username='dfherher4', phone='111111111', group_id=group_ids[0]))
 
             for s in students[10:25]:
-                session.add(Student(name=s, phone='222222222', group_id=group_ids[1]))
+                session.add(Student(name=s, username='rethrhtr', phone='222222222', group_id=group_ids[1]))
 
             for s in students[25:40]:
-                session.add(Student(name=s, phone='333333333', group_id=group_ids[2]))
+                session.add(Student(name=s, username='erherrher', phone='333333333', group_id=group_ids[2]))
 
             for s in students[40:60]:
-                session.add(Student(name=s, phone='444444444', group_id=group_ids[3]))
+                session.add(Student(name=s, username='erherhr', phone='444444444', group_id=group_ids[3]))
 
             session.commit()
 
     @staticmethod
-    def add_student(student_id):
-        user = Student(id=student_id)
+    def add_student(student_id, student_username):
+        user = Student(id=student_id, username=student_username)
         session.add(user)
 
         session.commit()

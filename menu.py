@@ -1,5 +1,5 @@
 from flask import Blueprint, session
-from keyboard import make_menu_keyboard, buttons, make_role_keyboard, studdekan_buttons, headman_buttons, dekanat_buttons
+from keyboard import make_menu_keyboard, menu_buttons, make_role_replykeyboard, studdekan_buttons, headman_buttons, dekanat_buttons
 from db.db import db, conn
 from roles.student.auditory_search import search_aud
 from roles.student.events import get_events_schelude
@@ -21,32 +21,32 @@ def start_message(message):
     bot.send_message(message.from_user.id, 'Выберите пункт меню:', reply_markup=make_menu_keyboard(message))
 
 
-@bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in buttons)
+@bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in menu_buttons)
 def get_student_messages(message):
-    if message.text == buttons[0]:
+    if message.text == menu_buttons[0]:
         bot.send_photo(message.from_user.id, "https://image.winudf.com/v2/image1/Y29tLnJ1c2xhbnRlcmVzaGNoZW5rby5zdHVkZHlfc2NyZWVuXzJfMTU1NDAwODQzN18wNjU/screen-2.jpg?fakeurl=1&type=.jpg")
-    elif message.text == buttons[1]:
+    elif message.text == menu_buttons[1]:
         markup = InlineKeyboardMarkup()
         markup.add(InlineKeyboardButton(text='http://www.zntu.edu.ua', url='http://www.zntu.edu.ua'))
         bot.send_message(message.chat.id, 'Сайт НУЗП', reply_markup=markup)
-    elif message.text == buttons[2]:
+    elif message.text == menu_buttons[2]:
         search_aud(message)
-    elif message.text == buttons[3]:
+    elif message.text == menu_buttons[3]:
         get_events_schelude(message)
-    elif message.text == buttons[4]:
+    elif message.text == menu_buttons[4]:
         bot.send_message(message.from_user.id, "Пока ниче")
-    elif message.text == buttons[5]:
+    elif message.text == menu_buttons[5]:
         show_studdekan_keyboard(message)
-    elif message.text == buttons[6]:
+    elif message.text == menu_buttons[6]:
         show_headman_keyboard(message)
-    elif message.text == buttons[7]:
+    elif message.text == menu_buttons[7]:
         show_dekanat_keyboard(message)
 
 
 @bot.message_handler(commands=['studdekan'])
 @restricted_studdekan
 def show_studdekan_keyboard(message):
-    bot.send_message(message.from_user.id, 'Выберите пункт меню:', reply_markup=make_role_keyboard(studdekan_buttons))
+    bot.send_message(message.from_user.id, 'Выберите пункт меню:', reply_markup=make_role_replykeyboard(studdekan_buttons))
 
 
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in studdekan_buttons)
@@ -67,7 +67,7 @@ def get_studdekan_messages(message):
 @bot.message_handler(commands=['headman'])
 @restricted_headman
 def show_headman_keyboard(message):
-    bot.send_message(message.from_user.id, 'Выберите пункт меню:', reply_markup=make_role_keyboard(headman_buttons))
+    bot.send_message(message.from_user.id, 'Выберите пункт меню:', reply_markup=make_role_replykeyboard(headman_buttons))
 
 
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in headman_buttons)
@@ -83,7 +83,7 @@ def get_headman_messages(message):
 
 @bot.message_handler(commands=['dekanat'])
 def show_dekanat_keyboard(message):
-    bot.send_message(message.from_user.id, 'Выберите пункт меню:', reply_markup=make_role_keyboard(dekanat_buttons))
+    bot.send_message(message.from_user.id, 'Выберите пункт меню:', reply_markup=make_role_replykeyboard(dekanat_buttons))
 
 
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in dekanat_buttons)

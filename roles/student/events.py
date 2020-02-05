@@ -1,7 +1,6 @@
 from flask import Blueprint
 from credentials import *
 from db.event import Event
-from db.student import Student
 from keyboard import make_keyboard
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -23,7 +22,7 @@ def get_events_schelude(message):
 
     keyboard.add(*keys_list)
 
-    bot.send_message(message.from_user.id, text=f'Розклад заходів', reply_markup=keyboard)
+    bot.send_message(chat_id=message.from_user.id, text=f'Розклад заходів', reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('schelude_') == True)
@@ -31,9 +30,7 @@ def get_events_schelude_callback(call):
     event_id = call.data.split('_')[1]
     event = Event.get_event(event_id)
 
-    message = f'''
-        {event.name} {event.place} {event.date} {event.time}
-    '''
+    message = f'{event.name} {event.place} {event.date} {event.time}'
 
     keyboard = InlineKeyboardMarkup()
     keyboard.add(InlineKeyboardButton(text='Зареєструватися', callback_data=f'regon_{event.id}'))
@@ -42,13 +39,6 @@ def get_events_schelude_callback(call):
 
 
 # registration
-@bot.message_handler(commands=['regon'])
-def register_on_event(message):
-    event_keyboard = make_keyboard('event', Event.get_all_events(), 'regon_')
-
-    bot.send_message(message.from_user.id, text='На какое мероприятие идешь?', reply_markup=event_keyboard)
-
-
 @bot.callback_query_handler(func=lambda call: call.data.startswith('regon_'))
 def register_on_event_callback(call):
     event_id = call.data.split('_')[1]
@@ -58,3 +48,11 @@ def register_on_event_callback(call):
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
                           text=f'Реєстрація пройшла успішно')
+
+
+# maybe trash
+@bot.message_handler(commands=['regon'])
+def register_on_event(message):
+    event_keyboard = make_keyboard('event', Event.get_all_events(), 'regon_')
+
+    bot.send_message(chat_id=message.from_user.id, text='На какое мероприятие идешь?', reply_markup=event_keyboard)
