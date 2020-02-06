@@ -6,6 +6,7 @@ from db.debtor import Debtor
 from keyboard import make_keyboard
 from helpers import restricted_studdekan
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from emoji import emojize
 
 debtors = Blueprint('debtors', __name__)
 
@@ -14,9 +15,12 @@ debtors = Blueprint('debtors', __name__)
 def debtor_keyboard(message):
     keyboard = InlineKeyboardMarkup()
 
-    keyboard.add(InlineKeyboardButton(text='Додати боржника', callback_data='add_debtor'))
-    keyboard.add(InlineKeyboardButton(text='Видалити боржника', callback_data='delete_debtor'))
-    keyboard.add(InlineKeyboardButton(text='Боржники за групою', callback_data='debtors_of_group'))
+    keyboard.add(InlineKeyboardButton(text=f'Додати боржника {emojize(":heavy_plus_sign:", use_aliases=True)}',
+                                      callback_data='add_debtor'))
+    keyboard.add(InlineKeyboardButton(text=f'Видалити боржника {emojize(":heavy_minus_sign:", use_aliases=True)}',
+                                      callback_data='delete_debtor'))
+    keyboard.add(InlineKeyboardButton(text=f'Боржники за групою {emojize(":busts_in_silhouette:", use_aliases=True)}',
+                                      callback_data='debtors_of_group'))
 
     bot.send_message(message.from_user.id, text='Вибери дію:', reply_markup=keyboard)
 

@@ -4,6 +4,7 @@ from db.event import Event
 from keyboard import make_keyboard
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from helpers import restricted_studdekan
+from emoji import emojize
 
 
 event_organize = Blueprint('event_organize', __name__)
@@ -13,30 +14,32 @@ event_organize = Blueprint('event_organize', __name__)
 def event_organize_keyboard(message):
     keyboard = InlineKeyboardMarkup()
 
-    keyboard.add(InlineKeyboardButton(text='Создать мероприятие', callback_data='new_event'))
-    keyboard.add(InlineKeyboardButton(text='Удалить мероприятие', callback_data='delete_event'))
-    keyboard.add(InlineKeyboardButton(text='Изменить мероприятие', callback_data='change_event'))
-    keyboard.add(InlineKeyboardButton(text='Обьявить мероприятие', callback_data='alarm_event'))
+    keyboard.add(InlineKeyboardButton(text=f'Створити захід {emojize(":white_check_mark:", use_aliases=True)}',
+                                      callback_data='new_event'))
+    keyboard.add(InlineKeyboardButton(text=f'Видалити захід {emojize(":x:", use_aliases=True)}',
+                                      callback_data='delete_event'))
+    keyboard.add(InlineKeyboardButton(text=f'Змінити захід {emojize(":pencil2:", use_aliases=True)}',
+                                      callback_data='change_event'))
+    keyboard.add(InlineKeyboardButton(text=f'Об’явити захід {emojize(":loudspeaker:", use_aliases=True)}',
+                                      callback_data='alarm_event'))
 
-    bot.send_message(message.from_user.id, text='Выбери', reply_markup=keyboard)
+    bot.send_message(chat_id=message.from_user.id, text='Вибери дію:', reply_markup=keyboard)
 
 
 # creating
-@bot.message_handler(commands=['org'])
 @bot.callback_query_handler(func=lambda call: call.data.startswith('new_event'))
 @restricted_studdekan
 def create_event(message):
     message = bot.edit_message_text(chat_id=message.from_user.id,
-                          message_id=message.message.message_id,
-                          text='Название мероприятия')
+                                    message_id=message.message.message_id,
+                                    text='Назва заходу')
 
     bot.register_next_step_handler(message, name_event)
 
 
 def name_event(message):
-    name = message.text
-    event = Event.add_event(name=name)
-    message = bot.send_message(message.from_user.id, "Место проведения")
+    event = Event.add_event(name=message.text)
+    message = bot.send_message(chat_id=message.from_user.id, text="Місце проведення")
 
     bot.register_next_step_handler(message, place_event, event.id)
 
@@ -44,20 +47,21 @@ def name_event(message):
 def place_event(message, event_id):
     Event.update_event(event_id=event_id, place=message.text)
 
-    message = bot.send_message(message.from_user.id, "Дата проведения")
+    message = bot.send_message(chat_id=message.from_user.id, text="Дата проведення")
     bot.register_next_step_handler(message, date_event, event_id)
 
 
 def date_event(message, event_id):
     Event.update_event(event_id=event_id, date=message.text)
 
-    message = bot.send_message(message.from_user.id, "Время проведения")
+    message = bot.send_message(chat_id=message.from_user.id, text="Час проведення")
     bot.register_next_step_handler(message, time_event, event_id)
 
 
 def time_event(message, event_id):
     Event.update_event(event_id=event_id, time=message.text)
-    message = bot.send_message(message.from_user.id, "Баннер мероприятия")
+
+    message = bot.send_message(chat_id=message.from_user.id, text="Баннер заходу")
     bot.register_next_step_handler(message, picture_event, event_id)
 
 
@@ -67,187 +71,157 @@ def picture_event(message, event_id):
 
     Event.update_event(event_id=event_id, poster=file_id)
 
-    event = Event.get_event(event_id)
-
-    success_message = f'''
-        Организация мероприятия {event.name}
-        в {event.place} {event.date} {event.time}
-        на удивление прошла успешно
-    '''
-    bot.send_photo(message.from_user.id, photo=file_id, caption=success_message)
+    bot.send_photo(chat_id=message.from_user.id, photo=file_id,
+                   caption=f'Захід "{Event.get_event(event_id=event_id).name}" створено')
 
 
 # deleting
-@bot.message_handler(commands=['edel'])
 @bot.callback_query_handler(func=lambda call: call.data.startswith('delete_event'))
 @restricted_studdekan
 def delete_event(call):
-    event_keyboard = make_keyboard('event', Event.get_all_events(), 'eventdelete_')
+    event_keyboard = make_keyboard(keyboard_type='event',
+                                   elem_list=Event.get_all_events(),
+                                   marker='eventdelete_')
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text='Какое мероприятие удалить?',
+                          text='Який захід видалити?',
                           reply_markup=event_keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('eventdelete_') == True)
+@bot.callback_query_handler(func=lambda call: call.data.startswith('eventdelete_'))
 def delete_event_callback(call):
     event_id = call.data.split('_')[1]
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'Мероприятие {Event.get_event(event_id).name} удалено')
+                          text=f'Захід {Event.get_event(event_id).name} видалено')
 
     Event.delete_event(event_id)
 
 
 # changing
-@bot.message_handler(commands=['ech'])
 @bot.callback_query_handler(func=lambda call: call.data.startswith('change_event'))
 @restricted_studdekan
 def change_event(call):
-    event_keyboard = make_keyboard('event', Event.get_all_events(), 'eventchange_')
+    event_keyboard = make_keyboard(keyboard_type='event',
+                                   elem_list=Event.get_all_events(),
+                                   marker='eventchange_')
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text='Какое мероприятие изменить?',
+                          text='Який захід змінити?',
                           reply_markup=event_keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('eventchange_') == True)
+@bot.callback_query_handler(func=lambda call: call.data.startswith('eventchange_'))
 def event_callback(call):
     event_id = call.data.split('_')[1]
-    event_name = Event.get_event(event_id).name
 
     change_event_keyboard = InlineKeyboardMarkup()
-    change_event_keyboard.add(InlineKeyboardButton(text='Название', callback_data='name_' + event_id))
-    change_event_keyboard.add(InlineKeyboardButton(text='Место проведения', callback_data='place_' + event_id))
-    change_event_keyboard.add(InlineKeyboardButton(text='Дата проведения', callback_data='date_' + event_id))
-    change_event_keyboard.add(InlineKeyboardButton(text='Время проведения', callback_data='time_' + event_id))
-    change_event_keyboard.add(InlineKeyboardButton(text='Постер', callback_data='poster_' + event_id))
+    change_event_keyboard.add(InlineKeyboardButton(text='Назва заходу', callback_data=f'name_{event_id}'))
+    change_event_keyboard.add(InlineKeyboardButton(text='Місце проведення', callback_data=f'place_{event_id}'))
+    change_event_keyboard.add(InlineKeyboardButton(text='Дата проведення', callback_data=f'date_{event_id}'))
+    change_event_keyboard.add(InlineKeyboardButton(text='Час проведення', callback_data=f'time_{event_id}'))
+    change_event_keyboard.add(InlineKeyboardButton(text='Баннер заходу', callback_data=f'poster_{event_id}'))
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'Что нужно изменить в мероприятии {event_name} ?',
+                          text=f'Що потрібно змінити в заході {Event.get_event(event_id=event_id).name}?',
                           reply_markup=change_event_keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('name_') or call.data.startswith('place_') or
-                    call.data.startswith('date_') or call.data.startswith('time_') or call.data.startswith('poster_'))
+@bot.callback_query_handler(func=lambda call: call.data.startswith(('name_', 'place_', 'date_', 'time_', 'poster_')))
 def change_event_callback(call):
     event_id = call.data.split('_')[1]
 
     if call.data.startswith('name_'):
-        message = bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text='Новое имя')
+        message = bot.edit_message_text(chat_id=call.from_user.id,
+                                        message_id=call.message.message_id,
+                                        text='Нова назва')
         bot.register_next_step_handler(message, change_event_name, event_id)
     elif call.data.startswith('place_'):
-        message = bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text='Новое место')
+        message = bot.edit_message_text(chat_id=call.from_user.id,
+                                        message_id=call.message.message_id,
+                                        text='Нове місце')
         bot.register_next_step_handler(message, change_event_place, event_id)
     elif call.data.startswith('date_'):
-        message = bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text='Новая дата')
+        message = bot.edit_message_text(chat_id=call.from_user.id,
+                                        message_id=call.message.message_id,
+                                        text='Нова дата')
         bot.register_next_step_handler(message, change_event_date, event_id)
     elif call.data.startswith('time_'):
-        message = bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text='Новое время')
+        message = bot.edit_message_text(chat_id=call.from_user.id,
+                                        message_id=call.message.message_id,
+                                        text='Новий час')
         bot.register_next_step_handler(message, change_event_time, event_id)
     elif call.data.startswith('poster_'):
-        message = bot.edit_message_text(chat_id=call.from_user.id, message_id=call.message.message_id, text='Новый постер')
+        message = bot.edit_message_text(chat_id=call.from_user.id,
+                                        message_id=call.message.message_id,
+                                        text='Новий баннер')
         bot.register_next_step_handler(message, change_event_poster, event_id)
 
 
 def change_event_name(message, event_id):
-    Event.update_event(event_id, name=message.text)
+    Event.update_event(event_id=event_id, name=message.text)
 
-    event = Event.get_event(event_id)
-
-    success_message = f'''
-        Изменение инфо про мероприятие {event.name}
-        в {event.place}
-        на {event.time}
-        на удивление прошло успешно
-    '''
-    bot.send_message(message.from_user.id, text=success_message)
+    bot.send_message(chat_id=message.from_user.id,
+                     text=f'Назву заходу змінено на "{Event.get_event(event_id=event_id).name}"')
 
 
 def change_event_place(message, event_id):
-    Event.update_event(event_id, place=message.text)
+    Event.update_event(event_id=event_id, place=message.text)
 
-    event = Event.get_event(event_id)
-
-    success_message = f'''
-        Изменение инфо про мероприятие {event.name}
-        в {event.place}
-        на {event.time}
-        на удивление прошло успешно
-    '''
-    bot.send_message(message.from_user.id, text=success_message)
+    bot.send_message(chat_id=message.from_user.id,
+                     text=f'Місце проведення заходу змінено на {Event.get_event(event_id=event_id).place}')
 
 
 def change_event_date(message, event_id):
-    Event.update_event(event_id, date=message.text)
+    Event.update_event(event_id=event_id, date=message.text)
 
-    event = Event.get_event(event_id)
-
-    success_message = f'''
-        Изменение инфо про мероприятие {event.name}
-        в {event.place}
-        на {event.time}
-        на удивление прошло успешно
-    '''
-    bot.send_message(message.from_user.id, text=success_message)
+    bot.send_message(chat_id=message.from_user.id,
+                     text=f'Дату проведення заходу змінено на {Event.get_event(event_id=event_id).date}')
 
 
 def change_event_time(message, event_id):
-    Event.update_event(event_id, time=message.text)
+    Event.update_event(event_id=event_id, time=message.text)
 
-    event = Event.get_event(event_id)
-
-    success_message = f'''
-        Изменение инфо про мероприятие {event.name}
-        в {event.place}
-        на {event.time}
-        на удивление прошло успешно
-    '''
-    bot.send_message(message.from_user.id, text=success_message)
+    bot.send_message(chat_id=message.from_user.id,
+                     text=f'Час проведення заходу змінено на {Event.get_event(event_id=event_id).time}')
 
 
 def change_event_poster(message, event_id):
     file_id = message.photo[-1].file_id
-    Event.update_event(event_id, poster=file_id)
+    Event.update_event(event_id=event_id, poster=file_id)
 
-    event = Event.get_event(event_id)
-
-    success_message = f'''
-        Изменение инфо про мероприятие {event.name}
-        в {event.place}
-        на {event.time}
-        на удивление прошло успешно
-    '''
-    bot.send_photo(message.from_user.id, photo=file_id, caption=success_message)
+    bot.send_photo(message.from_user.id, photo=file_id, caption=f'Баннер заходу змінено')
 
 
 # notification
-@bot.message_handler(commands=['alarm'])
 @bot.callback_query_handler(func=lambda call: call.data.startswith('alarm_event'))
 @restricted_studdekan
 def show_notification(call):
-    event_keyboard = make_keyboard('event', Event.get_all_events(), 'alarm_')
+    event_keyboard = make_keyboard(keyboard_type='event',
+                                   elem_list=Event.get_all_events(),
+                                   marker='alarm_')
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text='Какое мероприятие высветить?',
+                          text='Який захід оголосити?',
                           reply_markup=event_keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('alarm_') == True)
+@bot.callback_query_handler(func=lambda call: call.data.startswith('alarm_'))
 def show_notification_callback(call):
     event_id = call.data.split('_')[1]
     event = Event.get_event(event_id)
 
-    message = f'''
-        {event.place} {event.time} будет {event.name}
-    '''
-    channel_id = '-1001104545927'
-    bot.send_photo(channel_id, photo=event.poster, caption=message)
+    message = f'{event.name}\n' \
+              f'Місце проведення: {event.place}\n' \
+              f'Час проведення: {event.time}'
+
+    bot.send_photo(chat_id='-1001104545927', photo=event.poster, caption=message)
+
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text='ГОТОВО :D')
+                          text='Захід оголошено')

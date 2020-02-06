@@ -9,7 +9,6 @@ events = Blueprint('events', __name__)
 
 @events.route('/events')
 # get_events_schelude
-@bot.message_handler(commands=['sch'])
 def get_events_schelude(message):
     Event.add_events()
 
@@ -25,7 +24,7 @@ def get_events_schelude(message):
     bot.send_message(chat_id=message.from_user.id, text=f'Розклад заходів', reply_markup=keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('schelude_') == True)
+@bot.callback_query_handler(func=lambda call: call.data.startswith('schelude_'))
 def get_events_schelude_callback(call):
     event_id = call.data.split('_')[1]
     event = Event.get_event(event_id)

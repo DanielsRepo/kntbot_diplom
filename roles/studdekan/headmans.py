@@ -15,11 +15,14 @@ headmans = Blueprint('headmans', __name__)
 def headman_keyboard(message):
     keyboard = InlineKeyboardMarkup(row_width=1)
 
-    keyboard.add(InlineKeyboardButton(text='Призначити старосту', callback_data='assign_headman'))
-    keyboard.add(InlineKeyboardButton(text='Змінити старосту', callback_data='change_headman'))
-    keyboard.add(InlineKeyboardButton(text='Переглянути старосту', callback_data='get_headman'))
+    keyboard.add(InlineKeyboardButton(text=f'Призначити старосту {emojize(":white_check_mark:", use_aliases=True)}',
+                                      callback_data='assign_headman'))
+    keyboard.add(InlineKeyboardButton(text=f'Змінити старосту {emojize(":repeat:", use_aliases=True)}',
+                                      callback_data='change_headman'))
+    keyboard.add(InlineKeyboardButton(text=f'Переглянути старосту {emojize(":information_source:", use_aliases=True)}',
+                                      callback_data='get_headman'))
 
-    bot.send_message(message.from_user.id, text='Вибери дію:', reply_markup=keyboard)
+    bot.send_message(chat_id=message.from_user.id, text='Вибери дію:', reply_markup=keyboard)
 
 
 # add headman

@@ -7,7 +7,6 @@ auditory_search = Blueprint('auditory_search', __name__)
 
 
 @auditory_search.route('/auditory_search')
-@bot.message_handler(commands=['aud'])
 def search_aud(message):
     Audience.add_aud()
     auds = ' '.join(i.number for i in Audience.get_all_aud())

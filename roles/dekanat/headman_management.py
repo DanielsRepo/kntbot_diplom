@@ -12,7 +12,6 @@ headman_management = Blueprint('headman_management', __name__)
 
 
 @headman_management.route('/headman_management')
-@bot.message_handler(commands=['ratehead'])
 @bot.callback_query_handler(func=lambda call: call.data.startswith('assign_headman'))
 def rate_headman(message):
     group_keyboard = make_keyboard(keyboard_type='group', elem_list=Group.get_groups(), marker='rateheadman_')
