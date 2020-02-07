@@ -41,6 +41,8 @@ def get_student_messages(message):
         show_headman_keyboard(message)
     elif message.text == menu_buttons[7]:
         show_dekanat_keyboard(message)
+    elif message.text == menu_buttons[8]:
+        start_message(message)
 
 
 @bot.message_handler(commands=['studdekan'])
@@ -60,8 +62,6 @@ def get_studdekan_messages(message):
         event_organize_keyboard(message)
     elif message.text == studdekan_buttons[3]:
         event_visits_keyboard(message)
-    elif message.text == studdekan_buttons[4]:
-        start_message(message)
 
 
 @bot.message_handler(commands=['headman'])
@@ -94,8 +94,6 @@ def get_dekanat_messages(message):
         remind_journal(message)
     elif message.text == dekanat_buttons[2]:
         send_file(message)
-    elif message.text == dekanat_buttons[3]:
-        start_message(message)
 
 
 @bot.message_handler(commands=['del'])

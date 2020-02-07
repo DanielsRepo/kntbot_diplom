@@ -16,7 +16,7 @@ headman_management = Blueprint('headman_management', __name__)
 def rate_headman(message):
     group_keyboard = make_keyboard(keyboard_type='group', elem_list=Group.get_groups(), marker='rateheadman_')
 
-    bot.send_message(chat_id=message.from_user.id, text='Староста группы', reply_markup=group_keyboard)
+    bot.send_message(chat_id=message.from_user.id, text='Староста групи:', reply_markup=group_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('rateheadman_'))
@@ -36,7 +36,7 @@ def rate_headman_callback(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(('rateminus_', 'rateplus_')))
-def rate_headman_minus_callback(call):
+def rate_headman_sign_callback(call):
     group_id = call.data.split('_')[1]
     group = Group.get_group_by_id(group_id)
 
@@ -48,7 +48,7 @@ def rate_headman_minus_callback(call):
     elif call.data.startswith('rateplus_'):
         Dekanat.rate_headman(group_id, '+')
 
-    headman_rate_keyboard = make_headman_rate_keyboard(group_id, headman.rating)
+    headman_rate_keyboard = make_headman_rate_keyboard(group_id=group_id, rating=headman.rating)
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
@@ -64,7 +64,7 @@ def remind_journal(message):
     remind_keyboard.add(InlineKeyboardButton(text='Вибрати старосту', callback_data='remind_one'))
     remind_keyboard.add(InlineKeyboardButton(text='Всім', callback_data='remind_all'))
 
-    bot.send_message(message.from_user.id, text='Кому нагадати?', reply_markup=remind_keyboard)
+    bot.send_message(chat_id=message.from_user.id, text='Кому нагадати?', reply_markup=remind_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('remind_one'))
@@ -92,8 +92,7 @@ def remind_one_callback(call):
                           text=f'Старості групи КНТ-{group} '
                                f'{headman_name} було відправлено нагадування')
 
-    bot.send_message(headman.student_id, 'ЗАПОВНИ ЖУРНАЛ')
-    print(headman.student_id)
+    bot.send_message(chat_id=headman.student_id, text='ЗАПОВНИ ЖУРНАЛ')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('remind_all'))

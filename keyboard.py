@@ -4,35 +4,36 @@ from emoji import emojize
 
 
 menu_buttons = [
-    f'{emojize(":bell:", use_aliases=True)} Расписание звонков',
+    f'{emojize(":bell:", use_aliases=True)} Розклад дзвоників',
     f'{emojize(":computer:", use_aliases=True)} Сайт НУЗП',
-    f'{emojize(":mag_right:", use_aliases=True)} Поиск аудиторий',
-    f'{emojize(":tada:", use_aliases=True)} Мероприятия',
-    f'{emojize(":moneybag:", use_aliases=True)} Преподаватели',
-    f'{emojize(":iphone:", use_aliases=True)} Меню студдекана',
-    f'{emojize(":beer:", use_aliases=True)} Меню старосты',
-    f'{emojize(":clipboard:", use_aliases=True)} Меню деканата'
+    f'{emojize(":mag_right:", use_aliases=True)} Пошук аудиторій',
+    f'{emojize(":tada:", use_aliases=True)} Заходи',
+    f'{emojize(":books:", use_aliases=True)} Викладачі',
+    f'{emojize(":briefcase:", use_aliases=True)} Меню студдекана',
+    f'{emojize(":notebook_with_decorative_cover:", use_aliases=True)} Меню старости',
+    f'{emojize(":clipboard:", use_aliases=True)} Меню деканата',
+    f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
 
 studdekan_buttons = [
-    f'{emojize(":poop:", use_aliases=True)} Старосты',
-    f'{emojize(":dollar:", use_aliases=True)} Должники',
-    f'{emojize(":fire:", use_aliases=True)} Организация мероприятий',
-    f'{emojize(":busts_in_silhouette:", use_aliases=True)} Посещения мероприятий',
-    f'{emojize(":back:", use_aliases=True)} Назад'
+    f'{emojize(":ledger:", use_aliases=True)} Старости',
+    f'{emojize(":dollar:", use_aliases=True)} Боржники',
+    f'{emojize(":calendar:", use_aliases=True)} Організація заходів',
+    f'{emojize(":busts_in_silhouette:", use_aliases=True)} Відвідування заходів',
+    f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
 
 headman_buttons = [
     f'{emojize(":computer:", use_aliases=True)} headman command 1',
     f'{emojize(":computer:", use_aliases=True)} headman command 2',
-    f'{emojize(":back:", use_aliases=True)} Наазад'
+    f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
 
 dekanat_buttons = [
-    f'{emojize(":chart_with_upwards_trend:", use_aliases=True)} Рейтинг старосты',
-    f'{emojize(":sound:", use_aliases=True)} Напомнить про журналы',
-    f'{emojize(":envelope:", use_aliases=True)} Отправить файл',
-    f'{emojize(":back:", use_aliases=True)} Назаад'
+    f'{emojize(":chart_with_upwards_trend:", use_aliases=True)} Рейтинг старости',
+    f'{emojize(":sound:", use_aliases=True)} Нагадати про журнали',
+    f'{emojize(":envelope:", use_aliases=True)} Відправити файл',
+    f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
 
 

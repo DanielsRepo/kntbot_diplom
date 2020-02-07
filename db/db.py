@@ -39,7 +39,3 @@ session = Session(conn)
 # port = url.port
 
 # db = Database(user, password, host, port, dbname)
-
-
-
-
