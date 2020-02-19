@@ -1,8 +1,7 @@
 from db.db import *
 from db.student import Student
-from pprint import pprint
-
 import random
+
 
 class EventVisitor(Base):
     __tablename__ = 'eventvisitor'
@@ -14,6 +13,10 @@ class EventVisitor(Base):
 
     student_id = sa.Column(sa.Integer, sa.ForeignKey('student.id'))
     student = relationship('Student')
+
+    @staticmethod
+    def get_visitors():
+        return [visitor for visitor in session.query(EventVisitor).all()]
 
 
 class Event(Base):
@@ -45,16 +48,23 @@ class Event(Base):
 
             session.commit()
 
+        print("events added")
+
     @staticmethod
     def add_visitors(event_id):
-        session.query(EventVisitor).filter(EventVisitor.event_id == event_id).delete()
+        if len(EventVisitor.get_visitors()) > 0:
+            return
+        else:
+            session.query(EventVisitor).filter(EventVisitor.event_id == event_id).delete()
 
-        s_id_list = random.sample(range(1, 61), random.randint(20, 40))
-        for s_id in s_id_list:
-            event_visit = EventVisitor(event_id=event_id, student_id=s_id)
-            session.add(event_visit)
+            s_id_list = random.sample(range(1, 61), random.randint(20, 40))
+            for s_id in s_id_list:
+                event_visit = EventVisitor(event_id=event_id, student_id=s_id)
+                session.add(event_visit)
 
-        session.commit()
+            session.commit()
+
+            print("visitors added")
 
     @staticmethod
     def update_event(event_id, name='', place='', date='', time='', poster=''):

@@ -1,14 +1,14 @@
 from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
-from helpers import LIST_OF_ADMINS, LIST_OF_HEADMANS, LIST_OF_DEKANAT
+from helpers.role_helpers import LIST_OF_ADMINS, LIST_OF_HEADMANS, LIST_OF_DEKANAT
 from emoji import emojize
 
 
 menu_buttons = [
-    f'{emojize(":bell:", use_aliases=True)} Розклад дзвоників',
-    f'{emojize(":computer:", use_aliases=True)} Сайт НУЗП',
     f'{emojize(":mag_right:", use_aliases=True)} Пошук аудиторій',
+    f'{emojize(":bell:", use_aliases=True)} Розклад дзвоників',
+    f'{emojize(":books:", use_aliases=True)} Розклад викладачів',
     f'{emojize(":tada:", use_aliases=True)} Заходи',
-    f'{emojize(":books:", use_aliases=True)} Викладачі',
+    f'{emojize(":computer:", use_aliases=True)} Сайт НУЗП',
     f'{emojize(":briefcase:", use_aliases=True)} Меню студдекана',
     f'{emojize(":notebook_with_decorative_cover:", use_aliases=True)} Меню старости',
     f'{emojize(":clipboard:", use_aliases=True)} Меню деканата',
@@ -39,8 +39,9 @@ dekanat_buttons = [
 
 def make_menu_keyboard(message):
     menu_keyboard = ReplyKeyboardMarkup(True, False)
-    for button in menu_buttons[:5]:
+    for button in menu_buttons[:3]:
         menu_keyboard.add(button)
+    menu_keyboard.row(*menu_buttons[3:5])
 
     if message.from_user.id in LIST_OF_ADMINS:
         menu_keyboard.add(menu_buttons[5])
@@ -90,12 +91,3 @@ def make_keyboard(keyboard_type, elem_list, marker):
             j += 7
 
     return keyboard
-
-
-# def make_studdekan_inlinekeyboard(keys_dict):
-#     keyboard = InlineKeyboardMarkup(row_width=1)
-#
-#     for key, value in keys_dict.items():
-#         keyboard.add(InlineKeyboardButton(text=key, callback_data=value))
-#
-#     return keyboard

@@ -1,5 +1,6 @@
 from db.db import *
 from db.student import Student
+from sqlalchemy.orm.exc import NoResultFound
 
 
 class Debtor(Base):
@@ -12,8 +13,12 @@ class Debtor(Base):
 
     @staticmethod
     def add_debtor(debtor_id):
-        session.add(Debtor(student_id=debtor_id))
-        session.commit()
+        try:
+            if session.query(Debtor).filter(Debtor.student_id == debtor_id).one():
+                return False
+        except NoResultFound:
+            session.add(Debtor(student_id=debtor_id))
+            session.commit()
 
     @staticmethod
     def delete_debtor(debtor_id):

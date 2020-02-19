@@ -2,6 +2,7 @@ from flask import Blueprint
 from credentials import *
 from db.audience import Audience
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from emoji import emojize
 
 auditory_search = Blueprint('auditory_search', __name__)
 
@@ -19,14 +20,17 @@ def get_aud(message):
     number = message.text
 
     search_again = InlineKeyboardMarkup()
-    search_again.add(InlineKeyboardButton(text='Шукати ще', callback_data='search_aud_again'))
+    search_again.add(InlineKeyboardButton(text=f'{emojize(":mag_right:", use_aliases=True)} Шукати ще',
+                                          callback_data='search_aud_again'))
 
     if Audience.get_aud(number) is None:
-        bot.send_message(chat_id=message.from_user.id, text='Аудиторію не знайдено.', reply_markup=search_again)
+        bot.send_message(chat_id=message.from_user.id,
+                         text=f'Аудиторію не знайдено {emojize(":white_frowning_face:", use_aliases=True)}',
+                         reply_markup=search_again)
     else:
         building, floor = Audience.get_aud(number)
         bot.send_message(chat_id=message.from_user.id,
-                         text=f'Аудиторія {number} знаходиться в {building} корпусі на {floor} поверсі.',
+                         text=f'Аудиторія {number} знаходиться в {building} корпусі на {floor} поверсі',
                          reply_markup=search_again)
 
 

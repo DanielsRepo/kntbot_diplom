@@ -3,6 +3,7 @@ from credentials import *
 from db.event import Event
 from keyboard import make_keyboard
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from emoji import emojize
 
 events = Blueprint('events', __name__)
 
@@ -10,8 +11,6 @@ events = Blueprint('events', __name__)
 @events.route('/events')
 # get_events_schelude
 def get_events_schelude(message):
-    Event.add_events()
-
     keyboard = InlineKeyboardMarkup(row_width=2)
     keys_list = []
 
@@ -21,7 +20,10 @@ def get_events_schelude(message):
 
     keyboard.add(*keys_list)
 
-    bot.send_message(chat_id=message.from_user.id, text=f'Розклад заходів', reply_markup=keyboard)
+    bot.send_message(chat_id=message.from_user.id,
+                     text=f'{emojize(":man_juggling:", use_aliases=True)} Розклад заходів '
+                          f'{emojize(":performing_arts:", use_aliases=True)}',
+                     reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('schelude_'))
@@ -32,7 +34,8 @@ def get_events_schelude_callback(call):
     message = f'{event.name} {event.place} {event.date} {event.time}'
 
     keyboard = InlineKeyboardMarkup()
-    keyboard.add(InlineKeyboardButton(text='Зареєструватися', callback_data=f'regon_{event.id}'))
+    keyboard.add(InlineKeyboardButton(text=f'{emojize(":pencil2:", use_aliases=True)} Зареєструватися',
+                                      callback_data=f'regon_{event.id}'))
 
     bot.send_message(call.from_user.id, text=message, reply_markup=keyboard)
 
@@ -46,12 +49,4 @@ def register_on_event_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'Реєстрація пройшла успішно')
-
-
-# maybe trash
-@bot.message_handler(commands=['regon'])
-def register_on_event(message):
-    event_keyboard = make_keyboard('event', Event.get_all_events(), 'regon_')
-
-    bot.send_message(chat_id=message.from_user.id, text='На какое мероприятие идешь?', reply_markup=event_keyboard)
+                          text=f'Реєстрація пройшла успішно {emojize(":white_check_mark:", use_aliases=True)}')

@@ -3,7 +3,7 @@ from credentials import *
 from db.event import Event
 from keyboard import make_keyboard
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from helpers import restricted_studdekan
+from helpers.role_helpers import restricted_studdekan
 from emoji import emojize
 
 
@@ -65,14 +65,14 @@ def time_event(message, event_id):
     bot.register_next_step_handler(message, picture_event, event_id)
 
 
-@bot.message_handler(content_types=['photo'])
 def picture_event(message, event_id):
     file_id = message.photo[-1].file_id
 
     Event.update_event(event_id=event_id, poster=file_id)
 
     bot.send_photo(chat_id=message.from_user.id, photo=file_id,
-                   caption=f'Захід "{Event.get_event(event_id=event_id).name}" створено')
+                   caption=f'Захід "{Event.get_event(event_id=event_id).name}" створено '
+                           f'{emojize(":white_check_mark:", use_aliases=True)}')
 
 
 # deleting
@@ -95,7 +95,8 @@ def delete_event_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'Захід {Event.get_event(event_id).name} видалено')
+                          text=f'Захід {Event.get_event(event_id).name} видалено '
+                               f'{emojize(":white_check_mark:", use_aliases=True)}')
 
     Event.delete_event(event_id)
 
@@ -166,35 +167,40 @@ def change_event_name(message, event_id):
     Event.update_event(event_id=event_id, name=message.text)
 
     bot.send_message(chat_id=message.from_user.id,
-                     text=f'Назву заходу змінено на "{Event.get_event(event_id=event_id).name}"')
+                     text=f'Назву заходу змінено на "{Event.get_event(event_id=event_id).name}" '
+                          f'{emojize(":white_check_mark:", use_aliases=True)}')
 
 
 def change_event_place(message, event_id):
     Event.update_event(event_id=event_id, place=message.text)
 
     bot.send_message(chat_id=message.from_user.id,
-                     text=f'Місце проведення заходу змінено на {Event.get_event(event_id=event_id).place}')
+                     text=f'Місце проведення заходу змінено на {Event.get_event(event_id=event_id).place} '
+                          f'{emojize(":white_check_mark:", use_aliases=True)}')
 
 
 def change_event_date(message, event_id):
     Event.update_event(event_id=event_id, date=message.text)
 
     bot.send_message(chat_id=message.from_user.id,
-                     text=f'Дату проведення заходу змінено на {Event.get_event(event_id=event_id).date}')
+                     text=f'Дату проведення заходу змінено на {Event.get_event(event_id=event_id).date} '
+                          f'{emojize(":white_check_mark:", use_aliases=True)}')
 
 
 def change_event_time(message, event_id):
     Event.update_event(event_id=event_id, time=message.text)
 
     bot.send_message(chat_id=message.from_user.id,
-                     text=f'Час проведення заходу змінено на {Event.get_event(event_id=event_id).time}')
+                     text=f'Час проведення заходу змінено на {Event.get_event(event_id=event_id).time} '
+                          f'{emojize(":white_check_mark:", use_aliases=True)}')
 
 
 def change_event_poster(message, event_id):
     file_id = message.photo[-1].file_id
     Event.update_event(event_id=event_id, poster=file_id)
 
-    bot.send_photo(message.from_user.id, photo=file_id, caption=f'Баннер заходу змінено')
+    bot.send_photo(message.from_user.id, photo=file_id, caption=f'Баннер заходу змінено '
+                                                                f'{emojize(":white_check_mark:", use_aliases=True)}')
 
 
 # notification
@@ -224,4 +230,4 @@ def show_notification_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text='Захід оголошено')
+                          text=f'Захід оголошено {emojize(":white_check_mark:", use_aliases=True)}')

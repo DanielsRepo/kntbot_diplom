@@ -34,6 +34,8 @@ class Student(Base):
 
             session.commit()
 
+            print("students added")
+
     @staticmethod
     def add_student(student_id, student_username):
         user = Student(id=student_id, username=student_username)

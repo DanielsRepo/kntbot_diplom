@@ -19,6 +19,8 @@ class Group(Base):
 
             session.commit()
 
+        print("groups added")
+
     # @staticmethod
     # def get_id_by_group(group):
     #     group = session.query(Group).filter(Group.name == group).one()

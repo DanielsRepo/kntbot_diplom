@@ -4,7 +4,7 @@ from db.group import Group
 from db.student import Student
 from db.debtor import Debtor
 from keyboard import make_keyboard
-from helpers import restricted_studdekan
+from helpers.role_helpers import restricted_studdekan
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 
@@ -57,7 +57,11 @@ def add_debtor_callback(call):
     group = call.data.split('_')[1]
     debtor_id = call.data.split('_')[2]
 
-    Debtor.add_debtor(debtor_id)
+    if not Debtor.add_debtor(debtor_id):
+        bot.edit_message_text(chat_id=call.from_user.id,
+                              message_id=call.message.message_id,
+                              text='Студент вже занесений до боржників')
+        return
 
     username = Student.get_student_by_id(debtor_id).username
     name = Student.get_student_by_id(debtor_id).name

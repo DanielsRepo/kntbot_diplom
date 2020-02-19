@@ -20,10 +20,11 @@ class Database:
 
         return conn, metadata
 
-    def delete(self):
-        for _ in range(20):
-            print('clean')
-            Base.metadata.drop_all(conn)
+    @staticmethod
+    def delete():
+        # for _ in range(50):
+        #     print('clean')
+        Base.metadata.drop_all(conn)
 
 
 db = Database('postgres', 'admin', 'localhost', '5432', 'postgres')

@@ -4,7 +4,7 @@ from db.group import Group
 from db.student import Student
 from db.headman import Headman
 from keyboard import make_keyboard
-from helpers import restricted_studdekan
+from helpers.role_helpers import restricted_studdekan
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 
@@ -79,7 +79,7 @@ def add_headman_callback(call):
                           text=f'<a href="t.me/{username}">{name}</a> призначений старостою групи {group}',
                           parse_mode='html')
 
-    bot.send_message(headman_id, 'Тебе призначено старостою групи')
+    # bot.send_message(headman_id, 'Тебе призначено старостою групи')
 
 
 # change headman
@@ -126,7 +126,7 @@ def change_headman_callback(call):
                                f'призначений старостою групи {group}',
                           parse_mode='html')
 
-    bot.send_message(new_headman_id, 'Тебе призначено старостою групи')
+    # bot.send_message(new_headman_id, 'Тебе призначено старостою групи')
 
 
 # get headman

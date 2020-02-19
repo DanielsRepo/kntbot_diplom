@@ -2,6 +2,7 @@ from flask import Flask, request
 from roles.student.registration import registration
 from menu import menu
 from roles.student.auditory_search import auditory_search
+from roles.student.teachers import teachers
 from roles.studdekan.event_organize import event_organize
 from roles.studdekan.event_visits import event_visits
 from roles.student.events import events
@@ -17,6 +18,7 @@ app.register_blueprint(menu)
 app.register_blueprint(registration)
 app.register_blueprint(auditory_search)
 app.register_blueprint(events)
+app.register_blueprint(teachers)
 # for studdekan
 app.register_blueprint(event_organize)
 app.register_blueprint(event_visits)
