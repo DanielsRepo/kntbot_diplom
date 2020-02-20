@@ -1,6 +1,6 @@
 from flask import Blueprint, session
 from keyboard import make_menu_keyboard, menu_buttons, make_role_replykeyboard, studdekan_buttons, headman_buttons, dekanat_buttons
-from db.db import db, conn
+from db.db import db
 from db.group import Group
 from db.student import Student
 from db.event import Event
@@ -24,7 +24,7 @@ menu = Blueprint('menu', __name__)
 @menu.route('/menu')
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    add_all(message)
+    # add_all(message)
 
     if Student.get_student_by_id(message.from_user.id) is None:
         bot.send_message(chat_id=message.from_user.id,

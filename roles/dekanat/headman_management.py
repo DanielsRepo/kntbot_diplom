@@ -141,6 +141,8 @@ def send_file_headman(message, headman_id):
                          text=f'Файл не відправлено {emojize(":x:", use_aliases=True)}\n'
                               'Файл має бути фото чи документом\n'
                               'Відправте файл боту і він його передасть старості')
+
+        bot.register_next_step_handler(message, send_file_headman, headman_id)
     else:
         if message.content_type == 'document':
             file_id = message.document.file_id
@@ -153,6 +155,3 @@ def send_file_headman(message, headman_id):
 
         bot.send_message(chat_id=message.from_user.id,
                          text=f'Файл відправлений старості {emojize(":white_check_mark:", use_aliases=True)}')
-
-
-

@@ -30,7 +30,7 @@ def get_aud(message):
     else:
         building, floor = Audience.get_aud(number)
         bot.send_message(chat_id=message.from_user.id,
-                         text=f'Аудиторія {number} знаходиться в {building} корпусі на {floor} поверсі',
+                         text=f'Аудиторія: {number}\nКорпус: {building}\nПоверх: {floor}',
                          reply_markup=search_again)
 
 

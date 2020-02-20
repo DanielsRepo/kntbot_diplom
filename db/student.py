@@ -74,6 +74,7 @@ class Student(Base):
 
 Base.metadata.create_all(conn)
 
+
 students = [
     'Костин Юстин Леонидович',
     'Яковлев Ефрем Якунович',

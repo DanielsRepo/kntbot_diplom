@@ -1,7 +1,6 @@
 from flask import Blueprint
 from credentials import *
 from db.event import Event
-from keyboard import make_keyboard
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 
@@ -11,19 +10,25 @@ events = Blueprint('events', __name__)
 @events.route('/events')
 # get_events_schelude
 def get_events_schelude(message):
-    keyboard = InlineKeyboardMarkup(row_width=2)
-    keys_list = []
+    event_list = Event.get_all_events()
 
-    for event in Event.get_all_events():
-        keys_list.append(InlineKeyboardButton(text=event.name, callback_data=f'schelude_{event.id}'))
-        keys_list.append(InlineKeyboardButton(text=str(event.date), callback_data=f'schelude_{event.id}'))
+    if event_list:
+        keyboard = InlineKeyboardMarkup(row_width=2)
+        keys_list = []
 
-    keyboard.add(*keys_list)
+        for event in event_list:
+            keys_list.append(InlineKeyboardButton(text=event.name, callback_data=f'schelude_{event.id}'))
+            keys_list.append(InlineKeyboardButton(text=str(event.date), callback_data=f'schelude_{event.id}'))
 
-    bot.send_message(chat_id=message.from_user.id,
-                     text=f'{emojize(":man_juggling:", use_aliases=True)} Розклад заходів '
-                          f'{emojize(":performing_arts:", use_aliases=True)}',
-                     reply_markup=keyboard)
+        keyboard.add(*keys_list)
+
+        bot.send_message(chat_id=message.from_user.id,
+                         text=f'{emojize(":man_juggling:", use_aliases=True)} Розклад заходів '
+                              f'{emojize(":performing_arts:", use_aliases=True)}',
+                         reply_markup=keyboard)
+    else:
+        bot.send_message(chat_id=message.from_user.id,
+                         text='На даний час ніяких заходів незаплановано')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('schelude_'))

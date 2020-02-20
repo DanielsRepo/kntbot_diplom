@@ -22,21 +22,10 @@ class Database:
 
     @staticmethod
     def delete():
-        # for _ in range(50):
-        #     print('clean')
-        Base.metadata.drop_all(conn)
+        metadata.drop_all()
 
 
 db = Database('postgres', 'admin', 'localhost', '5432', 'postgres')
 
 conn, metadata = db.connect()
 session = Session(conn)
-
-# url = urlparse.urlparse(os.environ['DATABASE_URL'])
-# dbname = url.path[1:]
-# user = url.username
-# password = url.password
-# host = url.hostname
-# port = url.port
-
-# db = Database(user, password, host, port, dbname)
