@@ -15,6 +15,7 @@ class Database:
 
     def connect(self):
         url = f'postgresql://{self.admin}:{self.password}@{self.host}:{self.port}/{self.database}'
+        # url = f'mysql+mysqlconnector://{self.admin}:{self.password}@{self.host}/{self.database}'
         conn = sa.create_engine(url)
         metadata = sa.MetaData(bind=conn, reflect=True)
 

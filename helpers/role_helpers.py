@@ -2,7 +2,7 @@ from functools import wraps
 
 LIST_OF_ADMINS = [374464076]
 # LIST_OF_HEADMANS = Headman.get_all_headmans()
-LIST_OF_HEADMANS = []
+LIST_OF_HEADMANS = [374464076]
 LIST_OF_DEKANAT = [374464076]
 
 

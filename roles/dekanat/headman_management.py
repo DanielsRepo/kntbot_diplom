@@ -1,5 +1,5 @@
 from flask import Blueprint
-from credentials import *
+from credentials import bot
 from db.headman import Headman
 from db.group import Group
 from db.dekanat import Dekanat

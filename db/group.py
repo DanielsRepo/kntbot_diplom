@@ -5,7 +5,7 @@ class Group(Base):
     __tablename__ = 'group'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    name = sa.Column(sa.String)
+    name = sa.Column(sa.String(32))
 
     @staticmethod
     def add_groups():

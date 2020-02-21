@@ -23,11 +23,11 @@ class Event(Base):
     __tablename__ = 'event'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    name = sa.Column(sa.String)
-    place = sa.Column(sa.String)
-    date = sa.Column(sa.String)
-    time = sa.Column(sa.String)
-    poster = sa.Column(sa.String)
+    name = sa.Column(sa.String(256))
+    place = sa.Column(sa.String(256))
+    date = sa.Column(sa.String(256))
+    time = sa.Column(sa.String(256))
+    poster = sa.Column(sa.String(256))
 
     @staticmethod
     def add_event(name):

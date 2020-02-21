@@ -1,6 +1,5 @@
 from db.db import *
 from db.student import Student
-from sqlalchemy.orm.exc import NoResultFound
 
 
 class Headman(Base):

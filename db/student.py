@@ -6,9 +6,9 @@ class Student(Base):
     __tablename__ = 'student'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    username = sa.Column(sa.String)
-    name = sa.Column(sa.String)
-    phone = sa.Column(sa.String)
+    username = sa.Column(sa.String(256))
+    name = sa.Column(sa.String(256))
+    phone = sa.Column(sa.String(256))
     group_id = sa.Column(sa.Integer, sa.ForeignKey('group.id'))
 
     group = relationship('Group')

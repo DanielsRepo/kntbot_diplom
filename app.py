@@ -9,7 +9,7 @@ from roles.student.events import events
 from roles.studdekan.headmans import headmans
 from roles.studdekan.debtors import debtors
 from roles.dekanat.headman_management import headman_management
-from credentials import *
+from credentials import bot, secret, telebot
 
 app = Flask(__name__)
 
@@ -30,8 +30,13 @@ app.register_blueprint(debtors)
 # for dekanat
 app.register_blueprint(headman_management)
 
+# webhook set
+# bot.remove_webhook()
+# bot.set_webhook(url=f"https://dancher18.pythonanywhere.com/{secret}")
+
 
 @app.route("/", methods=['POST'])
+# @app.route(f"/{secret}", methods=['POST'])
 def webhook():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     return '!', 200

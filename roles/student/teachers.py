@@ -1,5 +1,5 @@
 from flask import Blueprint
-from credentials import *
+from credentials import bot
 
 teachers = Blueprint('teachers', __name__)
 

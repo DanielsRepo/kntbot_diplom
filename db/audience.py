@@ -7,7 +7,7 @@ class Audience(Base):
     __tablename__ = 'audience'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    number = sa.Column(sa.String)
+    number = sa.Column(sa.String(16))
     building_id = sa.Column(sa.Integer, sa.ForeignKey('building.id'))
     floor_id = sa.Column(sa.Integer, sa.ForeignKey('floor.id'))
 

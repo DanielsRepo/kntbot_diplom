@@ -1,5 +1,5 @@
 from flask import Blueprint
-from credentials import *
+from credentials import bot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from keyboard import make_keyboard
 from db.group import Group

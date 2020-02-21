@@ -13,7 +13,7 @@ from roles.studdekan.debtors import debtor_keyboard
 from roles.studdekan.event_organize import event_organize_keyboard
 from roles.studdekan.event_visits import event_visits_keyboard
 from roles.dekanat.headman_management import rate_headman, remind_journal, send_file
-from credentials import *
+from credentials import bot
 from helpers.role_helpers import restricted_studdekan, restricted_headman
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
@@ -70,7 +70,6 @@ def get_student_messages(message):
         start_message(message)
 
 
-@bot.message_handler(commands=['studdekan'])
 @restricted_studdekan
 def show_studdekan_keyboard(message):
     bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
@@ -108,7 +107,6 @@ def get_headman_messages(message):
         start_message(message)
 
 
-@bot.message_handler(commands=['dekanat'])
 def show_dekanat_keyboard(message):
     bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
                      reply_markup=make_role_replykeyboard(dekanat_buttons))

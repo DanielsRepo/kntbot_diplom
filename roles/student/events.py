@@ -1,5 +1,5 @@
 from flask import Blueprint
-from credentials import *
+from credentials import bot
 from db.event import Event
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
