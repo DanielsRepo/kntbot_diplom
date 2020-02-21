@@ -8,8 +8,8 @@ def get_fio(full_name):
         return
 
 
-def make_event_visitors_table(stud_dict, event_name):
-    workbook = xlsxwriter.Workbook(f'./tmp/{event_name}.xlsx')
+def make_event_visitors_table(stud_dict, event_name, file_path):
+    workbook = xlsxwriter.Workbook(f'{file_path}{event_name}.xlsx')
     worksheet = workbook.add_worksheet(name=event_name)
 
     cell_format = workbook.add_format({'bold': True, 'align': 'center'})
@@ -50,8 +50,8 @@ def make_event_visitors_table(stud_dict, event_name):
     workbook.close()
 
 
-def make_student_events_table(group_dict, file_name):
-    workbook = xlsxwriter.Workbook(f'./tmp/{file_name}.xlsx')
+def make_student_events_table(group_dict, file_name, file_path):
+    workbook = xlsxwriter.Workbook(f'{file_path}{file_name}.xlsx')
 
     cell_format = workbook.add_format({'bold': True, 'align': 'center'})
 

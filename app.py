@@ -12,8 +12,8 @@ from roles.dekanat.headman_management import headman_management
 from credentials import bot, secret, telebot
 
 app = Flask(__name__)
-
 app.register_blueprint(menu)
+
 # for students
 app.register_blueprint(registration)
 app.register_blueprint(auditory_search)
@@ -30,13 +30,8 @@ app.register_blueprint(debtors)
 # for dekanat
 app.register_blueprint(headman_management)
 
-# webhook set
-# bot.remove_webhook()
-# bot.set_webhook(url=f"https://dancher18.pythonanywhere.com/{secret}")
-
 
 @app.route("/", methods=['POST'])
-# @app.route(f"/{secret}", methods=['POST'])
 def webhook():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     return '!', 200
@@ -44,3 +39,19 @@ def webhook():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# for deploy
+
+# bot.remove_webhook()
+# bot.set_webhook(url = f'https://dancher18.pythonanywhere.com/{secret}')
+#
+# @app.route(f'/{secret}', methods=["POST"])
+# def telegram_webhook():
+#     if request.headers.get('content-type') == 'application/json':
+#         json_string = request.stream.read().decode('utf-8')
+#         update = telebot.types.Update.de_json(json_string)
+#         bot.process_new_updates([update])
+#         return 'ok', 200
+#     else:
+#         abort(403)
+

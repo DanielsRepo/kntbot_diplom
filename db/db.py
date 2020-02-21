@@ -24,6 +24,7 @@ class Database:
     @staticmethod
     def delete():
         metadata.drop_all()
+        print('deleted')
 
 
 db = Database('postgres', 'admin', 'localhost', '5432', 'postgres')

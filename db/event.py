@@ -39,7 +39,7 @@ class Event(Base):
     @staticmethod
     def add_events():
         if len(Event.get_all_events()) > 0:
-            return
+            return True
         else:
             session.add(Event(name='Мистер ЗНТУ', place='ауд. 366', date='12.08.20', time='10:00'))
             session.add(Event(name='КВН', place='акт зал', date='20.12.20', time='18:00'))
@@ -51,20 +51,20 @@ class Event(Base):
         print("events added")
 
     @staticmethod
-    def add_visitors(event_id):
+    def add_visitors():
         if len(EventVisitor.get_visitors()) > 0:
             return
         else:
-            session.query(EventVisitor).filter(EventVisitor.event_id == event_id).delete()
+            # session.query(EventVisitor).filter(EventVisitor.event_id == event_id).delete()
+            for event in Event.get_all_events():
+                s_id_list = random.sample(range(1, 61), random.randint(20, 40))
+                for s_id in s_id_list:
+                    event_visit = EventVisitor(event_id=event.id, student_id=s_id)
+                    session.add(event_visit)
 
-            s_id_list = random.sample(range(1, 61), random.randint(20, 40))
-            for s_id in s_id_list:
-                event_visit = EventVisitor(event_id=event_id, student_id=s_id)
-                session.add(event_visit)
+                session.commit()
 
-            session.commit()
-
-            print("visitors added")
+        print("visitors added")
 
     @staticmethod
     def update_event(event_id, name='', place='', date='', time='', poster=''):

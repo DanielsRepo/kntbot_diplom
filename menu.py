@@ -24,7 +24,7 @@ menu = Blueprint('menu', __name__)
 @menu.route('/menu')
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    # add_all(message)
+    add_all(message)
 
     if Student.get_student_by_id(message.from_user.id) is None:
         bot.send_message(chat_id=message.from_user.id,
@@ -133,10 +133,8 @@ def help_message(message):
 def add_all(message):
     Group.add_groups()
     Student.add_students()
-
     Event.add_events()
-    for event in Event.get_all_events():
-        Event.add_visitors(event.id)
+    Event.add_visitors()
 
 
 @bot.message_handler(commands=['del'])

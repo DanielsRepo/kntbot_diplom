@@ -8,6 +8,7 @@ from db.student import Student
 from helpers.xlsx_helpers import get_fio, make_event_visitors_table, make_student_events_table
 from helpers.role_helpers import restricted_studdekan
 from emoji import emojize
+import os
 
 event_visits = Blueprint('event_visits', __name__)
 
@@ -44,10 +45,12 @@ def get_event_visitors_callback(call):
     event_id = call.data.split('_')[1]
     event_name = Event.get_event(event_id).name
 
-    stud_dict = prepare_event_visitors_table(event_id)
-    make_event_visitors_table(stud_dict=stud_dict, event_name=event_name)
+    file_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '\\tmp\\'
 
-    doc = open(f'./tmp/{event_name}.xlsx', 'rb')
+    stud_dict = prepare_event_visitors_table(event_id)
+    make_event_visitors_table(stud_dict=stud_dict, event_name=event_name, file_path=file_path)
+
+    doc = open(f'{file_path}{event_name}.xlsx', 'rb')
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
@@ -75,11 +78,12 @@ def prepare_event_visitors_table(event_id):
 @restricted_studdekan
 def get_student_events(call):
     file_name = 'Відвідування заходів'
+    file_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '\\tmp\\'
 
     group_dict = prepare_student_events_table()
-    make_student_events_table(group_dict=group_dict, file_name=file_name)
+    make_student_events_table(group_dict=group_dict, file_name=file_name, file_path=file_path)
 
-    doc = open(f'./tmp/{file_name}.xlsx', 'rb')
+    doc = open(f'{file_path}{file_name}.xlsx', 'rb')
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,

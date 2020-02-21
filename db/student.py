@@ -16,7 +16,7 @@ class Student(Base):
     @staticmethod
     def add_students():
         if len(Student.get_all_students()) > 0:
-            return
+            return True
         else:
             group_ids = [1, 2, 3, 4]
 

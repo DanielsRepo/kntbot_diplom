@@ -10,7 +10,7 @@ class Group(Base):
     @staticmethod
     def add_groups():
         if len(Group.get_groups()) > 0:
-            return
+            return True
         else:
             group_list = [str(i+1) for i in range(61)]
             for g in group_list:
