@@ -38,6 +38,12 @@ def create_event(message):
 
 
 def name_event(message):
+    if message.text == '/cancel':
+        bot.send_message(chat_id=message.from_user.id,
+                         text=f'Дія була скасована {emojize(":white_check_mark:", use_aliases=True)}')
+        bot.clear_step_handler_by_chat_id(chat_id=message.from_user.id)
+        return
+
     event = Event.add_event(name=message.text)
     message = bot.send_message(chat_id=message.from_user.id, text="Місце проведення")
 

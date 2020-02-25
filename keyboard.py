@@ -1,4 +1,4 @@
-from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton
 from helpers.role_helpers import LIST_OF_ADMINS, LIST_OF_HEADMANS, LIST_OF_DEKANAT
 from emoji import emojize
 
@@ -76,18 +76,24 @@ def make_headman_rate_keyboard(group_id, rating):
 def make_keyboard(keyboard_type, elem_list, marker):
     keyboard = InlineKeyboardMarkup(row_width=1)
     keys_list = []
-
     for elem in elem_list:
-        keys_list.append(InlineKeyboardButton(text=elem.name, callback_data=marker + str(elem.id)))
+        keys_list.append(InlineKeyboardButton(text=str(elem.name), callback_data=marker + str(elem.id)))
 
     if keyboard_type == 'event' or keyboard_type == 'student':
         keyboard.add(*keys_list)
     elif keyboard_type == 'group':
+        keyboard = ReplyKeyboardMarkup(row_width=3)
+
+        keys_list = []
+
+        for g in elem_list:
+            keys_list.append(KeyboardButton(text=str(g.name)))
+
         i = 0
-        j = 7
+        j = 3
         for _ in range(len(keys_list)):
-            keyboard.row(*keys_list[i:j])
-            i += 7
-            j += 7
+            keyboard.add(*keys_list[i:j])
+            i += 3
+            j += 3
 
     return keyboard

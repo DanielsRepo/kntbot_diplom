@@ -4,6 +4,7 @@ from sqlalchemy.exc import ProgrammingError
 
 class Student(Base):
     __tablename__ = 'student'
+    __table_args__ = {'extend_existing': True}
 
     id = sa.Column(sa.Integer, primary_key=True)
     username = sa.Column(sa.String(256))

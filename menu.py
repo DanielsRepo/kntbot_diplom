@@ -22,20 +22,19 @@ menu = Blueprint('menu', __name__)
 
 
 @menu.route('/menu')
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start', 'cancel'])
 def start_message(message):
     add_all(message)
 
-    if Student.get_student_by_id(message.from_user.id) is None:
-        bot.send_message(chat_id=message.from_user.id,
-                         text=f'Привіт {emojize(":wave:", use_aliases=True)}\n'
-                              f'Для користування ботом треба зареєструватися',
-                         reply_markup=make_menu_keyboard(message))
-        register(message)
-    else:
-        bot.send_message(chat_id=message.from_user.id,
-                         text='Вибери пункт меню:',
-                         reply_markup=make_menu_keyboard(message))
+    # if Student.get_student_by_id(message.from_user.id) is None:
+    #     bot.send_message(chat_id=message.from_user.id,
+    #                      text=f'Привіт {emojize(":wave:", use_aliases=True)}\n'
+    #                           f'Для користування ботом треба зареєструватися')
+    #     register(message)
+    # else:
+    bot.send_message(chat_id=message.from_user.id,
+                     text='Вибери пункт меню:',
+                     reply_markup=make_menu_keyboard(message))
 
 
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in menu_buttons)
@@ -110,6 +109,10 @@ def get_headman_messages(message):
 def show_dekanat_keyboard(message):
     bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
                      reply_markup=make_role_replykeyboard(dekanat_buttons))
+
+
+def make_d():
+    return make_role_replykeyboard(dekanat_buttons)
 
 
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in dekanat_buttons)

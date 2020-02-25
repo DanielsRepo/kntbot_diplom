@@ -136,11 +136,16 @@ def send_file_callback(call):
 
 
 def send_file_headman(message, headman_id):
-    if message.content_type not in ['photo', 'document']:
+    if message.text == '/cancel':
         bot.send_message(chat_id=message.from_user.id,
-                         text=f'Файл не відправлено {emojize(":x:", use_aliases=True)}\n'
+                         text=f'Дія була скасована {emojize(":white_check_mark:", use_aliases=True)}')
+        bot.clear_step_handler_by_chat_id(chat_id=message.from_user.id)
+    elif message.content_type not in ['photo', 'document']:
+        bot.send_message(chat_id=message.from_user.id,
+                         text=f'Файл не відправлено {emojize(":x:", use_aliases=True)}\n\n'
                               'Файл має бути фото чи документом\n'
-                              'Відправте файл боту і він його передасть старості')
+                              'Відправте файл боту і він його передасть старості\n\n'
+                              'Щоб скасувати дію можна скористатися командою /cancel')
 
         bot.register_next_step_handler(message, send_file_headman, headman_id)
     else:

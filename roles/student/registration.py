@@ -2,7 +2,7 @@ from flask import Blueprint
 from credentials import bot
 from db.group import Group
 from db.student import Student
-from keyboard import make_keyboard
+from keyboard import make_keyboard, make_menu_keyboard
 from emoji import emojize
 import re
 
@@ -55,4 +55,4 @@ def get_phone(message):
         Student.update_student(student_id=message.from_user.id, phone=phone)
 
         success_message = f'Вітаю, ти зареєстрований {emojize(":white_check_mark:", use_aliases=True)}'
-        bot.send_message(chat_id=message.from_user.id, text=success_message)
+        bot.send_message(chat_id=message.from_user.id, text=success_message, reply_markup=make_menu_keyboard(message))

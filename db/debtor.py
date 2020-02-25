@@ -5,6 +5,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 class Debtor(Base):
     __tablename__ = 'debtor'
+    __table_args__ = {'extend_existing': True}
 
     id = sa.Column(sa.Integer, primary_key=True)
     student_id = sa.Column(sa.Integer, sa.ForeignKey('student.id'))

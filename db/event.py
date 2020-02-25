@@ -5,6 +5,7 @@ import random
 
 class EventVisitor(Base):
     __tablename__ = 'eventvisitor'
+    __table_args__ = {'extend_existing': True}
 
     id = sa.Column(sa.Integer, primary_key=True)
 
@@ -21,6 +22,7 @@ class EventVisitor(Base):
 
 class Event(Base):
     __tablename__ = 'event'
+    __table_args__ = {'extend_existing': True}
 
     id = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String(256))

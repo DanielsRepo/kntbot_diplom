@@ -4,6 +4,7 @@ from db.student import Student
 
 class Headman(Base):
     __tablename__ = 'headman'
+    __table_args__ = {'extend_existing': True}
 
     id = sa.Column(sa.Integer, primary_key=True)
     student_id = sa.Column(sa.Integer, sa.ForeignKey('student.id'))
