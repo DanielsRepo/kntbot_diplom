@@ -95,7 +95,7 @@ def prepare_student_events_table():
     group_dict = {}
 
     for group in Group.get_groups()[:4]:
-        students = Event.get_visitor_students(group.name)
+        students = Event.get_visitor_students(group.id)
 
         stud_dict = {}
 

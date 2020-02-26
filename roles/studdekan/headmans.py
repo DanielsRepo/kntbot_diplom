@@ -44,23 +44,29 @@ def headman_group_callback(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
-    if not Headman.get_headman_by_group(group_id):
-        student_keyboard = make_keyboard(keyboard_type='student',
-                                         elem_list=Student.get_students_by_group(group_id),
-                                         marker=f'headman_{Group.get_group_by_id(group_id)}_')
-
+    if group_id == False:
+        bot.clear_step_handler_by_chat_id(message.from_user.id)
         bot.send_message(chat_id=message.from_user.id,
-                         text='Вибери старосту:',
-                         reply_markup=student_keyboard)
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(studdekan_buttons))
     else:
-        keyboard = InlineKeyboardMarkup()
-        keyboard.add(InlineKeyboardButton(text='Змінити старосту', callback_data='change_headman'))
+        if not Headman.get_headman_by_group(group_id):
+            student_keyboard = make_keyboard(keyboard_type='student',
+                                             elem_list=Student.get_students_by_group(group_id),
+                                             marker=f'headman_{Group.get_group_by_id(group_id)}_')
 
-        bot.send_message(chat_id=message.from_user.id,
-                         text='Цій групі вже призначено старосту.\n'
-                              'Якщо потрібно його змінити, скористайся командою '
-                              f'{emojize(":point_down:", use_aliases=True)}',
-                         reply_markup=keyboard)
+            bot.send_message(chat_id=message.from_user.id,
+                             text='Вибери старосту:',
+                             reply_markup=student_keyboard)
+        else:
+            keyboard = InlineKeyboardMarkup()
+            keyboard.add(InlineKeyboardButton(text='Змінити старосту', callback_data='change_headman'))
+
+            bot.send_message(chat_id=message.from_user.id,
+                             text='Цій групі вже призначено старосту.\n'
+                                  'Якщо потрібно його змінити, скористайся командою '
+                                  f'{emojize(":point_down:", use_aliases=True)}',
+                             reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('headman_'))
@@ -104,13 +110,19 @@ def heeadman_group_callback(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
-    student_keyboard = make_keyboard(keyboard_type='student',
-                                     elem_list=Student.get_students_by_group(group_id),
-                                     marker=f'chheadman_{Group.get_group_by_id(group_id)}_')
+    if group_id == False:
+        bot.clear_step_handler_by_chat_id(message.from_user.id)
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(studdekan_buttons))
+    else:
+        student_keyboard = make_keyboard(keyboard_type='student',
+                                         elem_list=Student.get_students_by_group(group_id),
+                                         marker=f'chheadman_{Group.get_group_by_id(group_id)}_')
 
-    bot.send_message(chat_id=message.from_user.id,
-                     text='Вибери нового старосту:',
-                     reply_markup=student_keyboard)
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери нового старосту:',
+                         reply_markup=student_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('chheadman_'))
@@ -149,29 +161,33 @@ def get_headman(call):
 
 # @bot.callback_query_handler(func=lambda call: call.data.startswith('getheadgroup_'))
 def hheadman_group_callback(message):
-    # group_id = call.data.split('_')[1]
-    # group = Group.get_group_by_id(group_id)
-
     group = message.text
+    group_id = Group.get_id_by_group(group)
 
-    headman = Headman.get_headman_by_group(Group.get_id_by_group(group))
-
-    if not headman:
-        keyboard = InlineKeyboardMarkup()
-        keyboard.add(InlineKeyboardButton(text='Призначити старосту', callback_data='assign_headman'))
-
-        bot.send_message(chat_id=message.from_user.id,
-                         text=f'Групі {group} непризначено старосту.\n'
-                              'Для призначення старости скористайся командою '
-                              f'{emojize(":point_down:", use_aliases=True)}',
-                         reply_markup=keyboard)
-    else:
-        username = Student.get_student_by_id(headman.student_id).username
-        name = Student.get_student_by_id(headman.student_id).name
-
-        bot.send_message(chat_id=message.from_user.id,
-                         text=f'Староста групи {group}: <a href="t.me/{username}">{name}</a>',
-                         parse_mode='html')
+    if group_id == False:
+        bot.clear_step_handler_by_chat_id(message.from_user.id)
         bot.send_message(chat_id=message.from_user.id,
                          text='Вибери пункт меню:',
                          reply_markup=make_role_replykeyboard(studdekan_buttons))
+    else:
+        headman = Headman.get_headman_by_group(group_id)
+
+        if not headman:
+            keyboard = InlineKeyboardMarkup()
+            keyboard.add(InlineKeyboardButton(text='Призначити старосту', callback_data='assign_headman'))
+
+            bot.send_message(chat_id=message.from_user.id,
+                             text=f'Групі {group} непризначено старосту.\n'
+                                  'Для призначення старости скористайся командою '
+                                  f'{emojize(":point_down:", use_aliases=True)}',
+                             reply_markup=keyboard)
+        else:
+            username = Student.get_student_by_id(headman.student_id).username
+            name = Student.get_student_by_id(headman.student_id).name
+
+            bot.send_message(chat_id=message.from_user.id,
+                             text=f'Староста групи {group}: <a href="t.me/{username}">{name}</a>',
+                             parse_mode='html')
+            bot.send_message(chat_id=message.from_user.id,
+                             text='Вибери пункт меню:',
+                             reply_markup=make_role_replykeyboard(studdekan_buttons))

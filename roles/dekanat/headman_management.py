@@ -4,7 +4,7 @@ from db.headman import Headman
 from db.group import Group
 from db.dekanat import Dekanat
 from db.student import Student
-from keyboard import make_keyboard, make_headman_rate_keyboard
+from keyboard import make_keyboard, make_headman_rate_keyboard, make_role_replykeyboard, dekanat_buttons
 from telebot.apihelper import ApiException
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
@@ -19,21 +19,36 @@ def rate_headman(message):
 
     bot.send_message(chat_id=message.from_user.id, text='Староста групи:', reply_markup=group_keyboard)
 
+    bot.register_next_step_handler_by_chat_id(message.from_user.id, rate_headman_callback)
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('rateheadman_'))
-def rate_headman_callback(call):
-    group_id = call.data.split('_')[1]
-    group = Group.get_group_by_id(group_id)
 
-    headman = Headman.get_headman_by_group(group_id)
-    headman_name = Student.get_student_by_id(headman.student_id).name
+def rate_headman_callback(message):
+    group = message.text
+    group_id = Group.get_id_by_group(group)
 
-    headman_rate_keyboard = make_headman_rate_keyboard(group_id=group_id, rating=headman.rating)
+    if group_id == False:
+        bot.clear_step_handler_by_chat_id(message.from_user.id)
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(dekanat_buttons))
+    else:
+        headman = Headman.get_headman_by_group(group_id)
+        if headman is None:
+            bot.send_message(chat_id=message.from_user.id,
+                             text='Старосту не призначено\nВибери пункт меню:',
+                             reply_markup=make_role_replykeyboard(dekanat_buttons))
+        else:
+            headman_name = Student.get_student_by_id(headman.student_id).name
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text=f'Староста групи КНТ-{group} {headman_name}',
-                          reply_markup=headman_rate_keyboard)
+            headman_rate_keyboard = make_headman_rate_keyboard(group_id=group_id, rating=headman.rating)
+
+            bot.send_message(chat_id=message.from_user.id,
+                             text=f'Староста групи КНТ-{group} {headman_name}',
+                             reply_markup=headman_rate_keyboard)
+
+            bot.send_message(chat_id=message.from_user.id,
+                             text='Вибери пункт меню:',
+                             reply_markup=make_role_replykeyboard(dekanat_buttons))
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(('rateminus_', 'rateplus_')))
@@ -42,6 +57,12 @@ def rate_headman_sign_callback(call):
     group = Group.get_group_by_id(group_id)
 
     headman = Headman.get_headman_by_group(group_id)
+    if headman is None:
+        bot.send_message(chat_id=call.from_user.id,
+                         text='Старосту не призначено\nВибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(dekanat_buttons))
+        return
+
     headman_name = Student.get_student_by_id(headman.student_id).name
 
     if call.data.startswith('rateminus_'):
@@ -75,45 +96,67 @@ def remind_journal(message):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('remind_one'))
 def remind_one(call):
-    group_list = Group.get_groups()
+    group_keyboard = make_keyboard('group', Group.get_groups(), 'remindonegroup_')
 
-    group_keyboard = make_keyboard('group', group_list, 'remindonegroup_')
+    bot.send_message(chat_id=call.from_user.id,
+                     text='Виберіть старосту якої групи:',
+                     reply_markup=group_keyboard)
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text='Виберіть старосту якої групи:',
-                          reply_markup=group_keyboard)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, remind_one_callback)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('remindonegroup'))
-def remind_one_callback(call):
-    group_id = call.data.split('_')[1]
-    group = Group.get_group_by_id(group_id)
+def remind_one_callback(message):
+    group = message.text
+    group_id = Group.get_id_by_group(group)
 
-    headman = Headman.get_headman_by_group(group_id)
-    headman_name = Student.get_student_by_id(headman.student_id).name
+    if group_id == False:
+        bot.clear_step_handler_by_chat_id(message.from_user.id)
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(dekanat_buttons))
+    else:
+        headman = Headman.get_headman_by_group(group_id)
+        if headman is None:
+            bot.send_message(chat_id=message.from_user.id,
+                             text='Старосту не призначено\nВибери пункт меню:',
+                             reply_markup=make_role_replykeyboard(dekanat_buttons))
+            return
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text=f'Старості групи КНТ-{group} '
-                               f'{headman_name} було відправлено нагадування'
-                               f'{emojize(":white_check_mark:", use_aliases=True)}')
+        headman_name = Student.get_student_by_id(headman.student_id).name
 
-    bot.send_message(chat_id=headman.student_id, text='ЗАПОВНИ ЖУРНАЛ')
+        bot.send_message(chat_id=message.from_user.id,
+                         text=f'Старості групи КНТ-{group} '
+                              f'{headman_name} було відправлено нагадування'
+                              f'{emojize(":white_check_mark:", use_aliases=True)}')
+
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(dekanat_buttons))
+
+        bot.send_message(chat_id=headman.student_id,
+                         text='Повідомлення від деканату '
+                              f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}\n\n'
+                              'Заповни журнал')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('remind_all'))
 def remind_all(call):
     for headman_id in Headman.get_all_headmans():
         try:
-            bot.send_message(headman_id, text='ЗАПОВНИ ЖУРНАЛ')
+            bot.send_message(chat_id=headman_id,
+                             text='Повідомлення від деканату '
+                                  f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}\n\n'
+                                  'Заповни журнал')
         except ApiException:
             continue
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text='Всім старостам було відправлено нагадування '
-                               f'{emojize(":white_check_mark:", use_aliases=True)}')
+    bot.send_message(chat_id=call.from_user.id,
+                     text='Всім старостам було відправлено нагадування '
+                          f'{emojize(":white_check_mark:", use_aliases=True)}')
+
+    bot.send_message(chat_id=call.from_user.id,
+                     text='Вибери пункт меню:',
+                     reply_markup=make_role_replykeyboard(dekanat_buttons))
 
 
 def send_file(message):
@@ -121,18 +164,31 @@ def send_file(message):
 
     bot.send_message(chat_id=message.from_user.id, text='Виберіть старосту групи:', reply_markup=group_keyboard)
 
+    bot.register_next_step_handler_by_chat_id(message.from_user.id, send_file_callback)
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('sendfile'))
-def send_file_callback(call):
-    group_id = call.data.split('_')[1]
 
-    headman = Headman.get_headman_by_group(group_id)
+def send_file_callback(message):
+    group = message.text
+    group_id = Group.get_id_by_group(group)
 
-    message = bot.edit_message_text(chat_id=call.from_user.id,
-                                    message_id=call.message.message_id,
-                                    text='Відправте файл боту і він його передасть старості')
+    if group_id == False:
+        bot.clear_step_handler_by_chat_id(message.from_user.id)
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(dekanat_buttons))
+    else:
+        headman = Headman.get_headman_by_group(group_id)
+        if headman is None:
+            bot.send_message(chat_id=message.from_user.id,
+                             text='Старосту не призначено\nВибери пункт меню:',
+                             reply_markup=make_role_replykeyboard(dekanat_buttons))
+            return
 
-    bot.register_next_step_handler(message, send_file_headman, headman.student_id)
+        message = bot.send_message(chat_id=message.from_user.id,
+                                   text='Відправте файл боту і він його передасть старості',
+                                   reply_markup=make_role_replykeyboard(dekanat_buttons))
+
+        bot.register_next_step_handler(message, send_file_headman, headman.student_id)
 
 
 def send_file_headman(message, headman_id):
@@ -150,13 +206,17 @@ def send_file_headman(message, headman_id):
         bot.register_next_step_handler(message, send_file_headman, headman_id)
     else:
         if message.content_type == 'document':
-            file_id = message.document.file_id
-
-            bot.send_document(chat_id=headman_id, data=file_id)
+            bot.send_document(chat_id=headman_id,
+                              data=message.document.file_id,
+                              caption=f'Повідомлення від деканату '
+                                      f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}\n\n'
+                                      f'{message.caption}')
         elif message.content_type == 'photo':
-            file_id = message.photo[-1].file_id
-
-            bot.send_photo(chat_id=headman_id, photo=file_id)
+            bot.send_photo(chat_id=headman_id,
+                           photo=message.photo[-1].file_id,
+                           caption=f'Повідомлення від деканату '
+                                   f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}\n\n'
+                                   f'{message.caption}')
 
         bot.send_message(chat_id=message.from_user.id,
                          text=f'Файл відправлений старості {emojize(":white_check_mark:", use_aliases=True)}')

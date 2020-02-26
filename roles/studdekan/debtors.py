@@ -3,7 +3,7 @@ from credentials import bot
 from db.group import Group
 from db.student import Student
 from db.debtor import Debtor
-from keyboard import make_keyboard
+from keyboard import make_keyboard, make_role_replykeyboard, studdekan_buttons
 from helpers.role_helpers import restricted_studdekan
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
@@ -33,23 +33,30 @@ def add_debtor(call):
                                    elem_list=Group.get_groups(),
                                    marker='debtorgroup_')
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text='Вибери групу:',
-                          reply_markup=group_keyboard)
+    bot.send_message(chat_id=call.from_user.id,
+                     text='Вибери групу:',
+                     reply_markup=group_keyboard)
+
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, debtor_group_callback)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('debtorgroup_'))
-def debtor_group_callback(call):
-    group_id = call.data.split('_')[1]
+# @bot.callback_query_handler(func=lambda call: call.data.startswith('debtorgroup_'))
+def debtor_group_callback(message):
+    group = message.text
+    group_id = Group.get_id_by_group(group)
 
-    student_keyboard = make_keyboard(keyboard_type='student',
-                                     elem_list=[student for student in Student.get_students_by_group(group_id)],
-                                     marker=f'debtor_{Group.get_group_by_id(group_id)}_')
+    if group_id == False:
+        bot.clear_step_handler_by_chat_id(message.from_user.id)
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(studdekan_buttons))
+    else:
+        student_keyboard = make_keyboard(keyboard_type='student',
+                                         elem_list=[student for student in Student.get_students_by_group(group_id)],
+                                         marker=f'debtor_{Group.get_group_by_id(group_id)}_')
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text='Вибери студента:', reply_markup=student_keyboard)
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери студента:', reply_markup=student_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('debtor_'))
@@ -61,16 +68,23 @@ def add_debtor_callback(call):
         bot.edit_message_text(chat_id=call.from_user.id,
                               message_id=call.message.message_id,
                               text='Студент вже занесений до боржників')
-        return
 
-    username = Student.get_student_by_id(debtor_id).username
-    name = Student.get_student_by_id(debtor_id).name
+        bot.send_message(chat_id=call.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(studdekan_buttons))
+    else:
+        username = Student.get_student_by_id(debtor_id).username
+        name = Student.get_student_by_id(debtor_id).name
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text=f'Студент <a href="t.me/{username}">{name}</a> '
-                               f'групи {group} занесений до боржників',
-                          parse_mode='html')
+        bot.edit_message_text(chat_id=call.from_user.id,
+                              message_id=call.message.message_id,
+                              text=f'Студент <a href="t.me/{username}">{name}</a> '
+                                   f'групи {group} занесений до боржників',
+                              parse_mode='html')
+
+        bot.send_message(chat_id=call.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(studdekan_buttons))
 
 
 # delete debtor
@@ -81,31 +95,37 @@ def delete_debtor(call):
                                    elem_list=Group.get_groups(),
                                    marker='deldebtorgroup_')
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text='Вибери групу:',
-                          reply_markup=group_keyboard)
+    bot.send_message(chat_id=call.from_user.id,
+                     text='Вибери групу:',
+                     reply_markup=group_keyboard)
+
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, delete_debtor_group_callback)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('deldebtorgroup_'))
-def delete_debtor_group_callback(call):
-    group_id = call.data.split('_')[1]
+# @bot.callback_query_handler(func=lambda call: call.data.startswith('deldebtorgroup_'))
+def delete_debtor_group_callback(message):
+    group = message.text
+    group_id = Group.get_id_by_group(group)
 
-    debtor_list = Debtor.get_debtors_by_group(group_id)
-    debtor_list_keyboard = InlineKeyboardMarkup()
-
-    if not debtor_list:
-        message_text = 'В цій групі немає боржників'
+    if group_id == False:
+        bot.clear_step_handler_by_chat_id(message.from_user.id)
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(studdekan_buttons))
     else:
-        debtor_list_keyboard = make_keyboard(keyboard_type='student',
-                                             elem_list=debtor_list,
-                                             marker='deldebtor_')
-        message_text = 'Вибери боржника:'
+        debtor_list = Debtor.get_debtors_by_group(group_id)
+        debtor_list_keyboard = InlineKeyboardMarkup()
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text=message_text,
-                          reply_markup=debtor_list_keyboard)
+        if not debtor_list:
+            message_text = 'В цій групі немає боржників'
+        else:
+            debtor_list_keyboard = make_keyboard(keyboard_type='student',
+                                                 elem_list=debtor_list,
+                                                 marker='deldebtor_')
+            message_text = 'Вибери боржника:'
+
+        bot.send_message(chat_id=message.from_user.id,
+                         text=message_text, reply_markup=debtor_list_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('deldebtor_'))
@@ -124,6 +144,10 @@ def delete_debtor_callback(call):
 
     Debtor.delete_debtor(debtor_id)
 
+    bot.send_message(chat_id=call.from_user.id,
+                     text='Вибери пункт меню:',
+                     reply_markup=make_role_replykeyboard(studdekan_buttons))
+
 
 # get debtors
 @bot.callback_query_handler(func=lambda call: call.data.startswith('debtors_of_group'))
@@ -133,28 +157,37 @@ def get_debtors_by_group(call):
                                    elem_list=Group.get_groups(),
                                    marker='grdebtor_')
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text='Вибери групу:',
-                          reply_markup=group_keyboard)
+    bot.send_message(chat_id=call.from_user.id,
+                     text='Вибери групу:',
+                     reply_markup=group_keyboard)
+
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_debtors_by_group_callback)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('grdebtor_'))
-def get_debtors_by_group_callback(call):
-    group_id = call.data.split('_')[1]
-    group = Group.get_group_by_id(group_id)
+def get_debtors_by_group_callback(message):
+    group = message.text
+    group_id = Group.get_id_by_group(group)
 
-    debtors_list = Debtor.get_debtors_by_group(group_id)
-
-    if not debtors_list:
-        message_text = 'В цій групі немає боржників'
+    if group_id == False:
+        bot.clear_step_handler_by_chat_id(message.from_user.id)
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(studdekan_buttons))
     else:
-        debtors_str = ''.join((f'<a href="t.me/{debtor.username}">{debtor.name}</a>\n' for debtor in debtors_list))
-        message_text = f'Боржники групи {group}:\n{debtors_str}'
+        debtors_list = Debtor.get_debtors_by_group(group_id)
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text=message_text,
-                          parse_mode='html',
-                          disable_web_page_preview=True)
+        if not debtors_list:
+            message_text = 'В цій групі немає боржників'
+        else:
+            debtors_str = ''.join((f'<a href="t.me/{debtor.username}">{debtor.name}</a>\n' for debtor in debtors_list))
+            message_text = f'Боржники групи {group}:\n{debtors_str}'
+
+        bot.send_message(chat_id=message.from_user.id,
+                         text=message_text,
+                         parse_mode='html',
+                         disable_web_page_preview=True)
+
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_role_replykeyboard(studdekan_buttons))
 

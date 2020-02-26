@@ -37,20 +37,26 @@ dekanat_buttons = [
 ]
 
 
-def make_menu_keyboard(message):
+def make_menu_keyboard(message, other_fac):
     menu_keyboard = ReplyKeyboardMarkup(True, False)
-    for button in menu_buttons[:3]:
-        menu_keyboard.add(button)
-    menu_keyboard.row(*menu_buttons[3:5])
 
-    if message.from_user.id in LIST_OF_ADMINS:
-        menu_keyboard.add(menu_buttons[5])
+    if other_fac:
+        menu_keyboard.add(menu_buttons[0])
+        menu_keyboard.add(menu_buttons[1])
+        menu_keyboard.add(menu_buttons[4])
+    else:
+        for button in menu_buttons[:3]:
+            menu_keyboard.add(button)
+        menu_keyboard.row(*menu_buttons[3:5])
 
-    if message.from_user.id in LIST_OF_HEADMANS:
-        menu_keyboard.add(menu_buttons[6])
+        if message.from_user.id in LIST_OF_ADMINS:
+            menu_keyboard.add(menu_buttons[5])
 
-    if message.from_user.id in LIST_OF_DEKANAT:
-        menu_keyboard.add(menu_buttons[7])
+        if message.from_user.id in LIST_OF_HEADMANS:
+            menu_keyboard.add(menu_buttons[6])
+
+        if message.from_user.id in LIST_OF_DEKANAT:
+            menu_keyboard.add(menu_buttons[7])
 
     return menu_keyboard
 
@@ -82,7 +88,7 @@ def make_keyboard(keyboard_type, elem_list, marker):
     if keyboard_type == 'event' or keyboard_type == 'student':
         keyboard.add(*keys_list)
     elif keyboard_type == 'group':
-        keyboard = ReplyKeyboardMarkup(row_width=3)
+        keyboard = ReplyKeyboardMarkup(row_width=3, one_time_keyboard=True)
 
         keys_list = []
 

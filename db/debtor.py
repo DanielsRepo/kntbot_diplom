@@ -15,11 +15,14 @@ class Debtor(Base):
     @staticmethod
     def add_debtor(debtor_id):
         try:
+            # уже есть должник
             if session.query(Debtor).filter(Debtor.student_id == debtor_id).one():
                 return False
         except NoResultFound:
             session.add(Debtor(student_id=debtor_id))
             session.commit()
+
+        return True
 
     @staticmethod
     def delete_debtor(debtor_id):

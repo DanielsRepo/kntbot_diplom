@@ -1,5 +1,6 @@
 from db.db import *
 from sqlalchemy.exc import ProgrammingError
+from db.group import Group
 
 
 class Student(Base):
@@ -71,6 +72,11 @@ class Student(Base):
     @staticmethod
     def get_all_students():
         return [student for student in session.query(Student).all()]
+
+    @staticmethod
+    def check_fac(student_id):
+        if Student.get_student_by_id(student_id).group_id != Group.get_id_by_group('other'):
+            return True
 
 
 Base.metadata.create_all(conn)

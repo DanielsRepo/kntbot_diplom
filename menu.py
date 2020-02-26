@@ -7,7 +7,7 @@ from db.event import Event
 from roles.student.auditory_search import search_aud
 from roles.student.teachers import teachers_schelude
 from roles.student.events import get_events_schelude
-from roles.student.registration import register
+from roles.student.registration import register, add_another_fac
 from roles.studdekan.headmans import headman_keyboard
 from roles.studdekan.debtors import debtor_keyboard
 from roles.studdekan.event_organize import event_organize_keyboard
@@ -26,15 +26,38 @@ menu = Blueprint('menu', __name__)
 def start_message(message):
     add_all(message)
 
-    # if Student.get_student_by_id(message.from_user.id) is None:
-    #     bot.send_message(chat_id=message.from_user.id,
-    #                      text=f'Привіт {emojize(":wave:", use_aliases=True)}\n'
-    #                           f'Для користування ботом треба зареєструватися')
-    #     register(message)
-    # else:
-    bot.send_message(chat_id=message.from_user.id,
-                     text='Вибери пункт меню:',
-                     reply_markup=make_menu_keyboard(message))
+    keyboard = InlineKeyboardMarkup()
+    keyboard.row(
+        InlineKeyboardButton(text='Так', callback_data='yes'),
+        InlineKeyboardButton(text='Ні', callback_data='no')
+    )
+
+    if Student.get_student_by_id(message.from_user.id) is None:
+        bot.send_message(chat_id=message.from_user.id,
+                         text=f'Привіт {emojize(":wave:", use_aliases=True)}\nТи з ФКНТ?',
+                         reply_markup=keyboard)
+    elif not Student.check_fac(message.from_user.id):
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_menu_keyboard(message, other_fac=True))
+    else:
+        bot.send_message(chat_id=message.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_menu_keyboard(message, other_fac=False))
+
+
+@bot.callback_query_handler(func=lambda call: call.data in ['yes', 'no'])
+def knt_or_not(call):
+    if call.data == 'yes':
+        bot.send_message(chat_id=call.from_user.id,
+                         text='Для користування ботом треба зареєструватися')
+        register(call)
+    elif call.data == 'no':
+        add_another_fac(call)
+
+        bot.send_message(chat_id=call.from_user.id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_menu_keyboard(call, other_fac=True))
 
 
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in menu_buttons)
@@ -111,10 +134,6 @@ def show_dekanat_keyboard(message):
                      reply_markup=make_role_replykeyboard(dekanat_buttons))
 
 
-def make_d():
-    return make_role_replykeyboard(dekanat_buttons)
-
-
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in dekanat_buttons)
 def get_dekanat_messages(message):
     if message.text == dekanat_buttons[0]:
@@ -139,11 +158,14 @@ def add_all(message):
     Event.add_events()
     Event.add_visitors()
 
+    bot.send_message(chat_id=message.from_user.id, text="data is added")
+
 
 @bot.message_handler(commands=['del'])
 @restricted_studdekan
 def delete_all(message):
     db.delete()
+    bot.send_message(chat_id=message.from_user.id, text="database is cleared")
 
 
 @bot.message_handler(content_types=['text',

@@ -10,6 +10,7 @@ from roles.studdekan.headmans import headmans
 from roles.studdekan.debtors import debtors
 from roles.dekanat.headman_management import headman_management
 from credentials import bot, secret, telebot
+from db.db import session
 
 app = Flask(__name__)
 app.register_blueprint(menu)
@@ -31,6 +32,11 @@ app.register_blueprint(debtors)
 app.register_blueprint(headman_management)
 
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    print('session close')
+    session.close()
+
 
 @app.route("/", methods=['POST'])
 def webhook():
@@ -38,21 +44,19 @@ def webhook():
     return '!', 200
 
 
+# for deploy
+# @app.route(f'/{secret}', methods=["POST"])
+# def telegram_webhook():
+#     updates = telebot.types.Update.de_json(request.get_data().decode('utf-8'))
+
+#     try:
+#         bot.process_new_updates([updates])
+#     except BaseException as e:
+#         bot.send_message(374464076, str(e))
+#     return "ok", 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
-# for deploy
-
-# bot.remove_webhook()
-# bot.set_webhook(url = f'https://dancher18.pythonanywhere.com/{secret}')
-#
-@app.route(f'/{secret}', methods=["POST"])
-def telegram_webhook():
-    if request.headers.get('content-type') == 'application/json':
-        json_string = request.stream.read().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return 'ok', 200
-    else:
-        abort(403)
 
