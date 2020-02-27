@@ -14,16 +14,14 @@ class Group(Base):
         if len(Group.get_groups()) > 0:
             return True
         else:
-            # group_list = [str(i+1) for i in range(61)]
             group_list = [
                 '119', '129', '139', '119сп', '129сп', '219', '229', '219сп', '519', '519сп', '819', '819сп', '118',
                 '128', '138', '218', '518', '528', '228', '128сп', '228сп', '118сп', '518сп', '818', '818сп', '117',
                 '127', '137', '237сп', '217', '227', '517', '527', '817', '827сп', '218сп', '537сп', '147сп', '116',
                 '157сп', '126', '216', '516', '526', '816', '226', '129м', '219м', '819м', '119м', '519м', 'other'
             ]
-            for g in group_list:
-                group = Group(name=g)
-                session.add(group)
+            for group in group_list:
+                session.add(Group(name=group))
 
             session.commit()
 
@@ -44,7 +42,7 @@ class Group(Base):
 
     @staticmethod
     def get_groups():
-        return [group for group in session.query(Group).all()]
+        return [group for group in session.query(Group).all()][:-1]
 
 
 Base.metadata.create_all(conn)

@@ -1,5 +1,5 @@
 from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton, KeyboardButton
-from helpers.role_helpers import LIST_OF_ADMINS, LIST_OF_HEADMANS, LIST_OF_DEKANAT
+from helpers.role_helpers import LIST_OF_ADMINS, LIST_OF_DEKANAT
 from emoji import emojize
 
 
@@ -45,18 +45,24 @@ def make_menu_keyboard(message, other_fac):
         menu_keyboard.add(menu_buttons[1])
         menu_keyboard.add(menu_buttons[4])
     else:
-        for button in menu_buttons[:3]:
-            menu_keyboard.add(button)
-        menu_keyboard.row(*menu_buttons[3:5])
-
         if message.from_user.id in LIST_OF_ADMINS:
+            for button in menu_buttons[:3]:
+                menu_keyboard.add(button)
+            menu_keyboard.row(*menu_buttons[3:5])
             menu_keyboard.add(menu_buttons[5])
-
-        if message.from_user.id in LIST_OF_HEADMANS:
-            menu_keyboard.add(menu_buttons[6])
-
-        if message.from_user.id in LIST_OF_DEKANAT:
             menu_keyboard.add(menu_buttons[7])
+        elif message.from_user.id in LIST_OF_DEKANAT:
+            menu_keyboard.add(menu_buttons[0])
+            menu_keyboard.add(menu_buttons[1])
+            menu_keyboard.add(menu_buttons[4])
+            menu_keyboard.add(menu_buttons[7])
+        else:
+            for button in menu_buttons[:3]:
+                menu_keyboard.add(button)
+            menu_keyboard.row(*menu_buttons[3:5])
+
+        # if message.from_user.id in LIST_OF_HEADMANS:
+        #     menu_keyboard.add(menu_buttons[6])
 
     return menu_keyboard
 
@@ -92,8 +98,8 @@ def make_keyboard(keyboard_type, elem_list, marker):
 
         keys_list = []
 
-        for g in elem_list:
-            keys_list.append(KeyboardButton(text=str(g.name)))
+        for elem in elem_list:
+            keys_list.append(KeyboardButton(text=str(elem.name)))
 
         i = 0
         j = 3

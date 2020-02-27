@@ -13,8 +13,8 @@ from credentials import bot, secret, telebot
 from db.db import session
 
 app = Flask(__name__)
-app.register_blueprint(menu)
 
+app.register_blueprint(menu)
 # for students
 app.register_blueprint(registration)
 app.register_blueprint(auditory_search)
@@ -25,9 +25,6 @@ app.register_blueprint(event_organize)
 app.register_blueprint(event_visits)
 app.register_blueprint(headmans)
 app.register_blueprint(debtors)
-# for starosts
-
-
 # for dekanat
 app.register_blueprint(headman_management)
 
@@ -43,16 +40,19 @@ def webhook():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     return '!', 200
 
-
-# for deploy
+# DEPLOY
 # @app.route(f'/{secret}', methods=["POST"])
 # def telegram_webhook():
 #     updates = telebot.types.Update.de_json(request.get_data().decode('utf-8'))
-
+#
 #     try:
 #         bot.process_new_updates([updates])
 #     except BaseException as e:
-#         bot.send_message(374464076, str(e))
+#         print('BaseException OperationalError handled, session close')
+#         bot.send_message(374464076, text=f'BaseException handled :D \n\n {str(e)}')
+#
+#         bot.process_new_updates([updates])
+#
 #     return "ok", 200
 
 

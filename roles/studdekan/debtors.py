@@ -40,12 +40,11 @@ def add_debtor(call):
     bot.register_next_step_handler_by_chat_id(call.from_user.id, debtor_group_callback)
 
 
-# @bot.callback_query_handler(func=lambda call: call.data.startswith('debtorgroup_'))
 def debtor_group_callback(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
-    if group_id == False:
+    if group_id is False:
         bot.clear_step_handler_by_chat_id(message.from_user.id)
         bot.send_message(chat_id=message.from_user.id,
                          text='Вибери пункт меню:',
@@ -79,7 +78,8 @@ def add_debtor_callback(call):
         bot.edit_message_text(chat_id=call.from_user.id,
                               message_id=call.message.message_id,
                               text=f'Студент <a href="t.me/{username}">{name}</a> '
-                                   f'групи {group} занесений до боржників',
+                                   f'групи {group} занесений до боржників '
+                                   f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}',
                               parse_mode='html')
 
         bot.send_message(chat_id=call.from_user.id,
@@ -102,12 +102,11 @@ def delete_debtor(call):
     bot.register_next_step_handler_by_chat_id(call.from_user.id, delete_debtor_group_callback)
 
 
-# @bot.callback_query_handler(func=lambda call: call.data.startswith('deldebtorgroup_'))
 def delete_debtor_group_callback(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
-    if group_id == False:
+    if group_id is False:
         bot.clear_step_handler_by_chat_id(message.from_user.id)
         bot.send_message(chat_id=message.from_user.id,
                          text='Вибери пункт меню:',
@@ -139,7 +138,8 @@ def delete_debtor_callback(call):
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
                           text=f'Студент <a href="t.me/{username}">{name}</a> '
-                               f'групи {group} видалений з боржників',
+                               f'групи {group} видалений з боржників '
+                               f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}',
                           parse_mode='html')
 
     Debtor.delete_debtor(debtor_id)
@@ -168,7 +168,7 @@ def get_debtors_by_group_callback(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
-    if group_id == False:
+    if group_id is False:
         bot.clear_step_handler_by_chat_id(message.from_user.id)
         bot.send_message(chat_id=message.from_user.id,
                          text='Вибери пункт меню:',

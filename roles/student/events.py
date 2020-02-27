@@ -3,6 +3,8 @@ from credentials import bot
 from db.event import Event
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
+from db.group import Group
+from db.student import Student
 
 events = Blueprint('events', __name__)
 
@@ -18,7 +20,7 @@ def get_events_schelude(message):
 
         for event in event_list:
             keys_list.append(InlineKeyboardButton(text=event.name, callback_data=f'schelude_{event.id}'))
-            keys_list.append(InlineKeyboardButton(text=str(event.date), callback_data=f'schelude_{event.id}'))
+            keys_list.append(InlineKeyboardButton(text=event.date, callback_data=f'schelude_{event.id}'))
 
         keyboard.add(*keys_list)
 
@@ -28,7 +30,7 @@ def get_events_schelude(message):
                          reply_markup=keyboard)
     else:
         bot.send_message(chat_id=message.from_user.id,
-                         text='На даний час ніяких заходів незаплановано')
+                         text='На даний час ніяких заходів не заплановано')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('schelude_'))
@@ -36,13 +38,19 @@ def get_events_schelude_callback(call):
     event_id = call.data.split('_')[1]
     event = Event.get_event(event_id)
 
-    message = f'{event.name} {event.place} {event.date} {event.time}'
+    message = f'<b> {event.name} </b>\n' \
+              f'Місце проведення: {event.place}\n' \
+              f'Дата: {event.date}\n' \
+              f'Час: {event.time}'
 
     keyboard = InlineKeyboardMarkup()
     keyboard.add(InlineKeyboardButton(text=f'{emojize(":pencil2:", use_aliases=True)} Зареєструватися',
                                       callback_data=f'regon_{event.id}'))
 
-    bot.send_message(call.from_user.id, text=message, reply_markup=keyboard)
+    bot.edit_message_text(chat_id=call.from_user.id,
+                          message_id=call.message.message_id,
+                          text=message,
+                          reply_markup=keyboard, parse_mode='html')
 
 
 # registration
@@ -55,3 +63,10 @@ def register_on_event_callback(call):
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
                           text=f'Реєстрація пройшла успішно {emojize(":white_check_mark:", use_aliases=True)}')
+
+    user = Student.get_student_by_id(call.from_user.id)
+    bot.send_message(chat_id=374464076,
+                     text=f'#regonevent <a href="t.me/{user.username}">{user.name}</a> '
+                          f'КНТ-{Group.get_group_by_id(user.group_id)}',
+                     parse_mode='html',
+                     disable_web_page_preview=True)

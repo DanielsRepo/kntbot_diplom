@@ -58,6 +58,8 @@ class Student(Base):
 
         session.commit()
 
+        return user
+
     @staticmethod
     def get_student_by_id(student_id):
         try:

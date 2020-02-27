@@ -20,8 +20,6 @@ def event_organize_keyboard(message):
                                       callback_data='delete_event'))
     keyboard.add(InlineKeyboardButton(text=f'Змінити захід {emojize(":pencil2:", use_aliases=True)}',
                                       callback_data='change_event'))
-    keyboard.add(InlineKeyboardButton(text=f'Об’явити захід {emojize(":loudspeaker:", use_aliases=True)}',
-                                      callback_data='alarm_event'))
 
     bot.send_message(chat_id=message.from_user.id, text='Вибери дію:', reply_markup=keyboard)
 
@@ -67,18 +65,9 @@ def date_event(message, event_id):
 def time_event(message, event_id):
     Event.update_event(event_id=event_id, time=message.text)
 
-    message = bot.send_message(chat_id=message.from_user.id, text="Баннер заходу")
-    bot.register_next_step_handler(message, picture_event, event_id)
-
-
-def picture_event(message, event_id):
-    file_id = message.photo[-1].file_id
-
-    Event.update_event(event_id=event_id, poster=file_id)
-
-    bot.send_photo(chat_id=message.from_user.id, photo=file_id,
-                   caption=f'Захід "{Event.get_event(event_id=event_id).name}" створено '
-                           f'{emojize(":white_check_mark:", use_aliases=True)}')
+    bot.send_message(chat_id=message.from_user.id,
+                     text=f'Захід "{Event.get_event(event_id=event_id).name}" створено '
+                          f'{emojize(":white_check_mark:", use_aliases=True)}')
 
 
 # deleting
@@ -130,7 +119,6 @@ def event_callback(call):
     change_event_keyboard.add(InlineKeyboardButton(text='Місце проведення', callback_data=f'place_{event_id}'))
     change_event_keyboard.add(InlineKeyboardButton(text='Дата проведення', callback_data=f'date_{event_id}'))
     change_event_keyboard.add(InlineKeyboardButton(text='Час проведення', callback_data=f'time_{event_id}'))
-    change_event_keyboard.add(InlineKeyboardButton(text='Баннер заходу', callback_data=f'poster_{event_id}'))
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
@@ -138,7 +126,7 @@ def event_callback(call):
                           reply_markup=change_event_keyboard)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith(('name_', 'place_', 'date_', 'time_', 'poster_')))
+@bot.callback_query_handler(func=lambda call: call.data.startswith(('name_', 'place_', 'date_', 'time_')))
 def change_event_callback(call):
     event_id = call.data.split('_')[1]
 
@@ -162,11 +150,6 @@ def change_event_callback(call):
                                         message_id=call.message.message_id,
                                         text='Новий час')
         bot.register_next_step_handler(message, change_event_time, event_id)
-    elif call.data.startswith('poster_'):
-        message = bot.edit_message_text(chat_id=call.from_user.id,
-                                        message_id=call.message.message_id,
-                                        text='Новий баннер')
-        bot.register_next_step_handler(message, change_event_poster, event_id)
 
 
 def change_event_name(message, event_id):
@@ -199,41 +182,3 @@ def change_event_time(message, event_id):
     bot.send_message(chat_id=message.from_user.id,
                      text=f'Час проведення заходу змінено на {Event.get_event(event_id=event_id).time} '
                           f'{emojize(":white_check_mark:", use_aliases=True)}')
-
-
-def change_event_poster(message, event_id):
-    file_id = message.photo[-1].file_id
-    Event.update_event(event_id=event_id, poster=file_id)
-
-    bot.send_photo(message.from_user.id, photo=file_id, caption=f'Баннер заходу змінено '
-                                                                f'{emojize(":white_check_mark:", use_aliases=True)}')
-
-
-# notification
-@bot.callback_query_handler(func=lambda call: call.data.startswith('alarm_event'))
-@restricted_studdekan
-def show_notification(call):
-    event_keyboard = make_keyboard(keyboard_type='event',
-                                   elem_list=Event.get_all_events(),
-                                   marker='alarm_')
-
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text='Який захід оголосити?',
-                          reply_markup=event_keyboard)
-
-
-@bot.callback_query_handler(func=lambda call: call.data.startswith('alarm_'))
-def show_notification_callback(call):
-    event_id = call.data.split('_')[1]
-    event = Event.get_event(event_id)
-
-    message = f'{event.name}\n' \
-              f'Місце проведення: {event.place}\n' \
-              f'Час проведення: {event.time}'
-
-    bot.send_photo(chat_id='-1001104545927', photo=event.poster, caption=message)
-
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text=f'Захід оголошено {emojize(":white_check_mark:", use_aliases=True)}')

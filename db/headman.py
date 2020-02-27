@@ -21,7 +21,6 @@ class Headman(Base):
     def get_headman_by_group(group_id):
         return session.query(Headman, Student).filter(Student.group_id == group_id).filter(Headman.student_id == Student.id).scalar()
 
-
     @staticmethod
     def change_headman(new_headman_id):
         new_headman = Student.get_student_by_id(new_headman_id)
@@ -32,6 +31,17 @@ class Headman(Base):
     @staticmethod
     def get_all_headmans():
         return [headman.student_id for headman in session.query(Headman).all()]
+
+    @staticmethod
+    def rate_headman(group_id, sign):
+        headman = Headman.get_headman_by_group(group_id)
+
+        if sign == '-':
+            headman.rating -= 1
+        elif sign == '+':
+            headman.rating += 1
+
+        session.commit()
 
 
 Base.metadata.create_all(conn)

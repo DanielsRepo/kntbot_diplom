@@ -1,5 +1,6 @@
 from flask import Blueprint, session
-from keyboard import make_menu_keyboard, menu_buttons, make_role_replykeyboard, studdekan_buttons, headman_buttons, dekanat_buttons
+from keyboard import make_menu_keyboard, menu_buttons, make_role_replykeyboard, \
+    studdekan_buttons, headman_buttons, dekanat_buttons
 from db.db import db
 from db.group import Group
 from db.student import Student
@@ -14,7 +15,7 @@ from roles.studdekan.event_organize import event_organize_keyboard
 from roles.studdekan.event_visits import event_visits_keyboard
 from roles.dekanat.headman_management import rate_headman, remind_journal, send_file
 from credentials import bot
-from helpers.role_helpers import restricted_studdekan, restricted_headman
+from helpers.role_helpers import restricted_studdekan, LIST_OF_DEKANAT, LIST_OF_ADMINS
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 
@@ -26,24 +27,35 @@ menu = Blueprint('menu', __name__)
 def start_message(message):
     add_all(message)
 
-    keyboard = InlineKeyboardMarkup()
-    keyboard.row(
-        InlineKeyboardButton(text='Так', callback_data='yes'),
-        InlineKeyboardButton(text='Ні', callback_data='no')
-    )
+    chat_id = message.from_user.id
 
-    if Student.get_student_by_id(message.from_user.id) is None:
-        bot.send_message(chat_id=message.from_user.id,
-                         text=f'Привіт {emojize(":wave:", use_aliases=True)}\nТи з ФКНТ?',
-                         reply_markup=keyboard)
-    elif not Student.check_fac(message.from_user.id):
-        bot.send_message(chat_id=message.from_user.id,
-                         text='Вибери пункт меню:',
-                         reply_markup=make_menu_keyboard(message, other_fac=True))
-    else:
-        bot.send_message(chat_id=message.from_user.id,
+    if chat_id in LIST_OF_ADMINS:
+        bot.send_message(chat_id=chat_id,
                          text='Вибери пункт меню:',
                          reply_markup=make_menu_keyboard(message, other_fac=False))
+    elif chat_id in LIST_OF_DEKANAT:
+        bot.send_message(chat_id=chat_id,
+                         text='Виберіть пункт меню:',
+                         reply_markup=make_menu_keyboard(message, other_fac=False))
+        return
+    elif Student.get_student_by_id(chat_id) is None:
+        keyboard = InlineKeyboardMarkup()
+        keyboard.row(
+            InlineKeyboardButton(text='Так', callback_data='yes'),
+            InlineKeyboardButton(text='Ні', callback_data='no')
+        )
+
+        bot.send_message(chat_id=chat_id,
+                         text=f'Привіт {emojize(":wave:", use_aliases=True)}\nТи з ФКНТ?',
+                         reply_markup=keyboard)
+    elif Student.check_fac(chat_id):
+        bot.send_message(chat_id=chat_id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_menu_keyboard(message, other_fac=False))
+    elif not Student.check_fac(chat_id):
+        bot.send_message(chat_id=chat_id,
+                         text='Вибери пункт меню:',
+                         reply_markup=make_menu_keyboard(message, other_fac=True))
 
 
 @bot.callback_query_handler(func=lambda call: call.data in ['yes', 'no'])
@@ -54,6 +66,7 @@ def knt_or_not(call):
         register(call)
     elif call.data == 'no':
         add_another_fac(call)
+        bot.delete_message(chat_id=call.from_user.id, message_id=call.message.message_id)
 
         bot.send_message(chat_id=call.from_user.id,
                          text='Вибери пункт меню:',
@@ -74,6 +87,7 @@ def get_student_messages(message):
                                '6 пара  |  16:45  |  18:05\n'
                                '7 пара  |  18:15  |  19:35\n'
                                '8 пара  |  19:45  |  21:05\n'))
+        bot.send_message(chat_id=374464076, text='#asked_bells')
     elif message.text == menu_buttons[2]:
         teachers_schelude(message)
     elif message.text == menu_buttons[3]:
@@ -82,14 +96,15 @@ def get_student_messages(message):
         markup = InlineKeyboardMarkup()
         markup.add(InlineKeyboardButton(text='http://www.zntu.edu.ua', url='http://www.zntu.edu.ua'))
         bot.send_message(chat_id=message.chat.id, text='Сайт НУЗП', reply_markup=markup)
+        bot.send_message(chat_id=374464076, text="#askedwebsite")
     elif message.text == menu_buttons[5]:
         show_studdekan_keyboard(message)
-    elif message.text == menu_buttons[6]:
-        show_headman_keyboard(message)
     elif message.text == menu_buttons[7]:
         show_dekanat_keyboard(message)
     elif message.text == menu_buttons[8]:
         start_message(message)
+    # elif message.text == menu_buttons[6]:
+    #     show_headman_keyboard(message)
 
 
 @restricted_studdekan
@@ -111,24 +126,6 @@ def get_studdekan_messages(message):
         event_visits_keyboard(message)
 
 
-@bot.message_handler(commands=['headman'])
-@restricted_headman
-def show_headman_keyboard(message):
-    bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
-                     reply_markup=make_role_replykeyboard(headman_buttons))
-
-
-@bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in headman_buttons)
-@restricted_headman
-def get_headman_messages(message):
-    if message.text == headman_buttons[0]:
-        print('1')
-    elif message.text == headman_buttons[1]:
-        print('2')
-    elif message.text == headman_buttons[2]:
-        start_message(message)
-
-
 def show_dekanat_keyboard(message):
     bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
                      reply_markup=make_role_replykeyboard(dekanat_buttons))
@@ -146,12 +143,17 @@ def get_dekanat_messages(message):
 
 @bot.message_handler(commands=['help'])
 def help_message(message):
-    bot.send_message(chat_id=message.from_user.id, text="я не знаю как тебе помочь")
+    bot.send_message(chat_id=message.from_user.id,
+                     text="Доступні команди:\n"
+                          "/start - почати роботу з ботом\n"
+                          "/cancel - відміна дії\n"
+                          "/help - допомога")
+    bot.send_message(chat_id=374464076, text="#askedhelp")
 
 
 # SERVICE COMMANDS
 @bot.message_handler(commands=['fill'])
-@restricted_studdekan
+# @restricted_studdekan
 def add_all(message):
     Group.add_groups()
     Student.add_students()
@@ -162,7 +164,7 @@ def add_all(message):
 
 
 @bot.message_handler(commands=['del'])
-@restricted_studdekan
+# @restricted_studdekan
 def delete_all(message):
     db.delete()
     bot.send_message(chat_id=message.from_user.id, text="database is cleared")
@@ -189,12 +191,23 @@ def delete_all(message):
                                     'migrate_to_chat_id',
                                     'migrate_from_chat_id',
                                     'pinned_message'])
-def get_text_messages(message):
-    bot.send_message(chat_id=message.from_user.id, text="Отвали или обратись за помощью /help.")
+def get_trash_messages(message):
+    help_message(message)
 
 
+# @restricted_headman
+# def show_headman_keyboard(message):
+#     bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
+#                      reply_markup=make_role_replykeyboard(headman_buttons))
 
 
-
-
+# @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in headman_buttons)
+# @restricted_headman
+# def get_headman_messages(message):
+#     if message.text == headman_buttons[0]:
+#         print('1')
+#     elif message.text == headman_buttons[1]:
+#         print('2')
+#     elif message.text == headman_buttons[2]:
+#         start_message(message)
 

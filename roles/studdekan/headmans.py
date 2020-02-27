@@ -44,7 +44,7 @@ def headman_group_callback(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
-    if group_id == False:
+    if group_id is False:
         bot.clear_step_handler_by_chat_id(message.from_user.id)
         bot.send_message(chat_id=message.from_user.id,
                          text='Вибери пункт меню:',
@@ -60,7 +60,8 @@ def headman_group_callback(message):
                              reply_markup=student_keyboard)
         else:
             keyboard = InlineKeyboardMarkup()
-            keyboard.add(InlineKeyboardButton(text='Змінити старосту', callback_data='change_headman'))
+            keyboard.add(InlineKeyboardButton(text=f'Змінити старосту {emojize(":repeat:", use_aliases=True)}',
+                                              callback_data='change_headman'))
 
             bot.send_message(chat_id=message.from_user.id,
                              text='Цій групі вже призначено старосту.\n'
@@ -81,13 +82,12 @@ def add_headman_callback(call):
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'<a href="t.me/{username}">{name}</a> призначений старостою групи {group}'
+                          text=f'<a href="t.me/{username}">{name}</a> призначений старостою групи {group} '
                                f'{emojize(":white_check_mark:", use_aliases=True)}',
                           parse_mode='html')
     bot.send_message(chat_id=call.from_user.id,
                      text='Вибери пункт меню:',
                      reply_markup=make_role_replykeyboard(studdekan_buttons))
-    # bot.send_message(headman_id, 'Тебе призначено старостою групи')
 
 
 # change headman
@@ -99,18 +99,17 @@ def change_headman(call):
                                    marker='chheadgroup_')
 
     bot.send_message(chat_id=call.from_user.id,
-                     text='Змінити старосту групи',
+                     text='Змінити старосту групи:',
                      reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, heeadman_group_callback)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, change_headman_group_callback)
 
 
-# @bot.callback_query_handler(func=lambda call: call.data.startswith('chheadgroup_'))
-def heeadman_group_callback(message):
+def change_headman_group_callback(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
-    if group_id == False:
+    if group_id is False:
         bot.clear_step_handler_by_chat_id(message.from_user.id)
         bot.send_message(chat_id=message.from_user.id,
                          text='Вибери пункт меню:',
@@ -145,8 +144,6 @@ def change_headman_callback(call):
                      text='Вибери пункт меню:',
                      reply_markup=make_role_replykeyboard(studdekan_buttons))
 
-    # bot.send_message(new_headman_id, 'Тебе призначено старостою групи')
-
 
 # get headman
 @bot.callback_query_handler(func=lambda call: call.data.startswith('get_headman'))
@@ -156,15 +153,14 @@ def get_headman(call):
 
     bot.send_message(chat_id=call.from_user.id, text='Вибери группу:', reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, hheadman_group_callback)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_headman_group_callback)
 
 
-# @bot.callback_query_handler(func=lambda call: call.data.startswith('getheadgroup_'))
-def hheadman_group_callback(message):
+def get_headman_group_callback(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
-    if group_id == False:
+    if group_id is False:
         bot.clear_step_handler_by_chat_id(message.from_user.id)
         bot.send_message(chat_id=message.from_user.id,
                          text='Вибери пункт меню:',
@@ -174,7 +170,9 @@ def hheadman_group_callback(message):
 
         if not headman:
             keyboard = InlineKeyboardMarkup()
-            keyboard.add(InlineKeyboardButton(text='Призначити старосту', callback_data='assign_headman'))
+            keyboard.add(InlineKeyboardButton(text=f'Призначити старосту '
+                                                   f'{emojize(":white_check_mark:", use_aliases=True)}',
+                                              callback_data='assign_headman'))
 
             bot.send_message(chat_id=message.from_user.id,
                              text=f'Групі {group} непризначено старосту.\n'

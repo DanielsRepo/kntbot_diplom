@@ -57,7 +57,6 @@ class Event(Base):
         if len(EventVisitor.get_visitors()) > 0:
             return
         else:
-            # session.query(EventVisitor).filter(EventVisitor.event_id == event_id).delete()
             for event in Event.get_all_events():
                 s_id_list = random.sample(range(1, 61), random.randint(20, 40))
                 for s_id in s_id_list:
