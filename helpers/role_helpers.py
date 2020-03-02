@@ -1,8 +1,8 @@
 from functools import wraps
 
-
+# 374464076,
 LIST_OF_ADMINS = [374464076, 367567988]
-LIST_OF_DEKANAT = [374464076]
+LIST_OF_DEKANAT = [387635488]
 # LIST_OF_HEADMANS = []
 
 
@@ -11,7 +11,7 @@ def restricted_studdekan(func):
     def wrapped(message):
         user_id = message.from_user.id
         if user_id not in LIST_OF_ADMINS:
-            print(f'Denied restricted_studdekan for {user_id}')
+            print(f'############################# Denied restricted_studdekan for {user_id} #############################')
             return
         return func(message)
     return wrapped
@@ -22,7 +22,7 @@ def restricted_dekanat(func):
     def wrapped(message):
         user_id = message.from_user.id
         if user_id not in LIST_OF_DEKANAT:
-            print(f'Denied restricted_dekanat for {user_id}')
+            print(f'############################# Denied restricted_dekanat for {user_id} #############################')
             return
         return func(message)
     return wrapped

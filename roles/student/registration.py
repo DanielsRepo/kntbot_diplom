@@ -4,7 +4,6 @@ from db.group import Group
 from db.student import Student
 from keyboard import make_keyboard, make_menu_keyboard
 from emoji import emojize
-from telebot.types import ReplyKeyboardRemove
 import re
 
 registration = Blueprint('registration', __name__)
@@ -12,78 +11,82 @@ registration = Blueprint('registration', __name__)
 
 @registration.route('/registration')
 def add_another_fac(message):
-    Student.add_student(message.from_user.id, message.from_user.username)
-    Student.update_student(student_id=message.from_user.id, group_id=Group.get_id_by_group('other'))
+    Student.add_student(Student(id=message.from_user.id,
+                                username=message.from_user.username,
+                                group_id=Group.get_id_by_group('other')))
 
 
-@bot.message_handler(commands=['reg301198'])
 def register(message):
-    if Student.get_student_by_id(message.from_user.id) is None:
-        group_keyboard = make_keyboard(keyboard_type='group', elem_list=Group.get_groups(), marker='group_')
+    group_keyboard = make_keyboard(keyboard_type='group', elem_list=Group.get_groups(), marker='group_')
 
-        bot.delete_message(chat_id=message.from_user.id, message_id=message.message.message_id)
+    bot.delete_message(chat_id=message.from_user.id, message_id=message.message.message_id)
 
-        bot.send_message(chat_id=message.from_user.id, text='Вибери свою групу:', reply_markup=group_keyboard)
-        bot.register_next_step_handler_by_chat_id(message.from_user.id, group_callback)
-    else:
-        bot.send_message(chat_id=message.from_user.id, text='Ти вже зареєстрований')
-        bot.clear_step_handler_by_chat_id(chat_id=message.from_user.id)
+    bot.send_message(chat_id=message.from_user.id, text='Вибери свою групу:', reply_markup=group_keyboard)
+    bot.register_next_step_handler_by_chat_id(message.from_user.id, group_callback)
 
 
 def group_callback(message):
-    group = message.text
-    group_id = Group.get_id_by_group(group)
+    group_id = Group.get_id_by_group(message.text)
 
-    if group == '/cancel':
-        bot.clear_step_handler_by_chat_id(message.from_user.id)
-        bot.send_message(chat_id=message.from_user.id,
-                         text=f'Дія була скасована {emojize(":white_check_mark:", use_aliases=True)}',
-                         reply_markup=ReplyKeyboardRemove())
-    elif group_id is False:
+    if group_id is False:
         bot.clear_step_handler_by_chat_id(message.from_user.id)
         bot.send_message(chat_id=message.from_user.id,
                          text='Вибери свою групу:')
 
         bot.register_next_step_handler_by_chat_id(message.from_user.id, group_callback)
     else:
-        Student.add_student(message.from_user.id, message.from_user.username)
-        Student.update_student(student_id=message.from_user.id, group_id=group_id)
+        student = Student()
+        student.id = message.from_user.id
+        student.username = message.from_user.username
+        student.group_id = group_id
 
         message = bot.send_message(chat_id=message.from_user.id, text='Введи Ф.I.O. українською мовою')
-        bot.register_next_step_handler(message, get_name)
+        bot.register_next_step_handler(message, get_name, student)
 
 
-def get_name(message):
+def get_name(message, student):
     name = message.text
 
-    if bool(re.search("[^А-ЯҐЄІЇа-яієїґ' -]+", name)) or len(name.split(' ')) != 3:
+    if bool(re.search("[^А-ЯҐЄІIЇа-яiієїґ' -]+", name)) or len(name.split(' ')) != 3 or len(name) > 256:
         message = bot.send_message(chat_id=message.from_user.id,
                                    text='Неккоректний ввід\nВведи Ф.I.O. українською мовою')
-        bot.register_next_step_handler(message, get_name)
+        bot.register_next_step_handler(message, get_name, student)
     else:
-        Student.update_student(student_id=message.from_user.id, name=name)
+        student.name = name
 
         message = bot.send_message(chat_id=message.from_user.id, text='Введи свій номер телефону')
-        bot.register_next_step_handler(message, get_phone)
+        bot.register_next_step_handler(message, get_phone, student)
 
 
-def get_phone(message):
+def get_phone(message, student):
     phone = message.text
 
-    if bool(re.search("[^0-9]+", phone)):
+    if bool(re.search("[^0-9+]+", phone)) or len(phone) > 13:
         message = bot.send_message(chat_id=message.from_user.id,
                                    text='Неккоректний ввід\nВведи свій номер телефону')
-        bot.register_next_step_handler(message, get_phone)
+        bot.register_next_step_handler(message, get_phone, student)
     else:
-        user = Student.update_student(student_id=message.from_user.id, phone=phone)
+        student.phone = phone
+        student.add_student(student)
 
         success_message = f'Вітаю, ти зареєстрований {emojize(":white_check_mark:", use_aliases=True)}'
         bot.send_message(chat_id=message.from_user.id, text=success_message,
                          reply_markup=make_menu_keyboard(message, other_fac=False))
 
         bot.send_message(chat_id=374464076,
-                         text=f'#registered <a href="t.me/{user.username}">{user.name}</a> '
-                              f'КНТ-{Group.get_group_by_id(user.group_id)}',
+                         text=f'#registered <a href="t.me/{student.username}">{student.name}</a> '
+                              f'КНТ-{Group.get_group_by_id(student.group_id)}',
                          parse_mode='html',
                          disable_web_page_preview=True)
 
+
+@bot.message_handler(commands=['reg301198'])
+def register_for_admins(message):
+    if Student.get_student_by_id(message.from_user.id) is None:
+        group_keyboard = make_keyboard(keyboard_type='group', elem_list=Group.get_groups(), marker='group_')
+
+        bot.send_message(chat_id=message.from_user.id, text='Вибери свою групу:', reply_markup=group_keyboard)
+        bot.register_next_step_handler_by_chat_id(message.from_user.id, group_callback)
+    else:
+        bot.send_message(chat_id=message.from_user.id, text='Ти вже зареєстрований')
+        bot.clear_step_handler_by_chat_id(chat_id=message.from_user.id)

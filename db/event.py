@@ -1,6 +1,7 @@
 from db.db import *
 from db.student import Student
 import random
+from sqlalchemy.orm.exc import NoResultFound
 
 
 class EventVisitor(Base):
@@ -15,9 +16,39 @@ class EventVisitor(Base):
     student_id = sa.Column(sa.Integer, sa.ForeignKey('student.id'))
     student = relationship('Student')
 
+    # @staticmethod
+    # def get_visitors():
+    #     return [visitor for visitor in session.query(EventVisitor).all()]
+
     @staticmethod
-    def get_visitors():
-        return [visitor for visitor in session.query(EventVisitor).all()]
+    def add_visitor(event_id, student_id):
+        event_visit = EventVisitor(event_id=event_id, student_id=student_id)
+        session.add(event_visit)
+        session.commit()
+        return event_visit
+
+    @staticmethod
+    def get_visitors(event_id):
+        return [visitor.student_id for visitor in session.query(EventVisitor).filter(EventVisitor.event_id == event_id)]
+
+    @staticmethod
+    def check_visitor(event_id, student_id):
+        try:
+            session.query(EventVisitor).filter(EventVisitor.event_id == event_id). \
+                filter(EventVisitor.student_id == student_id).one()
+        except NoResultFound:
+            return False
+
+    @staticmethod
+    def delete_visitor(event_id, student_id):
+        session.delete(session.query(EventVisitor).filter(EventVisitor.event_id == event_id).
+                       filter(EventVisitor.student_id == student_id).one())
+        session.commit()
+
+    @staticmethod
+    def get_visitor_students(group_id):
+        return session.query(Student, EventVisitor).filter(Student.group_id == group_id).filter(
+            EventVisitor.student_id == Student.id).all()
 
 
 class Event(Base):
@@ -52,20 +83,20 @@ class Event(Base):
 
         print("events added")
 
-    @staticmethod
-    def add_visitors():
-        if len(EventVisitor.get_visitors()) > 0:
-            return
-        else:
-            for event in Event.get_all_events():
-                s_id_list = random.sample(range(1, 61), random.randint(20, 40))
-                for s_id in s_id_list:
-                    event_visit = EventVisitor(event_id=event.id, student_id=s_id)
-                    session.add(event_visit)
-
-                session.commit()
-
-        print("visitors added")
+    # @staticmethod
+    # def add_visitors():
+    #     if len(EventVisitor.get_visitors()) > 0:
+    #         return
+    #     else:
+    #         for event in Event.get_all_events():
+    #             s_id_list = random.sample(range(1, 61), random.randint(20, 40))
+    #             for s_id in s_id_list:
+    #                 event_visit = EventVisitor(event_id=event.id, student_id=s_id)
+    #                 session.add(event_visit)
+    #
+    #             session.commit()
+    #
+    #     print("visitors added")
 
     @staticmethod
     def update_event(event_id, name='', place='', date='', time='', poster=''):
@@ -83,21 +114,6 @@ class Event(Base):
             event.poster = poster
 
         session.commit()
-
-    @staticmethod
-    def add_visitor(event_id, student_id):
-        event_visit = EventVisitor(event_id=event_id, student_id=student_id)
-        session.add(event_visit)
-        session.commit()
-        return event_visit
-
-    @staticmethod
-    def get_visitors(event_id):
-        return [visitor.student_id for visitor in session.query(EventVisitor).filter(EventVisitor.event_id == event_id)]
-
-    @staticmethod
-    def get_visitor_students(group_id):
-        return session.query(Student, EventVisitor).filter(Student.group_id == group_id).filter(EventVisitor.student_id == Student.id).all()
 
     @staticmethod
     def get_event_id_by_name(name):

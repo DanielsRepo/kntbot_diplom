@@ -3,7 +3,7 @@ from credentials import bot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from keyboard import make_keyboard
 from db.group import Group
-from db.event import Event
+from db.event import Event, EventVisitor
 from db.student import Student
 from helpers.xlsx_helpers import get_fio, make_event_visitors_table, make_student_events_table
 from helpers.role_helpers import restricted_studdekan
@@ -45,7 +45,7 @@ def get_event_visitors_callback(call):
     event_id = call.data.split('_')[1]
     event_name = Event.get_event(event_id).name
 
-    file_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '\\tmp\\'
+    file_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/tmp/'
 
     stud_dict = prepare_event_visitors_table(event_id)
     make_event_visitors_table(stud_dict=stud_dict, event_name=event_name, file_path=file_path)
@@ -59,16 +59,19 @@ def get_event_visitors_callback(call):
 
 
 def prepare_event_visitors_table(event_id):
-    visitor_ids = Event.get_visitors(event_id)
+    visitor_ids = EventVisitor.get_visitors(event_id)
     stud_dict = {}
 
     for visitor_id in visitor_ids:
         student = Student.get_student_by_id(visitor_id)
 
-        s_name = get_fio(student.name)
-        s_group = f'КНТ-{Group.get_group_by_id(student.group_id)}'
+        try:
+            s_name = get_fio(student.name)
+            s_group = f'КНТ-{Group.get_group_by_id(student.group_id)}'
 
-        stud_dict.setdefault(s_group, []).append(s_name)
+            stud_dict.setdefault(s_group, []).append(s_name)
+        except AttributeError:
+            continue
 
     return stud_dict
 
@@ -78,7 +81,7 @@ def prepare_event_visitors_table(event_id):
 @restricted_studdekan
 def get_student_events(call):
     file_name = 'Відвідування заходів'
-    file_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + '\\tmp\\'
+    file_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/tmp/'
 
     group_dict = prepare_student_events_table()
     make_student_events_table(group_dict=group_dict, file_name=file_name, file_path=file_path)
@@ -94,8 +97,8 @@ def get_student_events(call):
 def prepare_student_events_table():
     group_dict = {}
 
-    for group in Group.get_groups()[:4]:
-        students = Event.get_visitor_students(group.id)
+    for group in Group.get_groups():
+        students = EventVisitor.get_visitor_students(group.id)
 
         stud_dict = {}
 

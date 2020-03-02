@@ -15,7 +15,7 @@ def make_event_visitors_table(stud_dict, event_name, file_path):
     cell_format = workbook.add_format({'bold': True, 'align': 'center'})
 
     col_counter = 1
-    row_number_for_quantity = max([len(stud_dict[group]) for group in stud_dict.keys()])
+    row_number_for_quantity = max([len(stud_dict[group]) for group in stud_dict.keys()]) + 1
 
     worksheet.write(0, 0, "Група", cell_format)
     worksheet.write(row_number_for_quantity, 0, "Кількість", cell_format)
@@ -23,10 +23,10 @@ def make_event_visitors_table(stud_dict, event_name, file_path):
     for group, students in sorted(stud_dict.items(), key=lambda key_value: key_value[0]):
         worksheet.write(0, col_counter, group, cell_format)
 
-        col_width = max([len(stud_fio) for stud_fio in students])
-
         stud_list = stud_dict[group]
         stud_list.sort()
+
+        col_width = max([len(stud_fio) for stud_fio in stud_list]) + 2
 
         for i in range(len(stud_list)):
             worksheet.set_column(i + 1, col_counter, col_width)
@@ -78,4 +78,3 @@ def make_student_events_table(group_dict, file_name, file_path):
             row_counter += 1
 
     workbook.close()
-

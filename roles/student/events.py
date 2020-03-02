@@ -1,6 +1,6 @@
 from flask import Blueprint
 from credentials import bot
-from db.event import Event
+from db.event import Event, EventVisitor
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 from db.group import Group
@@ -43,14 +43,24 @@ def get_events_schelude_callback(call):
               f'Дата: {event.date}\n' \
               f'Час: {event.time}'
 
-    keyboard = InlineKeyboardMarkup()
-    keyboard.add(InlineKeyboardButton(text=f'{emojize(":pencil2:", use_aliases=True)} Зареєструватися',
-                                      callback_data=f'regon_{event.id}'))
+    if EventVisitor.check_visitor(event_id=event_id, student_id=call.from_user.id) is False:
+        keyboard = InlineKeyboardMarkup()
+        keyboard.add(InlineKeyboardButton(text=f'{emojize(":pencil2:", use_aliases=True)} Зареєструватися',
+                                          callback_data=f'regon_{event.id}'))
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text=message,
-                          reply_markup=keyboard, parse_mode='html')
+        bot.edit_message_text(chat_id=call.from_user.id,
+                              message_id=call.message.message_id,
+                              text=message,
+                              reply_markup=keyboard, parse_mode='html')
+    else:
+        keyboard = InlineKeyboardMarkup()
+        keyboard.add(InlineKeyboardButton(text=f'{emojize(":x:", use_aliases=True)} Відмінити реєстрацію',
+                                          callback_data=f'cancelregevent_{event.id}'))
+
+        bot.edit_message_text(chat_id=call.from_user.id,
+                              message_id=call.message.message_id,
+                              text=message,
+                              reply_markup=keyboard, parse_mode='html')
 
 
 # registration
@@ -58,7 +68,7 @@ def get_events_schelude_callback(call):
 def register_on_event_callback(call):
     event_id = call.data.split('_')[1]
 
-    Event.add_visitor(event_id, call.from_user.id)
+    EventVisitor.add_visitor(event_id, call.from_user.id)
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
@@ -67,6 +77,24 @@ def register_on_event_callback(call):
     user = Student.get_student_by_id(call.from_user.id)
     bot.send_message(chat_id=374464076,
                      text=f'#regonevent <a href="t.me/{user.username}">{user.name}</a> '
+                          f'КНТ-{Group.get_group_by_id(user.group_id)}',
+                     parse_mode='html',
+                     disable_web_page_preview=True)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('cancelregevent_'))
+def cancel_reg_on_event_callback(call):
+    event_id = call.data.split('_')[1]
+
+    EventVisitor.delete_visitor(event_id, call.from_user.id)
+
+    bot.edit_message_text(chat_id=call.from_user.id,
+                          message_id=call.message.message_id,
+                          text=f'Реєстрація скасована {emojize(":white_check_mark:", use_aliases=True)}')
+
+    user = Student.get_student_by_id(call.from_user.id)
+    bot.send_message(chat_id=374464076,
+                     text=f'#cancelregevent <a href="t.me/{user.username}">{user.name}</a> '
                           f'КНТ-{Group.get_group_by_id(user.group_id)}',
                      parse_mode='html',
                      disable_web_page_preview=True)

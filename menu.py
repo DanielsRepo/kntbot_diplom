@@ -1,10 +1,8 @@
 from flask import Blueprint, session
 from keyboard import make_menu_keyboard, menu_buttons, make_role_replykeyboard, \
     studdekan_buttons, headman_buttons, dekanat_buttons
-from db.db import db
 from db.group import Group
 from db.student import Student
-from db.event import Event
 from roles.student.auditory_search import search_aud
 from roles.student.teachers import teachers_schelude
 from roles.student.events import get_events_schelude
@@ -25,8 +23,6 @@ menu = Blueprint('menu', __name__)
 @menu.route('/menu')
 @bot.message_handler(commands=['start', 'cancel'])
 def start_message(message):
-    add_all(message)
-
     chat_id = message.from_user.id
 
     if chat_id in LIST_OF_ADMINS:
@@ -144,7 +140,7 @@ def get_dekanat_messages(message):
 @bot.message_handler(commands=['help'])
 def help_message(message):
     bot.send_message(chat_id=message.from_user.id,
-                     text="Доступні команди:\n"
+                     text="Доступні команди:\n\n"
                           "/start - почати роботу з ботом\n"
                           "/cancel - відміна дії\n"
                           "/help - допомога")
@@ -152,22 +148,27 @@ def help_message(message):
 
 
 # SERVICE COMMANDS
-@bot.message_handler(commands=['fill'])
+# @bot.message_handler(commands=['fill'])
 # @restricted_studdekan
-def add_all(message):
+# def add_all(message):
+#     Group.add_groups()
+#     Student.add_students()
+#     Event.add_events()
+#     Event.add_visitors()
+
+
+# @bot.message_handler(commands=['del'])
+# @restricted_studdekan
+# def delete_all(message):
+#     db.delete()
+#     bot.send_message(chat_id=message.from_user.id, text="database is cleared")
+
+
+@bot.message_handler(commands=['groups301198'])
+@restricted_studdekan
+def add_groups(message):
     Group.add_groups()
-    Student.add_students()
-    Event.add_events()
-    Event.add_visitors()
-
-    bot.send_message(chat_id=message.from_user.id, text="data is added")
-
-
-@bot.message_handler(commands=['del'])
-# @restricted_studdekan
-def delete_all(message):
-    db.delete()
-    bot.send_message(chat_id=message.from_user.id, text="database is cleared")
+    bot.send_message(chat_id=message.from_user.id, text="groups added")
 
 
 @bot.message_handler(content_types=['text',

@@ -39,15 +39,13 @@ class Student(Base):
             print("students added")
 
     @staticmethod
-    def add_student(student_id, student_username):
-        user = Student(id=student_id, username=student_username)
-        session.add(user)
-
+    def add_student(student):
+        session.add(student)
         session.commit()
 
     @staticmethod
-    def update_student(student_id, name='', phone='', group_id=0):
-        user = session.query(Student).get(student_id)
+    def update_student(id_, name='', phone='', group_id=0):
+        user = session.query(Student).get(id_)
 
         if name != '':
             user.name = name
@@ -61,9 +59,9 @@ class Student(Base):
         return user
 
     @staticmethod
-    def get_student_by_id(student_id):
+    def get_student_by_id(id_):
         try:
-            return session.query(Student).get(student_id)
+            return session.query(Student).get(id_)
         except ProgrammingError:
             return None
 
@@ -76,8 +74,8 @@ class Student(Base):
         return [student for student in session.query(Student).all()]
 
     @staticmethod
-    def check_fac(student_id):
-        if Student.get_student_by_id(student_id).group_id != Group.get_id_by_group('other'):
+    def check_fac(id_):
+        if Student.get_student_by_id(id_).group_id != Group.get_id_by_group('other'):
             return True
 
 

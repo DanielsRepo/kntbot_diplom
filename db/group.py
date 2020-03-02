@@ -25,8 +25,6 @@ class Group(Base):
 
             session.commit()
 
-        print("groups added")
-
     @staticmethod
     def get_id_by_group(group):
         try:
