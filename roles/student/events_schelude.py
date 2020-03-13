@@ -1,10 +1,11 @@
 from flask import Blueprint
 from credentials import bot
-from db.event import Event, EventVisitor
+from database.event import Event, EventVisitor
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
-from db.group import Group
-from db.student import Student
+from keyboards.keyboard import menu_buttons
+from database.group import Group
+from database.student import Student
 
 events = Blueprint('events', __name__)
 
@@ -67,19 +68,44 @@ def get_events_schelude_callback(call):
 @bot.callback_query_handler(func=lambda call: call.data.startswith('regon_'))
 def register_on_event_callback(call):
     event_id = call.data.split('_')[1]
+    chat_id = call.from_user.id
 
-    EventVisitor.add_visitor(event_id, call.from_user.id)
+    if Group.get_group_by_id(Student.get_student_by_id(chat_id).group_id) == 'other':
+        message = bot.send_message(chat_id=chat_id,
+                                   text="Введіть прізвище ім'я факультет групу\n"
+                                        "<b>Наприклад:</b> <i>Петров Петро ФЕУ 123</i>",
+                                   parse_mode='html')
+        bot.register_next_step_handler(message, reg_on_event_other, event_id)
+    else:
+        EventVisitor.add_visitor(event_id, chat_id)
 
-    bot.edit_message_text(chat_id=call.from_user.id,
-                          message_id=call.message.message_id,
-                          text=f'Реєстрація пройшла успішно {emojize(":white_check_mark:", use_aliases=True)}')
+        bot.edit_message_text(chat_id=chat_id,
+                              message_id=call.message.message_id,
+                              text=f'Реєстрація пройшла успішно {emojize(":white_check_mark:", use_aliases=True)}')
 
-    user = Student.get_student_by_id(call.from_user.id)
-    bot.send_message(chat_id=374464076,
-                     text=f'#regonevent <a href="t.me/{user.username}">{user.name}</a> '
-                          f'КНТ-{Group.get_group_by_id(user.group_id)}',
-                     parse_mode='html',
-                     disable_web_page_preview=True)
+        user = Student.get_student_by_id(chat_id)
+        bot.send_message(chat_id=374464076,
+                         text=f'#regonevent <a href="t.me/{user.username}">{user.name}</a> '
+                              f'КНТ-{Group.get_group_by_id(user.group_id)}',
+                         parse_mode='html',
+                         disable_web_page_preview=True)
+
+
+def reg_on_event_other(message, event_id):
+    if message.text.startswith('/') or message.text in menu_buttons:
+        bot.send_message(chat_id=message.from_user.id,
+                         text=f'Дія була скасована {emojize(":white_check_mark:", use_aliases=True)}')
+        bot.clear_step_handler_by_chat_id(chat_id=message.from_user.id)
+    else:
+        EventVisitor.add_visitor(event_id, message.from_user.id, message.text)
+
+        bot.send_message(chat_id=message.from_user.id,
+                         text=f'Реєстрація пройшла успішно {emojize(":white_check_mark:", use_aliases=True)}')
+
+        bot.send_message(chat_id=374464076,
+                         text=f'#regonevent otherfac',
+                         parse_mode='html',
+                         disable_web_page_preview=True)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('cancelregevent_'))

@@ -18,7 +18,10 @@ def get_aud(message):
         bot.clear_step_handler_by_chat_id(chat_id=message.from_user.id)
         return
 
-    number_query = message.text
+    number_query = str(message.text).lower()
+
+    number_query = number_query.replace(' ', '') if ' ' in number_query else number_query
+    number_query = number_query.replace('-', '') if '-' in number_query else number_query
     number_query = number_query.replace('\u0061', 'а') if '\u0061' in number_query else number_query
 
     search_again = InlineKeyboardMarkup()
@@ -29,8 +32,11 @@ def get_aud(message):
         number, building, floor = get_aud_from_dict(number_query)
 
         bot.send_message(chat_id=message.from_user.id,
-                         text=f'Аудиторія: {number}\nКорпус: {building}\nПоверх: {floor}',
-                         reply_markup=search_again)
+                         text=f'<b>Аудиторія:</b> {number}\n'
+                              f'<b>Корпус:</b> {building}\n'
+                              f'<b>Поверх:</b> {floor}',
+                         reply_markup=search_again,
+                         parse_mode='html')
 
         bot.send_message(chat_id=374464076, text=f'#found_aud {number}')
     except TypeError:

@@ -1,4 +1,4 @@
-from db.db import *
+from database.database import *
 from sqlalchemy.orm.exc import NoResultFound
 
 
@@ -18,7 +18,7 @@ class Group(Base):
                 '119', '129', '139', '119сп', '129сп', '219', '229', '219сп', '519', '519сп', '819', '819сп', '118',
                 '128', '138', '218', '518', '528', '228', '128сп', '228сп', '118сп', '518сп', '818', '818сп', '117',
                 '127', '137', '237сп', '217', '227', '517', '527', '817', '827сп', '218сп', '537сп', '147сп', '116',
-                '157сп', '126', '216', '516', '526', '816', '226', '129м', '219м', '819м', '119м', '519м', 'other'
+                '157сп', '126', '216', '516', '526', '816', '226', '129м', '219м', '819м', '119м', '519м', 'other', '619м'
             ]
             for group in group_list:
                 session.add(Group(name=group))
@@ -40,7 +40,7 @@ class Group(Base):
 
     @staticmethod
     def get_groups():
-        return [group for group in session.query(Group).all()][:-1]
+        return [group for group in session.query(Group).all() if group.name != "other"]
 
 
 Base.metadata.create_all(conn)

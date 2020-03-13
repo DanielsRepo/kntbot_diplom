@@ -8,7 +8,7 @@ def get_fio(full_name):
         return
 
 
-def make_event_visitors_table(stud_dict, event_name, file_path):
+def make_event_visitors_table(stud_dict, otherfac_list, event_name, file_path):
     workbook = xlsxwriter.Workbook(f'{file_path}{event_name}.xlsx')
     worksheet = workbook.add_worksheet(name=event_name)
 
@@ -36,17 +36,23 @@ def make_event_visitors_table(stud_dict, event_name, file_path):
 
         col_counter += 1
 
-    chart = workbook.add_chart({'type': 'column'})
-    chart.add_series({
-        'categories': [f'{worksheet.name}', 0, 1, 0, len(stud_dict.keys())],
-        'values':  [f'{worksheet.name}', row_number_for_quantity, 1, row_number_for_quantity, len(stud_dict.keys())]
-    })
-    chart.set_style(37)
-    chart.set_title({'name': 'Гістограма кількості учасників заходу за групами',
-                     'name_font': {'name': 'Calibri', 'size': 13}})
-    chart.set_legend({'none': True})
+    # chart = workbook.add_chart({'type': 'column'})
+    # chart.add_series({
+    #     'categories': [f'{worksheet.name}', 0, 1, 0, len(stud_dict.keys())],
+    #     'values':  [f'{worksheet.name}', row_number_for_quantity, 1, row_number_for_quantity, len(stud_dict.keys())]
+    # })
+    # chart.set_style(37)
+    # chart.set_title({'name': 'Гістограма кількості учасників заходу за групами',
+    #                  'name_font': {'name': 'Calibri', 'size': 13}})
+    # chart.set_legend({'none': True})
+    #
+    # worksheet.insert_chart(f'B{row_number_for_quantity+3}', chart)
 
-    worksheet.insert_chart(f'B{row_number_for_quantity+3}', chart)
+    worksheet.write(row_number_for_quantity+2, 0, "Учасники з інших факультетів:", workbook.add_format({'bold': True}))
+
+    for i in range(len(otherfac_list)):
+        worksheet.write(i+row_number_for_quantity+3, 0, otherfac_list[i])
+
     workbook.close()
 
 

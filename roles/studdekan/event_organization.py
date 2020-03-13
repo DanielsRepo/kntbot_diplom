@@ -1,9 +1,9 @@
 from flask import Blueprint
 from credentials import bot
-from db.event import Event
-from keyboard import make_keyboard
+from database.event import Event
+from keyboards.keyboard import make_keyboard
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from helpers.role_helpers import restricted_studdekan
+from helpers.role_helper import restricted_studdekan
 from emoji import emojize
 
 

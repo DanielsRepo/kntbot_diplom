@@ -1,8 +1,8 @@
 from flask import Blueprint
 from credentials import bot
-from db.group import Group
-from db.student import Student
-from keyboard import make_keyboard, make_menu_keyboard
+from database.group import Group
+from database.student import Student
+from keyboards.keyboard import make_keyboard, make_menu_keyboard
 from emoji import emojize
 import re
 

@@ -1,5 +1,5 @@
-from db.db import *
-from db.student import Student
+from database.database import *
+from database.student import Student
 
 
 class Headman(Base):

@@ -1,5 +1,5 @@
 import telebot
 
-token = "980254800:AAG8pV7kVk0815E83BBgxwfo5mvTolYWUqQ"
+token = "1116908541:AAGYKzbGhsYLXTHrSK-bGT8Fq3n8Do_9SIo"
 bot = telebot.TeleBot(token, threaded=False)
 secret = ""

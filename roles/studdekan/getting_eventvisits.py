@@ -1,12 +1,12 @@
 from flask import Blueprint
 from credentials import bot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from keyboard import make_keyboard
-from db.group import Group
-from db.event import Event, EventVisitor
-from db.student import Student
-from helpers.xlsx_helpers import get_fio, make_event_visitors_table, make_student_events_table
-from helpers.role_helpers import restricted_studdekan
+from keyboards.keyboard import make_keyboard
+from database.group import Group
+from database.event import Event, EventVisitor
+from database.student import Student
+from helpers.xlsx_helper import get_fio, make_event_visitors_table, make_student_events_table
+from helpers.role_helper import restricted_studdekan
 from emoji import emojize
 import os
 
@@ -29,7 +29,6 @@ def event_visits_keyboard(message):
 @bot.callback_query_handler(func=lambda call: call.data.startswith('event_visitors'))
 @restricted_studdekan
 def get_event_visitors(call):
-
     event_keyboard = make_keyboard(keyboard_type='event',
                                    elem_list=Event.get_all_events(),
                                    marker='eventvisitor_')
@@ -47,8 +46,8 @@ def get_event_visitors_callback(call):
 
     file_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/tmp/'
 
-    stud_dict = prepare_event_visitors_table(event_id)
-    make_event_visitors_table(stud_dict=stud_dict, event_name=event_name, file_path=file_path)
+    stud_dict, otherfac_list = prepare_event_visitors_table(event_id)
+    make_event_visitors_table(stud_dict=stud_dict, otherfac_list=otherfac_list, event_name=event_name, file_path=file_path)
 
     doc = open(f'{file_path}{event_name}.xlsx', 'rb')
 
@@ -61,19 +60,23 @@ def get_event_visitors_callback(call):
 def prepare_event_visitors_table(event_id):
     visitor_ids = EventVisitor.get_visitors(event_id)
     stud_dict = {}
+    otherfac_list = []
 
     for visitor_id in visitor_ids:
         student = Student.get_student_by_id(visitor_id)
 
-        try:
-            s_name = get_fio(student.name)
-            s_group = f'КНТ-{Group.get_group_by_id(student.group_id)}'
+        if Group.get_group_by_id(student.group_id) == 'other':
+            otherfac_list.append(EventVisitor.get_visitor_by_id(visitor_id).note)
+        else:
+            try:
+                s_name = get_fio(student.name)
+                s_group = f'КНТ-{Group.get_group_by_id(student.group_id)}'
 
-            stud_dict.setdefault(s_group, []).append(s_name)
-        except AttributeError:
-            continue
+                stud_dict.setdefault(s_group, []).append(s_name)
+            except AttributeError:
+                continue
 
-    return stud_dict
+    return stud_dict, otherfac_list
 
 
 # table of group's visitors
@@ -99,14 +102,19 @@ def prepare_student_events_table():
 
     for group in Group.get_groups():
         students = EventVisitor.get_visitor_students(group.id)
+        if not students:
+            continue
+        else:
+            stud_dict = {}
 
-        stud_dict = {}
+            for student in students:
+                try:
+                    s_name = get_fio(Student.get_student_by_id(student[1].student_id).name)
+                    s_event = Event.get_event(student[1].event_id).name
 
-        for student in students:
-            s_name = get_fio(Student.get_student_by_id(student[1].student_id).name)
-            s_event = Event.get_event(student[1].event_id).name
-
-            stud_dict.setdefault(s_name, []).append(s_event)
+                    stud_dict.setdefault(s_name, []).append(s_event)
+                except AttributeError:
+                    continue
 
         group_dict[group.name] = stud_dict
 

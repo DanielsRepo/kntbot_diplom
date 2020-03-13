@@ -1,11 +1,12 @@
 from flask import Blueprint
 from credentials import bot
-from db.group import Group
-from db.student import Student
-from db.headman import Headman
-from keyboard import make_keyboard, make_role_replykeyboard, studdekan_buttons
-from helpers.role_helpers import restricted_studdekan
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from database.group import Group
+from database.student import Student
+from database.headman import Headman
+from keyboards.keyboard import make_keyboard, make_role_replykeyboard, studdekan_buttons
+from helpers.role_helper import restricted_studdekan
+from helpers.xlsx_helper import get_fio
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 
 headmans = Blueprint('headmans', __name__)
@@ -21,6 +22,8 @@ def headman_keyboard(message):
                                       callback_data='change_headman'))
     keyboard.add(InlineKeyboardButton(text=f'Переглянути старосту {emojize(":bust_in_silhouette:", use_aliases=True)}',
                                       callback_data='get_headman'))
+    keyboard.add(InlineKeyboardButton(text=f'Список старост {emojize(":page_facing_up:", use_aliases=True)}',
+                                      callback_data='list_headman'))
 
     bot.send_message(chat_id=message.from_user.id, text='Вибери дію:', reply_markup=keyboard)
 
@@ -189,3 +192,27 @@ def get_headman_group_callback(message):
             bot.send_message(chat_id=message.from_user.id,
                              text='Вибери пункт меню:',
                              reply_markup=make_role_replykeyboard(studdekan_buttons))
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('list_headman'))
+@restricted_studdekan
+def list_headman(call):
+    headmans_list = Headman.get_all_headmans()
+    message_text = f'<b>Старости {len(headmans_list)}/52:</b>\n\n'
+
+    for group in Group.get_groups():
+        headman = Headman.get_headman_by_group(group_id=group.id)
+        if headman:
+            student = Student.get_student_by_id(headman.student_id)
+
+            link = f'<a href="t.me/{student.username}">{get_fio(student.name)}</a> ({headman.rating})\n'
+        else:
+            link = '-\n'
+
+        message_text += ''.join(f'КНТ-{group.name}: {link}')
+
+    bot.edit_message_text(chat_id=call.from_user.id,
+                          message_id=call.message.message_id,
+                          text=message_text,
+                          parse_mode='html',
+                          disable_web_page_preview=True)

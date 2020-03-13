@@ -1,1 +1,1 @@
-"kntbot" 
+"kntbot_diplom" 

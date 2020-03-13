@@ -1,10 +1,10 @@
 from flask import Blueprint
 from credentials import bot
-from db.group import Group
-from db.student import Student
-from db.debtor import Debtor
-from keyboard import make_keyboard, make_role_replykeyboard, studdekan_buttons
-from helpers.role_helpers import restricted_studdekan
+from database.group import Group
+from database.student import Student
+from database.profcom_debtor import ProfcomDebtor
+from keyboards.keyboard import make_keyboard, make_role_replykeyboard, studdekan_buttons
+from helpers.role_helper import restricted_studdekan
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 
@@ -63,7 +63,7 @@ def add_debtor_callback(call):
     group = call.data.split('_')[1]
     debtor_id = call.data.split('_')[2]
 
-    if not Debtor.add_debtor(debtor_id):
+    if not ProfcomDebtor.add_debtor(debtor_id):
         bot.edit_message_text(chat_id=call.from_user.id,
                               message_id=call.message.message_id,
                               text='Студент вже занесений до боржників')
@@ -112,7 +112,7 @@ def delete_debtor_group_callback(message):
                          text='Вибери пункт меню:',
                          reply_markup=make_role_replykeyboard(studdekan_buttons))
     else:
-        debtor_list = Debtor.get_debtors_by_group(group_id)
+        debtor_list = ProfcomDebtor.get_debtors_by_group(group_id)
         debtor_list_keyboard = InlineKeyboardMarkup()
 
         if not debtor_list:
@@ -142,7 +142,7 @@ def delete_debtor_callback(call):
                                f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}',
                           parse_mode='html')
 
-    Debtor.delete_debtor(debtor_id)
+    ProfcomDebtor.delete_debtor(debtor_id)
 
     bot.send_message(chat_id=call.from_user.id,
                      text='Вибери пункт меню:',
@@ -174,7 +174,7 @@ def get_debtors_by_group_callback(message):
                          text='Вибери пункт меню:',
                          reply_markup=make_role_replykeyboard(studdekan_buttons))
     else:
-        debtors_list = Debtor.get_debtors_by_group(group_id)
+        debtors_list = ProfcomDebtor.get_debtors_by_group(group_id)
 
         if not debtors_list:
             message_text = 'В цій групі немає боржників'

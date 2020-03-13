@@ -1,6 +1,6 @@
-from db.db import *
+from database.database import *
 from sqlalchemy.exc import ProgrammingError
-from db.group import Group
+from database.group import Group
 
 
 class Student(Base):

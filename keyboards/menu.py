@@ -1,19 +1,26 @@
-from flask import Blueprint, session
-from keyboard import make_menu_keyboard, menu_buttons, make_role_replykeyboard, \
-    studdekan_buttons, headman_buttons, dekanat_buttons
-from db.group import Group
-from db.student import Student
+from flask import Blueprint
+from keyboards.keyboard import make_menu_keyboard, menu_buttons, make_role_replykeyboard, \
+    studdekan_buttons, teacher_buttons, dekanat_buttons
+from database.database import db
+from database.group import Group
+from database.student import Student
+from database.event import Event
+from database.subject import Subject
 from roles.student.auditory_search import search_aud
-from roles.student.teachers import teachers_schelude
-from roles.student.events import get_events_schelude
+from roles.student.teachers import teachers_schelude, get_grades
+from roles.student.events_schelude import get_events_schelude
 from roles.student.registration import register, add_another_fac
-from roles.studdekan.headmans import headman_keyboard
-from roles.studdekan.debtors import debtor_keyboard
-from roles.studdekan.event_organize import event_organize_keyboard
-from roles.studdekan.event_visits import event_visits_keyboard
-from roles.dekanat.headman_management import rate_headman, remind_journal, send_file
+from roles.studdekan.headman_management import headman_keyboard
+from roles.studdekan.profcomdebtor_management import debtor_keyboard
+from roles.studdekan.event_organization import event_organize_keyboard
+from roles.studdekan.getting_eventvisits import event_visits_keyboard
+from roles.dekanat.headman_communication import rate_headman, remind_journal, send_message_or_file
+from roles.teacher.grade_assignment import assign_grade
+from roles.teacher.subjectdebtor_management import subject_debtor_keyboard
+from roles.teacher.sending_methods import send_methods_file
 from credentials import bot
-from helpers.role_helpers import restricted_studdekan, LIST_OF_DEKANAT, LIST_OF_ADMINS
+from helpers.role_helper import restricted_studdekan, restricted_dekanat, restricted_teacher, \
+    LIST_OF_DEKANAT, LIST_OF_ADMINS
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 
@@ -23,6 +30,8 @@ menu = Blueprint('menu', __name__)
 @menu.route('/menu')
 @bot.message_handler(commands=['start', 'cancel'])
 def start_message(message):
+    add_all(message)
+
     chat_id = message.from_user.id
 
     if chat_id in LIST_OF_ADMINS:
@@ -94,19 +103,32 @@ def get_student_messages(message):
         bot.send_message(chat_id=message.chat.id, text='Сайт НУЗП', reply_markup=markup)
         bot.send_message(chat_id=374464076, text="#askedwebsite")
     elif message.text == menu_buttons[5]:
+        get_grades(message)
+    elif message.text == menu_buttons[6]:
         show_studdekan_keyboard(message)
     elif message.text == menu_buttons[7]:
         show_dekanat_keyboard(message)
     elif message.text == menu_buttons[8]:
+        show_teacher_keyboard(message)
+    elif message.text == menu_buttons[9]:
         start_message(message)
-    # elif message.text == menu_buttons[6]:
-    #     show_headman_keyboard(message)
 
 
 @restricted_studdekan
 def show_studdekan_keyboard(message):
     bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
                      reply_markup=make_role_replykeyboard(studdekan_buttons))
+
+
+def show_dekanat_keyboard(message):
+    bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
+                     reply_markup=make_role_replykeyboard(dekanat_buttons))
+
+
+@restricted_teacher
+def show_teacher_keyboard(message):
+    bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
+                     reply_markup=make_role_replykeyboard(teacher_buttons))
 
 
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in studdekan_buttons)
@@ -122,19 +144,26 @@ def get_studdekan_messages(message):
         event_visits_keyboard(message)
 
 
-def show_dekanat_keyboard(message):
-    bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
-                     reply_markup=make_role_replykeyboard(dekanat_buttons))
-
-
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in dekanat_buttons)
+@restricted_dekanat
 def get_dekanat_messages(message):
     if message.text == dekanat_buttons[0]:
         rate_headman(message)
     elif message.text == dekanat_buttons[1]:
         remind_journal(message)
     elif message.text == dekanat_buttons[2]:
-        send_file(message)
+        send_message_or_file(message)
+
+
+@bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in teacher_buttons)
+@restricted_studdekan
+def get_teacher_messages(message):
+    if message.text == teacher_buttons[0]:
+        assign_grade(message)
+    elif message.text == teacher_buttons[1]:
+        subject_debtor_keyboard(message)
+    elif message.text == teacher_buttons[2]:
+        send_methods_file(message)
 
 
 @bot.message_handler(commands=['help'])
@@ -147,21 +176,21 @@ def help_message(message):
     bot.send_message(chat_id=374464076, text="#askedhelp")
 
 
-# SERVICE COMMANDS
-# @bot.message_handler(commands=['fill'])
-# @restricted_studdekan
-# def add_all(message):
-#     Group.add_groups()
-#     Student.add_students()
-#     Event.add_events()
-#     Event.add_visitors()
+@bot.message_handler(commands=['fill'])
+def add_all(message):
+    Group.add_groups()
+    Student.add_students()
+    Event.add_events()
+    Event.add_visitors()
+
+    Subject.add_subjects()
 
 
-# @bot.message_handler(commands=['del'])
-# @restricted_studdekan
-# def delete_all(message):
-#     db.delete()
-#     bot.send_message(chat_id=message.from_user.id, text="database is cleared")
+@bot.message_handler(commands=['del'])
+@restricted_studdekan
+def delete_all(message):
+    db.delete()
+    bot.send_message(chat_id=message.from_user.id, text="database is cleared")
 
 
 @bot.message_handler(commands=['groups301198'])
@@ -194,21 +223,3 @@ def add_groups(message):
                                     'pinned_message'])
 def get_trash_messages(message):
     help_message(message)
-
-
-# @restricted_headman
-# def show_headman_keyboard(message):
-#     bot.send_message(chat_id=message.from_user.id, text='Вибери пункт меню:',
-#                      reply_markup=make_role_replykeyboard(headman_buttons))
-
-
-# @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in headman_buttons)
-# @restricted_headman
-# def get_headman_messages(message):
-#     if message.text == headman_buttons[0]:
-#         print('1')
-#     elif message.text == headman_buttons[1]:
-#         print('2')
-#     elif message.text == headman_buttons[2]:
-#         start_message(message)
-

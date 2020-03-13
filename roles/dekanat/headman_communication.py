@@ -1,9 +1,9 @@
 from flask import Blueprint
 from credentials import bot
-from db.headman import Headman
-from db.group import Group
-from db.student import Student
-from keyboard import make_keyboard, make_headman_rate_keyboard, make_role_replykeyboard, dekanat_buttons
+from database.headman import Headman
+from database.group import Group
+from database.student import Student
+from keyboards.keyboard import make_keyboard, make_headman_rate_keyboard, make_role_replykeyboard, dekanat_buttons
 from telebot.apihelper import ApiException
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
@@ -85,14 +85,15 @@ def rate_headman_sign_callback(call):
     bot.send_message(chat_id=374464076, text='#dekanatchangedrate')
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith('remind_journal'))
 def remind_journal(message):
-    remind_keyboard = InlineKeyboardMarkup()
+    remind_journal_keyboard = InlineKeyboardMarkup()
 
-    remind_keyboard.add(InlineKeyboardButton(text='Вибрати старосту', callback_data='remind_one'))
-    remind_keyboard.add(InlineKeyboardButton(text='Всім', callback_data='remind_all'))
+    remind_journal_keyboard.add(InlineKeyboardButton(text='Вибрати старосту', callback_data='remind_one'))
+    remind_journal_keyboard.add(InlineKeyboardButton(text='Всім', callback_data='remind_all'))
 
-    bot.send_message(chat_id=message.from_user.id, text='Кому нагадати?', reply_markup=remind_keyboard)
+    bot.send_message(chat_id=message.from_user.id,
+                     text='Кому нагадати?',
+                     reply_markup=remind_journal_keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('remind_one'))
@@ -154,9 +155,10 @@ def remind_all(call):
         except ApiException:
             continue
 
-    bot.send_message(chat_id=call.from_user.id,
-                     text='Всім старостам було відправлено нагадування '
-                          f'{emojize(":white_check_mark:", use_aliases=True)}')
+    bot.edit_message_text(chat_id=call.from_user.id,
+                          message_id=call.message.message_id,
+                          text='Всім старостам було відправлено нагадування '
+                               f'{emojize(":white_check_mark:", use_aliases=True)}')
 
     bot.send_message(chat_id=call.from_user.id,
                      text='Виберіть пункт меню:',
@@ -165,15 +167,28 @@ def remind_all(call):
     bot.send_message(chat_id=374464076, text='#dekanatremindall')
 
 
-def send_file(message):
-    group_keyboard = make_keyboard(keyboard_type='group', elem_list=Group.get_groups(), marker='sendfile_')
+def send_message_or_file(message):
+    send_file_keyboard = InlineKeyboardMarkup()
 
-    bot.send_message(chat_id=message.from_user.id, text='Виберіть старосту групи:', reply_markup=group_keyboard)
+    send_file_keyboard.add(InlineKeyboardButton(text='Вибрати старосту', callback_data='send_to_one'))
+    send_file_keyboard.add(InlineKeyboardButton(text='Тільки 4 курсу', callback_data='send_fourcourse'))
+    send_file_keyboard.add(InlineKeyboardButton(text='Тільки магістрам', callback_data='send_magistr'))
+    send_file_keyboard.add(InlineKeyboardButton(text='Всім', callback_data='send_all'))
 
-    bot.register_next_step_handler_by_chat_id(message.from_user.id, send_file_callback)
+    bot.send_message(chat_id=message.from_user.id, text='Кому відправити?', reply_markup=send_file_keyboard)
 
 
-def send_file_callback(message):
+@bot.callback_query_handler(func=lambda call: call.data.startswith('send_to_one'))
+def send_message_or_file_to_one(call):
+    group_keyboard = make_keyboard(keyboard_type='group', elem_list=Group.get_groups(), marker='sendmessagefile_')
+
+    bot.send_message(chat_id=call.from_user.id, text='Староста групи:', reply_markup=group_keyboard)
+
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, send_message_or_file_to_one_callback)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('sendmessagefile_'))
+def send_message_or_file_to_one_callback(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
@@ -192,43 +207,110 @@ def send_file_callback(message):
             return
 
         message = bot.send_message(chat_id=message.from_user.id,
-                                   text='Відправте файл боту і він його передасть старості '
+                                   text='Відправте файл або повідомлення боту і він передасть старості '
                                         f'{emojize(":incoming_envelope:", use_aliases=True)}',
                                    reply_markup=make_role_replykeyboard(dekanat_buttons))
 
-        bot.register_next_step_handler(message, send_file_headman, headman.student_id)
+        bot.register_next_step_handler(message, send_message_or_file_func, [headman.student_id])
 
 
-def send_file_headman(message, headman_id):
+@bot.callback_query_handler(func=lambda call: call.data.startswith('send_fourcourse'))
+def send_message_or_file_to_fourcourse(message):
+    headmans = []
+    for group in Group.get_groups():
+        group_name = group.name
+        if group_name[len(group_name) - 1] == '6' or '7сп' in group_name:
+            try:
+                headmans.append(Headman.get_headman_by_group(group.id).student_id)
+            except AttributeError:
+                continue
+
+    message = bot.send_message(chat_id=message.from_user.id,
+                               text='Відправте файл або повідомлення боту і він передасть старостам '
+                                    f'{emojize(":incoming_envelope:", use_aliases=True)}')
+
+    bot.register_next_step_handler(message, send_message_or_file_func, headmans)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('send_magistr'))
+def send_message_or_file_to_magistrs(message):
+    headmans = []
+    for group in Group.get_groups():
+        group_name = group.name
+        if group_name[len(group_name) - 1] == 'м':
+            try:
+                headmans.append(Headman.get_headman_by_group(group.id).student_id)
+            except AttributeError:
+                continue
+
+    message = bot.send_message(chat_id=message.from_user.id,
+                               text='Відправте файл або повідомлення боту і він передасть старостам '
+                                    f'{emojize(":incoming_envelope:", use_aliases=True)}')
+
+    bot.register_next_step_handler(message, send_message_or_file_func, headmans)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('send_all'))
+def send_message_or_file_to_all(message):
+    headmans = []
+    for group in Group.get_groups():
+        try:
+            headmans.append(Headman.get_headman_by_group(group.id).student_id)
+        except AttributeError:
+            continue
+
+    message = bot.send_message(chat_id=message.from_user.id,
+                               text='Відправте файл або повідомлення боту і він передасть старостам '
+                                    f'{emojize(":incoming_envelope:", use_aliases=True)}')
+
+    bot.register_next_step_handler(message, send_message_or_file_func, headmans)
+
+
+def send_message_or_file_func(message, headman_list):
     if message.text == '/cancel':
         bot.send_message(chat_id=message.from_user.id,
                          text=f'Дія була скасована {emojize(":white_check_mark:", use_aliases=True)}')
         bot.clear_step_handler_by_chat_id(chat_id=message.from_user.id)
-    elif message.content_type not in ['photo', 'document']:
-        bot.send_message(chat_id=message.from_user.id,
-                         text=f'Файл не відправлено {emojize(":x:", use_aliases=True)}\n\n'
-                              'Файл має бути фото чи документом\n'
-                              'Відправте файл боту і він його передасть старості\n\n'
-                              'Щоб скасувати дію можна скористатися командою /cancel')
-
-        bot.register_next_step_handler(message, send_file_headman, headman_id)
     else:
-        caption = '' if message.caption is None else message.caption
+        for headman_id in headman_list:
+            if message.content_type not in ['text', 'photo', 'document']:
+                bot.send_message(chat_id=message.from_user.id,
+                                 text=f'Файл/повідомлення не відправлено {emojize(":x:", use_aliases=True)}\n\n'
+                                      'Некорректний формат\n'
+                                      'Відправте файл/повідомлення боту і він передасть старості\n\n'
+                                      'Щоб скасувати дію можна скористатися командою /cancel')
 
-        if message.content_type == 'document':
-            bot.send_document(chat_id=headman_id,
-                              data=message.document.file_id,
-                              caption=f'Повідомлення від деканату '
-                                      f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}'
-                                      f'\n\n{caption}')
-        elif message.content_type == 'photo':
-            bot.send_photo(chat_id=headman_id,
-                           photo=message.photo[-1].file_id,
-                           caption=f'Повідомлення від деканату '
-                                   f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}'
-                                   f'\n\n{caption}')
+                bot.register_next_step_handler(message, send_message_or_file_func, headman_list)
+            else:
+                caption = '' if message.caption is None else message.caption
+
+                if message.content_type == 'text':
+                    bot.send_message(chat_id=headman_id,
+                                     text=f'Повідомлення від деканату '
+                                          f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}'
+                                          f'\n\n{message.text}')
+                    bot.send_message(chat_id=message.from_user.id,
+                                     text=f'Повідомлення було відправлено '
+                                          f'{emojize(":white_check_mark:", use_aliases=True)}')
+                elif message.content_type == 'document':
+                    bot.send_document(chat_id=headman_id,
+                                      data=message.document.file_id,
+                                      caption=f'Повідомлення від деканату '
+                                              f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}'
+                                              f'\n\n{caption}')
+                    bot.send_message(chat_id=message.from_user.id,
+                                     text=f'Файл було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
+                elif message.content_type == 'photo':
+                    bot.send_photo(chat_id=headman_id,
+                                   photo=message.photo[-1].file_id,
+                                   caption=f'Повідомлення від деканату '
+                                           f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}'
+                                           f'\n\n{caption}')
+                    bot.send_message(chat_id=message.from_user.id,
+                                     text=f'Фото було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
 
         bot.send_message(chat_id=message.from_user.id,
-                         text=f'Файл відправлений старості {emojize(":white_check_mark:", use_aliases=True)}')
+                         text='Виберіть пункт меню:',
+                         reply_markup=make_role_replykeyboard(dekanat_buttons))
 
         bot.send_message(chat_id=374464076, text='#dekanatsentfile')
