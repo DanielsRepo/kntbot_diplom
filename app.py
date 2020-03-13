@@ -2,7 +2,7 @@ from flask import Flask, request
 from roles.student.registration import registration
 from keyboards.menu import menu
 from roles.student.auditory_search import auditory_search
-from roles.student.teachers import teachers
+from roles.student.studying import teachers
 from roles.studdekan.event_organization import event_organize
 from roles.studdekan.getting_eventvisits import event_visits
 from roles.student.events_schelude import events

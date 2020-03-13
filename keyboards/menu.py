@@ -7,7 +7,7 @@ from database.student import Student
 from database.event import Event
 from database.subject import Subject
 from roles.student.auditory_search import search_aud
-from roles.student.teachers import teachers_schelude, get_grades
+from roles.student.studying import teachers_schelude, get_grades
 from roles.student.events_schelude import get_events_schelude
 from roles.student.registration import register, add_another_fac
 from roles.studdekan.headman_management import headman_keyboard

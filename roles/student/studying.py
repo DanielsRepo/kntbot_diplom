@@ -21,8 +21,6 @@ def teachers_schelude(message):
 
 
 def get_grades(message):
-    print()
-
     grades_dict = {}
 
     for grade in Grade.get_grade_by_student(student_id=message.from_user.id):
