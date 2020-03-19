@@ -1,26 +1,37 @@
 from flask import Blueprint
 from keyboards.keyboard import make_menu_keyboard, menu_buttons, make_role_replykeyboard, \
     studdekan_buttons, teacher_buttons, dekanat_buttons
+
 from database.database import db
 from database.group import Group
 from database.student import Student
 from database.event import Event
 from database.subject import Subject
+from database.cathedra import Cathedra
+from database.teacher import Teacher
+
 from roles.student.auditory_search import search_aud
-from roles.student.studying import teachers_schelude, get_grades
+from roles.student.teachers import teacher_keyboard
+from roles.student.studying import studying_keyboard
+from roles.student.univer_info import univer_info_keyboard
 from roles.student.events_schelude import get_events_schelude
 from roles.student.registration import register, add_another_fac
+
 from roles.studdekan.headman_management import headman_keyboard
 from roles.studdekan.profcomdebtor_management import debtor_keyboard
 from roles.studdekan.event_organization import event_organize_keyboard
 from roles.studdekan.getting_eventvisits import event_visits_keyboard
+
 from roles.dekanat.headman_communication import rate_headman, remind_journal, send_message_or_file
+from roles.dekanat.rating_formation import create_rating
+
 from roles.teacher.grade_assignment import assign_grade
 from roles.teacher.subjectdebtor_management import subject_debtor_keyboard
-from roles.teacher.sending_methods import send_methods_file
+from roles.teacher.sending_methods import send_message_or_file
+
 from credentials import bot
 from helpers.role_helper import restricted_studdekan, restricted_dekanat, restricted_teacher, \
-    LIST_OF_DEKANAT, LIST_OF_ADMINS
+    LIST_OF_DEKANAT, LIST_OF_ADMINS, LIST_OF_TEACHERS
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 
@@ -38,11 +49,10 @@ def start_message(message):
         bot.send_message(chat_id=chat_id,
                          text='Вибери пункт меню:',
                          reply_markup=make_menu_keyboard(message, other_fac=False))
-    elif chat_id in LIST_OF_DEKANAT:
+    elif chat_id in LIST_OF_DEKANAT or LIST_OF_TEACHERS:
         bot.send_message(chat_id=chat_id,
                          text='Виберіть пункт меню:',
                          reply_markup=make_menu_keyboard(message, other_fac=False))
-        return
     elif Student.get_student_by_id(chat_id) is None:
         keyboard = InlineKeyboardMarkup()
         keyboard.row(
@@ -94,16 +104,13 @@ def get_student_messages(message):
                                '8 пара  |  19:45  |  21:05\n'))
         bot.send_message(chat_id=374464076, text='#asked_bells')
     elif message.text == menu_buttons[2]:
-        teachers_schelude(message)
+        studying_keyboard(message)
     elif message.text == menu_buttons[3]:
-        get_events_schelude(message)
+        teacher_keyboard(message)
     elif message.text == menu_buttons[4]:
-        markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton(text='http://www.zntu.edu.ua', url='http://www.zntu.edu.ua'))
-        bot.send_message(chat_id=message.chat.id, text='Сайт НУЗП', reply_markup=markup)
-        bot.send_message(chat_id=374464076, text="#askedwebsite")
+        get_events_schelude(message)
     elif message.text == menu_buttons[5]:
-        get_grades(message)
+        univer_info_keyboard(message)
     elif message.text == menu_buttons[6]:
         show_studdekan_keyboard(message)
     elif message.text == menu_buttons[7]:
@@ -153,17 +160,19 @@ def get_dekanat_messages(message):
         remind_journal(message)
     elif message.text == dekanat_buttons[2]:
         send_message_or_file(message)
+    elif message.text == dekanat_buttons[3]:
+        create_rating(message)
 
 
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in teacher_buttons)
-@restricted_studdekan
+@restricted_teacher
 def get_teacher_messages(message):
     if message.text == teacher_buttons[0]:
         assign_grade(message)
     elif message.text == teacher_buttons[1]:
         subject_debtor_keyboard(message)
     elif message.text == teacher_buttons[2]:
-        send_methods_file(message)
+        send_message_or_file(message)
 
 
 @bot.message_handler(commands=['help'])
@@ -182,6 +191,9 @@ def add_all(message):
     Student.add_students()
     Event.add_events()
     Event.add_visitors()
+
+    Cathedra.add_cathedras()
+    Teacher.add_teachers()
 
     Subject.add_subjects()
 

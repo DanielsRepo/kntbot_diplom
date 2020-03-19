@@ -6,10 +6,10 @@ from emoji import emojize
 menu_buttons = [
     f'{emojize(":mag_right:", use_aliases=True)} Пошук аудиторій',
     f'{emojize(":bell:", use_aliases=True)} Розклад дзвінків',
-    f'{emojize(":books:", use_aliases=True)} Розклад викладачів',
+    f'{emojize(":pencil:", use_aliases=True)} Навчання',
+    f'{emojize(":books:", use_aliases=True)} Викладачі',
     f'{emojize(":tada:", use_aliases=True)} Заходи',
-    f'{emojize(":computer:", use_aliases=True)} Сайт НУЗП',
-    f'{emojize(":chart_with_upwards_trend:", use_aliases=True)} Моя успішність',
+    f'{emojize(":page_facing_up:", use_aliases=True)} Контакти',
     f'{emojize(":briefcase:", use_aliases=True)} Меню студдекана',
     f'{emojize(":clipboard:", use_aliases=True)} Меню деканата',
     f'{emojize(":black_nib:", use_aliases=True)} Меню вчителя',
@@ -28,7 +28,7 @@ studdekan_buttons = [
 teacher_buttons = [
     f'{emojize(":100:", use_aliases=True)} Поставити оцінку',
     f'{emojize(":memo:", use_aliases=True)} Боржники',
-    f'{emojize(":notebook_with_decorative_cover:", use_aliases=True)} Відправити методичку',
+    f'{emojize(":notebook_with_decorative_cover:", use_aliases=True)} Відправити файл/повідомлення',
     f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
 
@@ -36,6 +36,7 @@ dekanat_buttons = [
     f'{emojize(":chart_with_upwards_trend:", use_aliases=True)} Рейтинг старости',
     f'{emojize(":sound:", use_aliases=True)} Нагадати про журнали',
     f'{emojize(":envelope:", use_aliases=True)} Відправити файл/повідомлення',
+    f'{emojize(":bar_chart:", use_aliases=True)} Рейтинг студентів',
     f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
 
@@ -45,37 +46,36 @@ def make_menu_keyboard(message, other_fac):
 
     if other_fac:
         menu_keyboard.add(menu_buttons[0],
-                          menu_buttons[1],
-                          menu_buttons[3],
-                          menu_buttons[4])
+                          menu_buttons[1])
+        menu_keyboard.row(menu_buttons[4],
+                          menu_buttons[5])
     elif message.from_user.id in LIST_OF_ADMINS:
         menu_keyboard.add(menu_buttons[0],
-                          menu_buttons[1],
-                          menu_buttons[2])
-        menu_keyboard.row(menu_buttons[3],
-                          menu_buttons[4])
-        menu_keyboard.add(menu_buttons[5],
-                          menu_buttons[6],
+                          menu_buttons[1])
+        menu_keyboard.row(menu_buttons[2],
+                          menu_buttons[3])
+        menu_keyboard.row(menu_buttons[4],
+                          menu_buttons[5])
+        menu_keyboard.add(menu_buttons[6],
                           menu_buttons[7],
                           menu_buttons[8])
     elif message.from_user.id in LIST_OF_DEKANAT:
         menu_keyboard.add(menu_buttons[0],
                           menu_buttons[1],
-                          menu_buttons[4],
+                          menu_buttons[5],
                           menu_buttons[7])
     elif message.from_user.id in LIST_OF_TEACHERS:
         menu_keyboard.add(menu_buttons[0],
                           menu_buttons[1],
-                          menu_buttons[2],
-                          menu_buttons[4],
+                          menu_buttons[5],
                           menu_buttons[8])
     else:
         menu_keyboard.add(menu_buttons[0],
-                          menu_buttons[1],
-                          menu_buttons[2])
-        menu_keyboard.row(menu_buttons[3],
-                          menu_buttons[4])
-        menu_keyboard.add(menu_buttons[5])
+                          menu_buttons[1])
+        menu_keyboard.row(menu_buttons[2],
+                          menu_buttons[3])
+        menu_keyboard.row(menu_buttons[4],
+                          menu_buttons[5])
 
     return menu_keyboard
 
@@ -99,13 +99,16 @@ def make_headman_rate_keyboard(group_id, rating):
 
 
 def make_keyboard(keyboard_type, elem_list, marker):
-    if keyboard_type == 'event' or keyboard_type == 'student':
-        keyboard = InlineKeyboardMarkup(row_width=1)
-        keys_list = []
-        for elem in elem_list:
-            keys_list.append(InlineKeyboardButton(text=str(elem.name), callback_data=marker + str(elem.id)))
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    keys_list = []
+    for elem in sorted(elem_list, key=lambda elem: elem.name):
+        keys_list.append(InlineKeyboardButton(text=str(elem.name), callback_data=marker + str(elem.id)))
 
+    if keyboard_type == 'event' or keyboard_type == 'student' or keyboard_type == 'teacher':
         keyboard.add(*keys_list)
+    elif keyboard_type == 'cathedra':
+        keyboard.row(*keys_list[0:3])
+        keyboard.row(*keys_list[3:7])
     elif keyboard_type == 'group':
         keyboard = ReplyKeyboardMarkup(row_width=3, one_time_keyboard=True)
 
