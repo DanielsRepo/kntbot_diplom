@@ -13,7 +13,7 @@ from roles.studdekan.profcomdebtor_management import debtors
 from roles.dekanat.headman_communication import headman_management
 from roles.dekanat.rating_formation import rating_formation
 
-from roles.teacher.sending_methods import sending_methods
+from roles.teacher.student_communication import student_communication
 from roles.teacher.subjectdebtor_management import subject_debtors
 from roles.teacher.grade_assignment import grades
 from credentials import bot, telebot
@@ -39,7 +39,7 @@ app.register_blueprint(headman_management)
 app.register_blueprint(rating_formation)
 # for teacher
 app.register_blueprint(subject_debtors)
-app.register_blueprint(sending_methods)
+app.register_blueprint(student_communication)
 app.register_blueprint(grades)
 
 

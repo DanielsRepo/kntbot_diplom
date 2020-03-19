@@ -7,10 +7,10 @@ from telebot.apihelper import ApiException
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 
-sending_methods = Blueprint('sending_methods', __name__)
+student_communication = Blueprint('student_communication', __name__)
 
 
-@sending_methods.route('/sending_methods')
+@student_communication.route('/student_communication')
 # SEND METHODS FILE
 def send_message_or_file(message):
     subjects_keyboard = InlineKeyboardMarkup(row_width=1)

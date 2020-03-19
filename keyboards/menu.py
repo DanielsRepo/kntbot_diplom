@@ -27,7 +27,7 @@ from roles.dekanat.rating_formation import create_rating
 
 from roles.teacher.grade_assignment import assign_grade
 from roles.teacher.subjectdebtor_management import subject_debtor_keyboard
-from roles.teacher.sending_methods import send_message_or_file
+from roles.teacher.student_communication import send_message_or_file
 
 from credentials import bot
 from helpers.role_helper import restricted_studdekan, restricted_dekanat, restricted_teacher, \
