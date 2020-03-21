@@ -4,8 +4,10 @@ from database.group import Group
 from database.student import Student
 from database.subject import Subject
 from telebot.apihelper import ApiException
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from keyboards.keyboard import make_keyboard
 from emoji import emojize
+import os
+from pathlib import Path
 
 student_communication = Blueprint('student_communication', __name__)
 
@@ -13,12 +15,7 @@ student_communication = Blueprint('student_communication', __name__)
 @student_communication.route('/student_communication')
 # SEND METHODS FILE
 def send_message_or_file(message):
-    subjects_keyboard = InlineKeyboardMarkup(row_width=1)
-
-    keys_list = []
-    for elem in Subject.get_subjects():
-        keys_list.append(InlineKeyboardButton(text=str(elem.name), callback_data='methodsubject_' + str(elem.id)))
-    subjects_keyboard.add(*keys_list)
+    subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'methodsubject_')
 
     bot.send_message(chat_id=message.from_user.id,
                      text='Виберіть предмет:',
@@ -56,7 +53,6 @@ def send_message_or_file_func(message, subject_id):
 
         for group in Group.get_groups():
             for student in Student.get_students_by_group(group.id):
-                print(student.id)
                 try:
                     caption = '' if message.caption is None else message.caption
 
@@ -73,6 +69,8 @@ def send_message_or_file_func(message, subject_id):
                                                   f'\n\n{caption}')
                         bot.send_message(chat_id=message.from_user.id,
                                          text=f'Файл було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
+
+                        save_file_to_local(message.document.file_id, subject)
                     elif message.content_type == 'photo':
                         bot.send_photo(chat_id=student.id,
                                        photo=message.photo[-1].file_id,
@@ -80,5 +78,24 @@ def send_message_or_file_func(message, subject_id):
                                                f'\n\n{caption}')
                         bot.send_message(chat_id=message.from_user.id,
                                          text=f'Фото було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
+
+                        save_file_to_local(message.photo[-1].file_id, subject)
                 except ApiException:
                     continue
+
+
+def save_file_to_local(file_id, subject):
+    bot_file_path = bot.get_file(file_id).file_path
+    downloaded_file = bot.download_file(bot_file_path)
+    file_extension = bot_file_path.split('.')[1]
+
+    local_file_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/tmp'
+    subject_path = f'{local_file_path}/{subject}'
+    Path(subject_path).mkdir(parents=True, exist_ok=True)
+
+    file_count = len(next(os.walk(subject_path))[2])
+    number = '' if file_count == 0 else f'_{file_count + 1}'
+
+    with open(f'{subject_path}/{subject}{number}.{file_extension}', 'wb') as new_file:
+        new_file.write(downloaded_file)
+

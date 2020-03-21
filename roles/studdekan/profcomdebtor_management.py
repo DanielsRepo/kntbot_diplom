@@ -63,7 +63,7 @@ def add_debtor_callback(call):
     group = call.data.split('_')[1]
     debtor_id = call.data.split('_')[2]
 
-    if not ProfcomDebtor.add_debtor(debtor_id):
+    if ProfcomDebtor.debtor_exists(debtor_id):
         bot.edit_message_text(chat_id=call.from_user.id,
                               message_id=call.message.message_id,
                               text='Студент вже занесений до боржників')
@@ -72,19 +72,30 @@ def add_debtor_callback(call):
                          text='Вибери пункт меню:',
                          reply_markup=make_role_replykeyboard(studdekan_buttons))
     else:
-        username = Student.get_student_by_id(debtor_id).username
-        name = Student.get_student_by_id(debtor_id).name
-
         bot.edit_message_text(chat_id=call.from_user.id,
                               message_id=call.message.message_id,
-                              text=f'Студент <a href="t.me/{username}">{name}</a> '
-                                   f'групи {group} занесений до боржників '
-                                   f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}',
-                              parse_mode='html')
+                              text='Введи борг студента')
 
-        bot.send_message(chat_id=call.from_user.id,
-                         text='Вибери пункт меню:',
-                         reply_markup=make_role_replykeyboard(studdekan_buttons))
+        bot.register_next_step_handler_by_chat_id(call.from_user.id, add_debtor_func, debtor_id, group)
+
+
+def add_debtor_func(message, debtor_id, group):
+    debt = message.text
+
+    ProfcomDebtor.add_debtor(debtor_id, debt)
+
+    username = Student.get_student_by_id(debtor_id).username
+    name = Student.get_student_by_id(debtor_id).name
+
+    bot.send_message(chat_id=message.from_user.id,
+                     text=f'Студент <a href="t.me/{username}">{name}</a> '
+                          f'групи {group} занесений до боржників '
+                          f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}',
+                     parse_mode='html')
+
+    bot.send_message(chat_id=message.from_user.id,
+                     text='Вибери пункт меню:',
+                     reply_markup=make_role_replykeyboard(studdekan_buttons))
 
 
 # delete debtor
@@ -179,7 +190,8 @@ def get_debtors_by_group_callback(message):
         if not debtors_list:
             message_text = 'В цій групі немає боржників'
         else:
-            debtors_str = ''.join((f'<a href="t.me/{debtor.username}">{debtor.name}</a>\n' for debtor in debtors_list))
+            debtors_str = ''.join((f'<a href="t.me/{debtor.username}">'
+                                   f'{debtor.name}</a> - {ProfcomDebtor.get_debt(debtor.id)}\n' for debtor in debtors_list))
             message_text = f'Боржники групи {group}:\n{debtors_str}'
 
         bot.send_message(chat_id=message.from_user.id,
@@ -190,4 +202,3 @@ def get_debtors_by_group_callback(message):
         bot.send_message(chat_id=message.from_user.id,
                          text='Вибери пункт меню:',
                          reply_markup=make_role_replykeyboard(studdekan_buttons))
-

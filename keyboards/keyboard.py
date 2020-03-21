@@ -104,7 +104,7 @@ def make_keyboard(keyboard_type, elem_list, marker):
     for elem in sorted(elem_list, key=lambda elem: elem.name):
         keys_list.append(InlineKeyboardButton(text=str(elem.name), callback_data=marker + str(elem.id)))
 
-    if keyboard_type == 'event' or keyboard_type == 'student' or keyboard_type == 'teacher':
+    if keyboard_type in ['event', 'student', 'teacher', 'subject']:
         keyboard.add(*keys_list)
     elif keyboard_type == 'cathedra':
         keyboard.row(*keys_list[0:3])

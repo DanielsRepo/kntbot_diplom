@@ -5,7 +5,8 @@ from database.grade import Grade
 from database.subject_debtor import SubjectDebtor
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
-
+from keyboards.keyboard import make_keyboard
+import os
 
 studying = Blueprint('studying', __name__)
 
@@ -24,7 +25,32 @@ def studying_keyboard(message):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('study_methods'))
 def get_study_methods(message):
-    bot.send_message(chat_id=message.from_user.id, text='study_methods')
+    subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'getfilesubject_')
+
+    bot.edit_message_text(chat_id=message.from_user.id,
+                          message_id=message.message.message_id,
+                          text='Вибери предмет:',
+                          reply_markup=subjects_keyboard)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('getfilesubject_'))
+def get_study_methods(call):
+    subject_id = call.data.split('_')[1]
+    subject_name = Subject.get_subject_by_id(subject_id)
+
+    subject_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + f'/tmp/{subject_name}'
+    if os.path.exists(subject_path) and os.listdir(subject_path):
+        bot.edit_message_text(chat_id=call.from_user.id,
+                              message_id=call.message.message_id,
+                              text=f'Методичні матеріали по предмету {subject_name}')
+
+        for file_name in next(os.walk(subject_path))[2]:
+            doc = open(f'{subject_path}/{file_name}', 'rb')
+            bot.send_document(chat_id=call.from_user.id, data=doc)
+    else:
+        bot.edit_message_text(chat_id=call.from_user.id,
+                              message_id=call.message.message_id,
+                              text='Методичних матеріалів немає')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('my_progress'))
@@ -45,4 +71,6 @@ def get_my_progress(message):
     debts += '\n'.join([Subject.get_subject_by_id(debt.subject_id)
                         for debt in SubjectDebtor.get_debt_by_student(student_id=message.from_user.id)])
 
-    bot.send_message(chat_id=message.from_user.id, text=grades+debts, parse_mode='html')
+    bot.edit_message_text(chat_id=message.from_user.id,
+                          message_id=message.message.message_id,
+                          text=grades+debts, parse_mode='html')

@@ -21,7 +21,7 @@ def subject_debtor_keyboard(message):
                                       callback_data='add_subject_debtor'))
     keyboard.add(InlineKeyboardButton(text=f'Видалити боржника {emojize(":heavy_minus_sign:", use_aliases=True)}',
                                       callback_data='delete_subject_debtor'))
-    keyboard.add(InlineKeyboardButton(text=f'Боржники за предмет {emojize(":busts_in_silhouette:", use_aliases=True)}',
+    keyboard.add(InlineKeyboardButton(text=f'Боржники за предметом {emojize(":busts_in_silhouette:", use_aliases=True)}',
                                       callback_data='get_subject_debtors'))
 
     bot.send_message(message.from_user.id, text='Виберіть дію:', reply_markup=keyboard)
@@ -29,11 +29,7 @@ def subject_debtor_keyboard(message):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('add_subject_debtor'))
 def add_debtor(call):
-    subjects_keyboard = InlineKeyboardMarkup(row_width=1)
-    keys_list = []
-    for elem in Subject.get_subjects():
-        keys_list.append(InlineKeyboardButton(text=str(elem.name), callback_data='debtorsubject_' + str(elem.id)))
-    subjects_keyboard.add(*keys_list)
+    subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'debtorsubject_')
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
@@ -45,13 +41,7 @@ def add_debtor(call):
 def choose_debtorsubject_callback(call):
     subject_id = call.data.split('_')[1]
 
-    group_keyboard = InlineKeyboardMarkup(row_width=1)
-    keys_list = []
-
-    for group in Group.get_groups()[:4]:
-        keys_list.append(InlineKeyboardButton(text=str(group.name), callback_data=f'subjectdebtorgroup_{subject_id}_' + str(group.id)))
-
-    group_keyboard.add(*keys_list)
+    group_keyboard = make_keyboard('student', Group.get_groups()[:4], f'subjectdebtorgroup_{subject_id}_')
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,

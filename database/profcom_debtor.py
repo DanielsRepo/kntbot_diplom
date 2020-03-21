@@ -8,21 +8,28 @@ class ProfcomDebtor(Base):
     __table_args__ = {'extend_existing': True}
 
     id = sa.Column(sa.Integer, primary_key=True)
+    debt = sa.Column(sa.Integer)
+
     student_id = sa.Column(sa.Integer, sa.ForeignKey('student.id'))
 
     student = relationship('Student')
 
     @staticmethod
-    def add_debtor(debtor_id):
+    def debtor_exists(debtor_id):
         try:
-            # уже есть должник
             if session.query(ProfcomDebtor).filter(ProfcomDebtor.student_id == debtor_id).one():
-                return False
+                return True
         except NoResultFound:
-            session.add(ProfcomDebtor(student_id=debtor_id))
-            session.commit()
+            return False
 
-        return True
+    @staticmethod
+    def get_debt(debtor_id):
+        return session.query(ProfcomDebtor).filter(ProfcomDebtor.student_id == debtor_id).one().debt
+
+    @staticmethod
+    def add_debtor(debtor_id, debt):
+        session.add(ProfcomDebtor(student_id=debtor_id, debt=debt))
+        session.commit()
 
     @staticmethod
     def delete_debtor(debtor_id):
