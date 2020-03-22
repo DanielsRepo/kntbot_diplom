@@ -57,7 +57,7 @@ def get_study_methods(call):
 def get_my_progress(message):
     grades_dict = {}
 
-    for grade in Grade.get_grade_by_student(student_id=message.from_user.id):
+    for grade in Grade.get_grades_by_student(student_id=message.from_user.id):
         subject = Subject.get_subject_by_id(grade.subject_id)
         grade = grade.grade
 

@@ -1,5 +1,5 @@
 import xlsxwriter
-
+from database.group import Group
 
 def get_fio(full_name):
     try:
@@ -36,17 +36,17 @@ def make_event_visitors_table(stud_dict, otherfac_list, event_name, file_path):
 
         col_counter += 1
 
-    # chart = workbook.add_chart({'type': 'column'})
-    # chart.add_series({
-    #     'categories': [f'{worksheet.name}', 0, 1, 0, len(stud_dict.keys())],
-    #     'values':  [f'{worksheet.name}', row_number_for_quantity, 1, row_number_for_quantity, len(stud_dict.keys())]
-    # })
-    # chart.set_style(37)
-    # chart.set_title({'name': 'Гістограма кількості учасників заходу за групами',
-    #                  'name_font': {'name': 'Calibri', 'size': 13}})
-    # chart.set_legend({'none': True})
-    #
-    # worksheet.insert_chart(f'B{row_number_for_quantity+3}', chart)
+    chart = workbook.add_chart({'type': 'column'})
+    chart.add_series({
+        'categories': [f'{worksheet.name}', 0, 1, 0, len(stud_dict.keys())],
+        'values':  [f'{worksheet.name}', row_number_for_quantity, 1, row_number_for_quantity, len(stud_dict.keys())]
+    })
+    chart.set_style(37)
+    chart.set_title({'name': 'Гістограма кількості учасників заходу за групами',
+                     'name_font': {'name': 'Calibri', 'size': 13}})
+    chart.set_legend({'none': True})
+
+    worksheet.insert_chart(f'B{row_number_for_quantity+3}', chart)
 
     worksheet.write(row_number_for_quantity+2, 0, "Учасники з інших факультетів:", workbook.add_format({'bold': True}))
 
@@ -82,5 +82,42 @@ def make_student_events_table(group_dict, file_name, file_path):
             worksheet.write(row_counter + 1, 1, event_list)
 
             row_counter += 1
+
+    workbook.close()
+
+
+def make_student_grades_table(stud_dict, file_name, file_path):
+    workbook = xlsxwriter.Workbook(f'{file_path}{file_name}.xlsx')
+
+    cell_format = workbook.add_format({'bold': True, 'align': 'center'})
+
+    worksheet = workbook.add_worksheet(name=f'Рейтинг успішності студентів')
+
+    first_col_width = 30
+    other_col_width = 10
+
+    worksheet.write(0, 0, f'П.І.Б', cell_format)
+    worksheet.write(0, 1, f'5б', cell_format)
+    worksheet.write(0, 2, f'100б', cell_format)
+    worksheet.write(0, 3, f'Група', cell_format)
+
+    row_counter = 0
+
+    for student, average in sorted(stud_dict.items(), key=lambda value: value[1][0], reverse=True):
+        print(student, average)
+
+        worksheet.set_column(row_counter + 1, 0, first_col_width)
+        worksheet.write(row_counter + 1, 0, student.split('_')[0])
+
+        worksheet.set_column(row_counter + 1, 1, other_col_width)
+        worksheet.write(row_counter + 1, 1, average[0])
+
+        worksheet.set_column(row_counter + 1, 2, other_col_width)
+        worksheet.write(row_counter + 1, 2, average[1])
+
+        worksheet.set_column(row_counter + 1, 3, other_col_width)
+        worksheet.write(row_counter + 1, 3, f'КНТ-{student.split("_")[1]}')
+
+        row_counter += 1
 
     workbook.close()

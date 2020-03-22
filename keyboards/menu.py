@@ -9,6 +9,7 @@ from database.event import Event
 from database.subject import Subject
 from database.cathedra import Cathedra
 from database.teacher import Teacher
+from database.grade import Grade
 
 from roles.student.auditory_search import search_aud
 from roles.student.teachers import teacher_keyboard
@@ -196,6 +197,7 @@ def add_all(message):
     Teacher.add_teachers()
 
     Subject.add_subjects()
+    Grade.add_grades()
 
 
 @bot.message_handler(commands=['del'])

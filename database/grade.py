@@ -1,4 +1,8 @@
 from database.database import *
+from database.student import Student
+from database.group import Group
+from database.subject import Subject
+import random
 
 
 class Grade(Base):
@@ -19,7 +23,20 @@ class Grade(Base):
         session.commit()
 
     @staticmethod
-    def get_grade_by_student(student_id):
+    def add_grades():
+        if len(session.query(Grade).all()) > 0:
+            return
+        else:
+            for group in Group.get_groups()[:4]:
+                for student in Student.get_students_by_group(group.id):
+                    for subject in Subject.get_subjects():
+                        session.add(Grade(grade=random.randint(60, 100), student_id=student.id, subject_id=subject.id))
+                        session.commit()
+
+            print("grades added")
+
+    @staticmethod
+    def get_grades_by_student(student_id):
         return [grade for grade in session.query(Grade).filter(Grade.student_id == student_id)]
 
 
