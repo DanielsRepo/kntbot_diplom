@@ -6,10 +6,12 @@ from database.database import db
 from database.group import Group
 from database.student import Student
 from database.event import Event
+from database.event_visitor import EventVisitor
 from database.subject import Subject
 from database.cathedra import Cathedra
 from database.teacher import Teacher
 from database.grade import Grade
+from database.extra_grade import ExtraGrade
 
 from roles.student.auditory_search import search_aud
 from roles.student.teachers import teacher_keyboard
@@ -22,6 +24,7 @@ from roles.studdekan.headman_management import headman_keyboard
 from roles.studdekan.profcomdebtor_management import debtor_keyboard
 from roles.studdekan.event_organization import event_organize_keyboard
 from roles.studdekan.getting_eventvisits import event_visits_keyboard
+from roles.studdekan.extragrade_assignment import add_extragrade
 
 from roles.dekanat.headman_communication import rate_headman, remind_journal, send_message_or_file
 from roles.dekanat.rating_formation import create_rating
@@ -150,6 +153,8 @@ def get_studdekan_messages(message):
         event_organize_keyboard(message)
     elif message.text == studdekan_buttons[3]:
         event_visits_keyboard(message)
+    elif message.text == studdekan_buttons[4]:
+        add_extragrade(message)
 
 
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in dekanat_buttons)
@@ -190,14 +195,17 @@ def help_message(message):
 def add_all(message):
     Group.add_groups()
     Student.add_students()
+
     Event.add_events()
-    Event.add_visitors()
+    EventVisitor.add_visitors()
 
     Cathedra.add_cathedras()
     Teacher.add_teachers()
 
     Subject.add_subjects()
     Grade.add_grades()
+
+    ExtraGrade.add_extragrades()
 
 
 @bot.message_handler(commands=['del'])

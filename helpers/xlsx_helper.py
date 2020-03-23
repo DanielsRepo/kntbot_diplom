@@ -99,24 +99,26 @@ def make_student_grades_table(stud_dict, file_name, file_path):
     worksheet.write(0, 0, f'П.І.Б', cell_format)
     worksheet.write(0, 1, f'5б', cell_format)
     worksheet.write(0, 2, f'100б', cell_format)
-    worksheet.write(0, 3, f'Група', cell_format)
+    worksheet.write(0, 3, f'Дод. бал', cell_format)
+    worksheet.write(0, 4, f'Група', cell_format)
 
     row_counter = 0
 
-    for student, average in sorted(stud_dict.items(), key=lambda value: value[1][0], reverse=True):
-        print(student, average)
-
+    for student, score in sorted(stud_dict.items(), key=lambda value: value[1][0], reverse=True):
         worksheet.set_column(row_counter + 1, 0, first_col_width)
         worksheet.write(row_counter + 1, 0, student.split('_')[0])
 
         worksheet.set_column(row_counter + 1, 1, other_col_width)
-        worksheet.write(row_counter + 1, 1, average[0])
+        worksheet.write(row_counter + 1, 1, score[0])
 
         worksheet.set_column(row_counter + 1, 2, other_col_width)
-        worksheet.write(row_counter + 1, 2, average[1])
+        worksheet.write(row_counter + 1, 2, score[1])
 
         worksheet.set_column(row_counter + 1, 3, other_col_width)
-        worksheet.write(row_counter + 1, 3, f'КНТ-{student.split("_")[1]}')
+        worksheet.write(row_counter + 1, 3, score[2])
+
+        worksheet.set_column(row_counter + 1, 4, other_col_width)
+        worksheet.write(row_counter + 1, 4, f'КНТ-{student.split("_")[1]}')
 
         row_counter += 1
 

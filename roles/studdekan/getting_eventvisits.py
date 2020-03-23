@@ -3,7 +3,8 @@ from credentials import bot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from keyboards.keyboard import make_keyboard
 from database.group import Group
-from database.event import Event, EventVisitor
+from database.event import Event
+from database.event_visitor import EventVisitor
 from database.student import Student
 from helpers.xlsx_helper import get_fio, make_event_visitors_table, make_student_events_table
 from helpers.role_helper import restricted_studdekan

@@ -10,7 +10,7 @@ class Grade(Base):
     __table_args__ = {'extend_existing': True}
 
     id = sa.Column(sa.Integer, primary_key=True)
-    grade = sa.Column(sa.String(256))
+    grade = sa.Column(sa.Integer)
     student_id = sa.Column(sa.Integer, sa.ForeignKey('student.id'))
     subject_id = sa.Column(sa.Integer, sa.ForeignKey('subject.id'))
 

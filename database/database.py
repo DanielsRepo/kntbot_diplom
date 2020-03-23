@@ -26,7 +26,7 @@ class Database:
         print('deleted')
 
 
-db = Database('postgres', 'admin', 'localhost', '5432', 'postgres')
+db = Database('postgres', 'admin', 'localhost', '5432', 'database')
 
 conn, metadata = db.connect()
 session = Session(conn)

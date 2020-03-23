@@ -1,6 +1,8 @@
 from database.database import *
 from database.student import Student
 from sqlalchemy.orm.exc import NoResultFound
+from database.event import Event
+import random
 
 
 class EventVisitor(Base):
@@ -16,6 +18,21 @@ class EventVisitor(Base):
     student = relationship('Student')
 
     note = sa.Column(sa.String(256))
+
+    @staticmethod
+    def add_visitors():
+        if len(EventVisitor.get_all_visitors()) > 0:
+            return
+        else:
+            for event in Event.get_all_events():
+                s_id_list = random.sample(range(1, 61), random.randint(20, 40))
+                for s_id in s_id_list:
+                    event_visit = EventVisitor(event_id=event.id, student_id=s_id)
+                    session.add(event_visit)
+
+                session.commit()
+
+        print("visitors added")
 
     @staticmethod
     def get_all_visitors():
@@ -54,3 +71,6 @@ class EventVisitor(Base):
     def get_visitor_students(group_id):
         return session.query(Student, EventVisitor).filter(Student.group_id == group_id).filter(
             EventVisitor.student_id == Student.id).all()
+
+
+Base.metadata.create_all(conn)

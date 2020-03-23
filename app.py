@@ -7,6 +7,8 @@ from roles.student.univer_info import univer_info
 from roles.student.studying import studying
 from roles.studdekan.event_organization import event_organize
 from roles.studdekan.getting_eventvisits import event_visits
+from roles.studdekan.extragrade_assignment import extragrade_assignment
+
 from roles.student.events_schelude import events
 from roles.studdekan.headman_management import headmans
 from roles.studdekan.profcomdebtor_management import debtors
@@ -34,6 +36,7 @@ app.register_blueprint(event_organize)
 app.register_blueprint(event_visits)
 app.register_blueprint(headmans)
 app.register_blueprint(debtors)
+app.register_blueprint(extragrade_assignment)
 # for dekanat
 app.register_blueprint(headman_management)
 app.register_blueprint(rating_formation)
@@ -51,8 +54,15 @@ def shutdown_session(exception=None):
 
 @app.route("/", methods=['POST'])
 def webhook():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-    return '!', 200
+    try:
+        bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    except BaseException as e:
+        print('BaseException OperationalError handled, session close')
+        bot.send_message(374464076, text=f'BaseException handled :D \n\n {str(e)}')
+
+        bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+
+    return "ok", 200
 
 
 if __name__ == '__main__':

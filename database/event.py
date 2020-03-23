@@ -1,6 +1,4 @@
 from database.database import *
-import random
-from database.event_visitor import EventVisitor
 
 
 class Event(Base):
@@ -34,21 +32,6 @@ class Event(Base):
             session.commit()
 
         print("events added")
-
-    @staticmethod
-    def add_visitors():
-        if len(EventVisitor.get_all_visitors()) > 0:
-            return
-        else:
-            for event in Event.get_all_events():
-                s_id_list = random.sample(range(1, 61), random.randint(20, 40))
-                for s_id in s_id_list:
-                    event_visit = EventVisitor(event_id=event.id, student_id=s_id)
-                    session.add(event_visit)
-
-                session.commit()
-
-        print("visitors added")
 
     @staticmethod
     def update_event(event_id, name='', place='', date='', time='', over=''):

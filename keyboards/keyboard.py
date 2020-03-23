@@ -21,6 +21,7 @@ studdekan_buttons = [
     f'{emojize(":dollar:", use_aliases=True)} Боржники',
     f'{emojize(":calendar:", use_aliases=True)} Організація заходів',
     f'{emojize(":busts_in_silhouette:", use_aliases=True)} Відвідування заходів',
+    f'{emojize(":heavy_plus_sign:", use_aliases=True)} Нарахування доп. балів',
     f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
 

@@ -1,6 +1,7 @@
 from flask import Blueprint
 from credentials import bot
-from database.event import Event, EventVisitor
+from database.event import Event
+from database.event_visitor import EventVisitor
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 from keyboards.keyboard import menu_buttons

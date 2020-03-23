@@ -1,6 +1,8 @@
 from flask import Blueprint
 from credentials import bot
 from database.grade import Grade
+from database.extra_grade import ExtraGrade
+
 from database.group import Group
 from database.student import Student
 from database.subject import Subject
@@ -19,8 +21,6 @@ def create_rating(message):
 
     stud_dict = prepare_student_grades_table()
 
-    pprint(stud_dict)
-
     make_student_grades_table(stud_dict=stud_dict, file_name=file_name, file_path=file_path)
 
     doc = open(f'{file_path}{file_name}.xlsx', 'rb')
@@ -34,14 +34,29 @@ def prepare_student_grades_table():
 
     for student in Student.get_all_students():
         try:
-            s_name_group = f'{student.name}_{Group.get_group_by_id(student.group_id)}'
-            s_avg = sum([int(grade.grade) for grade in Grade.get_grades_by_student(student.id)]) / len(Subject.get_subjects())
+            name_group = f'{student.name}_{Group.get_group_by_id(student.group_id)}'
 
-            stud_dict[s_name_group] = [convert_score(s_avg), s_avg]
+            score, extragrade = calculate_score(student.id)
+
+            stud_dict[name_group] = [convert_score(score), score, extragrade]
         except AttributeError:
             continue
 
     return stud_dict
+
+
+def calculate_score(student_id):
+    max_rating_score = 100
+    max_subject_score = 100
+
+    subject_score = sum([int(grade.grade) for grade in Grade.get_grades_by_student(student_id)])
+    subject_quantity = len(Subject.get_subjects())
+
+    extragrade = sum([int(exgrade.extra_grade) for exgrade in ExtraGrade.get_extragrade_by_student(student_id)])
+
+    score = max_rating_score * (subject_score / (subject_quantity * max_subject_score)) + extragrade
+
+    return score, extragrade
 
 
 def convert_score(score):
