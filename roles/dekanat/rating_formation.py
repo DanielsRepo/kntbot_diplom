@@ -36,9 +36,11 @@ def prepare_student_grades_table():
         try:
             name_group = f'{student.name}_{Group.get_group_by_id(student.group_id)}'
 
-            score, extragrade = calculate_score(student.id)
-
-            stud_dict[name_group] = [convert_score(score), score, extragrade]
+            score = calculate_score(student.id)
+            if score is False:
+                continue
+            else:
+                stud_dict[name_group] = [score[0], score[1], score[2]]
         except AttributeError:
             continue
 
@@ -46,25 +48,30 @@ def prepare_student_grades_table():
 
 
 def calculate_score(student_id):
-    max_rating_score = 100
-    max_subject_score = 100
+    coef = 0.9
 
-    subject_score = sum([int(grade.grade) for grade in Grade.get_grades_by_student(student_id)])
     subject_quantity = len(Subject.get_subjects())
+
+    grade_sum_hundred_system = sum([int(grade.grade) for grade in Grade.get_grades_by_student(student_id)])
+    grade_sum_five_system = sum([convert_to_five(int(grade.grade)) for grade in Grade.get_grades_by_student(student_id)])
 
     extragrade = sum([int(exgrade.extra_grade) for exgrade in ExtraGrade.get_extragrade_by_student(student_id)])
 
-    score = max_rating_score * (subject_score / (subject_quantity * max_subject_score)) + extragrade
+    score_hundred_system = coef * (grade_sum_hundred_system / subject_quantity) + extragrade
+    score_five_system = grade_sum_five_system / subject_quantity
 
-    return score, extragrade
+    if score_hundred_system < 60:
+        return False
+    else:
+        return [score_five_system, score_hundred_system, extragrade]
 
 
-def convert_score(score):
+def convert_to_five(score):
     if score >= 90:
         return 5
-    elif score >= 80:
+    elif score >= 75:
         return 4
-    elif score >= 70:
+    elif score >= 60:
         return 3
     elif score >= 60:
         return 2

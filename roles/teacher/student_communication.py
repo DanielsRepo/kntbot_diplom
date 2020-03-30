@@ -50,38 +50,48 @@ def send_message_or_file_func(message, subject_id):
         bot.register_next_step_handler(message, send_message_or_file_func, subject_id)
     else:
         subject = Subject.get_subject_by_id(subject_id)
+        students = []
 
         for group in Group.get_groups():
             for student in Student.get_students_by_group(group.id):
+                students.append(student)
+
+        caption = '' if message.caption is None else message.caption
+
+        if message.content_type == 'text':
+            for student in students:
                 try:
-                    caption = '' if message.caption is None else message.caption
-
-                    if message.content_type == 'text':
-                        bot.send_message(chat_id=student.id,
-                                         text=f'Повідомлення по предмету {subject}:\n\n{message.text}')
-                        bot.send_message(chat_id=message.from_user.id,
-                                         text=f'Повідомлення було відправлено '
-                                              f'{emojize(":white_check_mark:", use_aliases=True)}')
-                    elif message.content_type == 'document':
-                        bot.send_document(chat_id=student.id,
-                                          data=message.document.file_id,
-                                          caption=f'Методичний матеріал з предмету {subject} '
-                                                  f'\n\n{caption}')
-                        bot.send_message(chat_id=message.from_user.id,
-                                         text=f'Файл було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
-
-                        save_file_to_local(message.document.file_id, subject)
-                    elif message.content_type == 'photo':
-                        bot.send_photo(chat_id=student.id,
-                                       photo=message.photo[-1].file_id,
-                                       caption=f'Методичний матеріал з предмету {subject} '
-                                               f'\n\n{caption}')
-                        bot.send_message(chat_id=message.from_user.id,
-                                         text=f'Фото було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
-
-                        save_file_to_local(message.photo[-1].file_id, subject)
+                    bot.send_message(chat_id=student.id,
+                                     text=f'Повідомлення по предмету {subject}:\n\n{message.text}')
+                    bot.send_message(chat_id=message.from_user.id,
+                                     text=f'Повідомлення було відправлено '
+                                          f'{emojize(":white_check_mark:", use_aliases=True)}')
                 except ApiException:
                     continue
+        elif message.content_type == 'document':
+            for student in students:
+                try:
+                    bot.send_document(chat_id=student.id,
+                                      data=message.document.file_id,
+                                      caption=f'Методичний матеріал з предмету {subject} '
+                                              f'\n\n{caption}')
+                    bot.send_message(chat_id=message.from_user.id,
+                                     text=f'Файл було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
+                except ApiException:
+                    continue
+            save_file_to_local(message.document.file_id, subject)
+        elif message.content_type == 'photo':
+            for student in students:
+                try:
+                    bot.send_photo(chat_id=student.id,
+                                   photo=message.photo[-1].file_id,
+                                   caption=f'Методичний матеріал з предмету {subject} '
+                                           f'\n\n{caption}')
+                    bot.send_message(chat_id=message.from_user.id,
+                                     text=f'Фото було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
+                except ApiException:
+                    continue
+            save_file_to_local(message.photo[-1].file_id, subject)
 
 
 def save_file_to_local(file_id, subject):

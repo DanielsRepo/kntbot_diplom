@@ -12,7 +12,7 @@ menu_buttons = [
     f'{emojize(":page_facing_up:", use_aliases=True)} Контакти',
     f'{emojize(":briefcase:", use_aliases=True)} Меню студдекана',
     f'{emojize(":clipboard:", use_aliases=True)} Меню деканата',
-    f'{emojize(":black_nib:", use_aliases=True)} Меню вчителя',
+    f'{emojize(":black_nib:", use_aliases=True)} Меню викладача',
     f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
 

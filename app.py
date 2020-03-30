@@ -55,7 +55,9 @@ def shutdown_session(exception=None):
 @app.route("/", methods=['POST'])
 def webhook():
     try:
-        bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+        bot.process_new_updates([telebot.types.Update.de_json
+                                 (request.stream.read().
+                                  decode("utf-8"))])
     except BaseException as e:
         print('BaseException OperationalError handled, session close')
         bot.send_message(374464076, text=f'BaseException handled :D \n\n {str(e)}')
@@ -67,5 +69,3 @@ def webhook():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
