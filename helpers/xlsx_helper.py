@@ -1,5 +1,6 @@
 import xlsxwriter
-from database.group import Group
+from pprint import pprint
+
 
 def get_fio(full_name):
     try:

@@ -11,6 +11,7 @@ class Student(Base):
     username = sa.Column(sa.String(256))
     name = sa.Column(sa.String(256))
     phone = sa.Column(sa.String(256))
+    gradebook_id = sa.Column(sa.String(256))
     group_id = sa.Column(sa.Integer, sa.ForeignKey('group.id'))
 
     group = relationship('Group')
@@ -23,16 +24,16 @@ class Student(Base):
             group_ids = [1, 2, 3, 4]
 
             for s in students[:10]:
-                session.add(Student(name=s, username='dfherher4', phone='111111111', group_id=group_ids[0]))
+                session.add(Student(name=s, username='dfherher4', phone='111111111', gradebook_id='234242424', group_id=group_ids[0]))
 
             for s in students[10:25]:
-                session.add(Student(name=s, username='rethrhtr', phone='222222222', group_id=group_ids[1]))
+                session.add(Student(name=s, username='rethrhtr', phone='222222222', gradebook_id='234242424', group_id=group_ids[1]))
 
             for s in students[25:40]:
-                session.add(Student(name=s, username='erherrher', phone='333333333', group_id=group_ids[2]))
+                session.add(Student(name=s, username='erherrher', phone='333333333', gradebook_id='234242424', group_id=group_ids[2]))
 
             for s in students[40:60]:
-                session.add(Student(name=s, username='erherhr', phone='444444444', group_id=group_ids[3]))
+                session.add(Student(name=s, username='erherhr', phone='444444444', gradebook_id='234242424', group_id=group_ids[3]))
 
             session.commit()
 

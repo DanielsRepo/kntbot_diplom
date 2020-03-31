@@ -10,6 +10,7 @@ from database.event_visitor import EventVisitor
 from database.subject import Subject
 from database.cathedra import Cathedra
 from database.teacher import Teacher
+from database.grade_type import GradeType
 from database.grade import Grade
 from database.extra_grade import ExtraGrade
 
@@ -203,8 +204,9 @@ def add_all(message):
     Teacher.add_teachers()
 
     Subject.add_subjects()
-    Grade.add_grades()
 
+    GradeType.add_gradetypes()
+    Grade.add_grades()
     ExtraGrade.add_extragrades()
 
 

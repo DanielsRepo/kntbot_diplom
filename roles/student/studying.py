@@ -1,6 +1,7 @@
 from flask import Blueprint
 from credentials import bot
 from database.subject import Subject
+from database.grade_type import GradeType
 from database.grade import Grade
 from database.subject_debtor import SubjectDebtor
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -59,16 +60,19 @@ def get_my_progress(message):
 
     for grade in Grade.get_grades_by_student(student_id=message.from_user.id):
         subject = Subject.get_subject_by_id(grade.subject_id)
+        grade_type = GradeType.get_gradetype_by_id(grade.gradetype_id)
+        ects = grade.ects
         grade = grade.grade
 
-        grades_dict.setdefault(subject, []).append(grade)
+        grades_dict.setdefault(subject, []).append(f' {grade_type}: {grade} ({ects})\n')
 
-    grades = '<b>Оцінки</b>:\n'
+    grades = '<b>Оцінки</b>:\n\n'
+
     for subject in grades_dict:
-        grades += ''.join(f'{subject}: {", ".join(grades_dict[subject])}\n')
+        grades += ''.join(f'<i>{subject}:</i>\n{"".join(grades_dict[subject])}\n')
 
-    debts = '\n<b>Борги</b>:\n'
-    debts += '\n'.join([Subject.get_subject_by_id(debt.subject_id)
+    debts = '<b>Борги</b>: '
+    debts += ', '.join([Subject.get_subject_by_id(debt.subject_id)
                         for debt in SubjectDebtor.get_debt_by_student(student_id=message.from_user.id)])
 
     bot.edit_message_text(chat_id=message.from_user.id,

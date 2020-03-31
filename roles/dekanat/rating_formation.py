@@ -1,5 +1,6 @@
 from flask import Blueprint
 from credentials import bot
+from database.grade_type import GradeType
 from database.grade import Grade
 from database.extra_grade import ExtraGrade
 
@@ -37,10 +38,14 @@ def prepare_student_grades_table():
             name_group = f'{student.name}_{Group.get_group_by_id(student.group_id)}'
 
             score = calculate_score(student.id)
+
             if score is False:
                 continue
             else:
                 stud_dict[name_group] = [score[0], score[1], score[2]]
+
+                print(stud_dict)
+
         except AttributeError:
             continue
 
@@ -52,13 +57,20 @@ def calculate_score(student_id):
 
     subject_quantity = len(Subject.get_subjects())
 
-    grade_sum_hundred_system = sum([int(grade.grade) for grade in Grade.get_grades_by_student(student_id)])
-    grade_sum_five_system = sum([convert_to_five(int(grade.grade)) for grade in Grade.get_grades_by_student(student_id)])
+    grade_sum_hundred_system = sum([int(grade.grade)
+                                    for grade in Grade.get_grades_by_student(student_id)
+                                    if grade.gradetype_id in [4, 5]])
+
+    grade_sum_five_system = sum([convert_to_five(int(grade.grade))
+                                 for grade in Grade.get_grades_by_student(student_id)
+                                 if grade.gradetype_id in [4, 5]])
 
     extragrade = sum([int(exgrade.extra_grade) for exgrade in ExtraGrade.get_extragrade_by_student(student_id)])
 
     score_hundred_system = coef * (grade_sum_hundred_system / subject_quantity) + extragrade
     score_five_system = grade_sum_five_system / subject_quantity
+
+    print(score_hundred_system)
 
     if score_hundred_system < 60:
         return False

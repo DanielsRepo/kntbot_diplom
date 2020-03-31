@@ -20,6 +20,7 @@ from roles.teacher.subjectdebtor_management import subject_debtors
 from roles.teacher.grade_assignment import grades
 from credentials import bot, telebot
 from database.database import session
+import json
 
 app = Flask(__name__)
 
@@ -62,7 +63,10 @@ def webhook():
         print('BaseException OperationalError handled, session close')
         bot.send_message(374464076, text=f'BaseException handled :D \n\n {str(e)}')
 
-        bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+        try:
+            bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+        except json.decoder.JSONDecodeError:
+            bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
 
     return "ok", 200
 

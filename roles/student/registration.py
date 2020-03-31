@@ -54,6 +54,20 @@ def get_name(message, student):
     else:
         student.name = name
 
+        message = bot.send_message(chat_id=message.from_user.id, text='Введи номер своєї залікової книжки')
+        bot.register_next_step_handler(message, get_gradebook_id, student)
+
+
+def get_gradebook_id(message, student):
+    gradebook_id = message.text
+
+    if bool(re.search("^\d+(\.\d+)*$", gradebook_id)) == False:
+        message = bot.send_message(chat_id=message.from_user.id,
+                                   text='Неккоректний ввід\nВведи номер своєї залікової книжки')
+        bot.register_next_step_handler(message, get_gradebook_id, student)
+    else:
+        student.gradebook_id = gradebook_id
+
         message = bot.send_message(chat_id=message.from_user.id, text='Введи свій номер телефону')
         bot.register_next_step_handler(message, get_phone, student)
 

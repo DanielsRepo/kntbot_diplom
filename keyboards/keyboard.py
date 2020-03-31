@@ -21,7 +21,7 @@ studdekan_buttons = [
     f'{emojize(":dollar:", use_aliases=True)} Боржники',
     f'{emojize(":calendar:", use_aliases=True)} Організація заходів',
     f'{emojize(":busts_in_silhouette:", use_aliases=True)} Відвідування заходів',
-    f'{emojize(":heavy_plus_sign:", use_aliases=True)} Нарахування доп. балів',
+    f'{emojize(":heavy_plus_sign:", use_aliases=True)} Нарахування дод. балів',
     f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
 
@@ -105,7 +105,7 @@ def make_keyboard(keyboard_type, elem_list, marker):
     for elem in sorted(elem_list, key=lambda elem: elem.name):
         keys_list.append(InlineKeyboardButton(text=str(elem.name), callback_data=marker + str(elem.id)))
 
-    if keyboard_type in ['event', 'student', 'teacher', 'subject']:
+    if keyboard_type in ['event', 'student', 'teacher', 'subject', 'gradetype']:
         keyboard.add(*keys_list)
     elif keyboard_type == 'cathedra':
         keyboard.row(*keys_list[0:3])
