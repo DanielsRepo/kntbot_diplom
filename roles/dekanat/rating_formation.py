@@ -43,9 +43,6 @@ def prepare_student_grades_table():
                 continue
             else:
                 stud_dict[name_group] = [score[0], score[1], score[2]]
-
-                print(stud_dict)
-
         except AttributeError:
             continue
 
@@ -55,7 +52,7 @@ def prepare_student_grades_table():
 def calculate_score(student_id):
     coef = 0.9
 
-    subject_quantity = len(Subject.get_subjects())
+    subject_quantity = 4
 
     grade_sum_hundred_system = sum([int(grade.grade)
                                     for grade in Grade.get_grades_by_student(student_id)
@@ -70,8 +67,6 @@ def calculate_score(student_id):
     score_hundred_system = coef * (grade_sum_hundred_system / subject_quantity) + extragrade
     score_five_system = grade_sum_five_system / subject_quantity
 
-    print(score_hundred_system)
-
     if score_hundred_system < 60:
         return False
     else:
@@ -85,7 +80,5 @@ def convert_to_five(score):
         return 4
     elif score >= 60:
         return 3
-    elif score >= 60:
-        return 2
     else:
-        return 1
+        return

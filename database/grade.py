@@ -52,18 +52,46 @@ class Grade(Base):
         if len(session.query(Grade).all()) > 0:
             return
         else:
+            random.seed(5)
+
             for group in Group.get_groups()[:4]:
                 for student in Student.get_students_by_group(group.id):
-                    for subject in Subject.get_subjects():
-                        grade = random.randint(60, 100)
-                        gradetype_id = random.randint(1, 5)
-                        session.add(Grade(grade=grade,
-                                          ects=Grade.convert_to_ects(grade),
-                                          date=date.today().strftime("%m/%d/%Y"),
-                                          gradetype_id=gradetype_id,
-                                          student_id=student.id,
-                                          subject_id=subject.id))
-                        session.commit()
+                    grade = random.randint(75, 100)
+                    session.add(Grade(grade=grade,
+                                      ects=Grade.convert_to_ects(grade),
+                                      date=date.today().strftime("%m/%d/%Y"),
+                                      gradetype_id=5,
+                                      student_id=student.id,
+                                      subject_id=1))
+                    grade = random.randint(75, 100)
+                    session.add(Grade(grade=grade,
+                                      ects=Grade.convert_to_ects(grade),
+                                      date=date.today().strftime("%m/%d/%Y"),
+                                      gradetype_id=4,
+                                      student_id=student.id,
+                                      subject_id=2))
+                    grade = random.randint(75, 100)
+                    session.add(Grade(grade=grade,
+                                      ects=Grade.convert_to_ects(grade),
+                                      date=date.today().strftime("%m/%d/%Y"),
+                                      gradetype_id=3,
+                                      student_id=student.id,
+                                      subject_id=3))
+                    grade = random.randint(75, 100)
+                    session.add(Grade(grade=grade,
+                                      ects=Grade.convert_to_ects(grade),
+                                      date=date.today().strftime("%m/%d/%Y"),
+                                      gradetype_id=5,
+                                      student_id=student.id,
+                                      subject_id=4))
+                    grade = random.randint(75, 100)
+                    session.add(Grade(grade=grade,
+                                      ects=Grade.convert_to_ects(grade),
+                                      date=date.today().strftime("%m/%d/%Y"),
+                                      gradetype_id=5,
+                                      student_id=student.id,
+                                      subject_id=5))
+                    session.commit()
 
             print("grades added")
 

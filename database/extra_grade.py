@@ -24,9 +24,9 @@ class ExtraGrade(Base):
         if len(session.query(ExtraGrade).all()) > 0:
             return
         else:
-            for _ in Student.get_all_students():
+            for student_id in [10, 12, 15, 20, 23, 27, 32, 40, 43, 55, 57]:
                 try:
-                    session.add(ExtraGrade(extra_grade=random.randint(0, 10), student_id=random.randint(1, 60)))
+                    session.add(ExtraGrade(extra_grade=random.randint(0, 10), student_id=student_id))
                     session.commit()
                 except IntegrityError:
                     continue

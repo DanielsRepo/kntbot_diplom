@@ -61,7 +61,7 @@ def webhook():
                                   decode("utf-8"))])
     except BaseException as e:
         print('BaseException OperationalError handled, session close')
-        bot.send_message(374464076, text=f'BaseException handled :D \n\n {str(e)}')
+        # bot.send_message(374464076, text=f'BaseException handled :D \n\n {str(e)}')
 
         try:
             bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])

@@ -18,7 +18,8 @@ class SubjectDebtor(Base):
     def add_debtor(debtor_id, subject_id):
         try:
             # уже есть должник
-            if session.query(SubjectDebtor).filter(SubjectDebtor.student_id == debtor_id).filter(SubjectDebtor.subject_id == subject_id).one():
+            if session.query(SubjectDebtor).filter(SubjectDebtor.student_id == debtor_id)\
+                    .filter(SubjectDebtor.subject_id == subject_id).one():
                 return False
         except NoResultFound:
             session.add(SubjectDebtor(student_id=debtor_id, subject_id=subject_id))
@@ -27,13 +28,16 @@ class SubjectDebtor(Base):
         return True
 
     @staticmethod
-    def delete_debtor(debtor_id):
-        session.delete(session.query(SubjectDebtor).filter(SubjectDebtor.student_id == debtor_id).one())
+    def delete_debtor(subject_id, debtor_id):
+        session.delete(session.query(SubjectDebtor).filter(SubjectDebtor.student_id == debtor_id)
+                       .filter(SubjectDebtor.subject_id == subject_id).one())
         session.commit()
 
     @staticmethod
-    def get_debtors_by_group(group_id):
-        debtors = session.query(SubjectDebtor, Student).filter(Student.group_id == group_id).filter(SubjectDebtor.student_id == Student.id).all()
+    def get_debtors_by_subject_group(subject_id, group_id):
+        debtors = session.query(SubjectDebtor, Student).filter(SubjectDebtor.subject_id == subject_id)\
+            .filter(Student.group_id == group_id).filter(SubjectDebtor.student_id == Student.id).all()
+
         return [Student.get_student_by_id(debtor[0].student_id) for debtor in debtors]
 
     @staticmethod

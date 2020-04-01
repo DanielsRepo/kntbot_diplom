@@ -124,7 +124,7 @@ def choose_debtor_group_callback(call):
     subject_id = call.data.split('_')[1]
     group_id = call.data.split('_')[2]
 
-    debtor_list = SubjectDebtor.get_debtors_by_group(group_id)
+    debtor_list = SubjectDebtor.get_debtors_by_subject_group(subject_id, group_id)
     debtor_list_keyboard = InlineKeyboardMarkup()
 
     if not debtor_list:
@@ -146,6 +146,8 @@ def choose_debtor_delete_callback(call):
     subject_id = call.data.split('_')[1]
     group_id = call.data.split('_')[2]
     student_id = call.data.split('_')[3]
+
+    SubjectDebtor.delete_debtor(subject_id, student_id)
 
     student = Student.get_student_by_id(student_id)
     bot.edit_message_text(chat_id=call.from_user.id,

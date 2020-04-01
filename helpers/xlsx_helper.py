@@ -105,7 +105,7 @@ def make_student_grades_table(stud_dict, file_name, file_path):
 
     row_counter = 0
 
-    for student, score in sorted(stud_dict.items(), key=lambda value: value[1][0], reverse=True):
+    for student, score in sorted(stud_dict.items(), key=lambda value: (value[1][0], value[1][1],), reverse=True):
         worksheet.set_column(row_counter + 1, 0, first_col_width)
         worksheet.write(row_counter + 1, 0, student.split('_')[0])
 
