@@ -7,16 +7,21 @@ class Subject(Base):
 
     id = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String(256))
+    fullname = sa.Column(sa.String(256))
 
     @staticmethod
     def add_subjects():
-        subjects = ['ООП', 'ОПИ', 'АВдоПЗ', 'ГДіК', 'ЯПЗтаТ']
+        subjects = [("Об'єктно орієнтоване програмування", 'ООП'),
+                    ('Основи програмної інжеренії', 'ОПІ'),
+                    ('Аналіз вимог до програмного забезпечення', 'АВдоПЗ'),
+                    ('Групова динаміка і комунікації', 'ГДіК'),
+                    ('Якість програмного забезпечення та тестування', 'ЯПЗтаТ')]
 
         if len(Subject.get_subjects()) > 0:
             return
         else:
             for subject in subjects:
-                session.add(Subject(name=subject))
+                session.add(Subject(name=subject[1], fullname=subject[0]))
 
             session.commit()
 
@@ -29,7 +34,7 @@ class Subject(Base):
     @staticmethod
     def get_subject_by_id(subject_id):
         subject = session.query(Subject).get(subject_id)
-        return subject.name
+        return subject.fullname
 
 
 Base.metadata.create_all(conn)

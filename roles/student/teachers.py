@@ -18,25 +18,25 @@ def teacher_keyboard(message):
     keyboard.add(InlineKeyboardButton(text=f'Розклад викладачів {emojize(":clipboard:", use_aliases=True)}',
                                       callback_data='teachers_schelude'))
     keyboard.add(InlineKeyboardButton(text=f'Контактна інформація {emojize(":e-mail:", use_aliases=True)}',
-                                      callback_data='teachers_info'))
+                                      callback_data='choose_cathedra'))
 
     bot.send_message(message.from_user.id, text='Вибери:', reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('teachers_schelude'))
-def teachers_schelude(message):
+def teachers_schelude(call):
     file_name = 'Розклад викладачів'
     file_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/tmp/'
 
     doc = open(f'{file_path}{file_name}.xls', 'rb')
 
-    bot.send_document(chat_id=message.from_user.id, data=doc)
+    bot.send_document(chat_id=call.from_user.id, data=doc)
 
     bot.send_message(chat_id=374464076, text='#asked_teachers')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('teachers_info'))
-def teachers_info(message):
+def choose_cathedra(message):
     cathedra_keyboard = make_keyboard(keyboard_type='cathedra',
                                       elem_list=Cathedra.get_cathedras(),
                                       marker='teachercathedra_')
@@ -48,7 +48,7 @@ def teachers_info(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('teachercathedra_'))
-def teacher_cathedra_callback(call):
+def get_cathedra_info(call):
     cathedra_id = call.data.split('_')[1]
     cathedra = Cathedra.get_cathedra_by_id(cathedra_id)
 
@@ -156,7 +156,7 @@ def teacher_cathedra_callback(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('teachersinfo_'))
-def teacher_info_callback(call):
+def choose_teacher(call):
     cathedra_id = call.data.split('_')[1]
 
     teachers_info_keyboard = make_keyboard(keyboard_type='teacher',
@@ -171,7 +171,7 @@ def teacher_info_callback(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('showteacher_'))
-def teacher_info_callback(call):
+def get_teacher_info(call):
     teacher_id = call.data.split('_')[1]
     teacher = Teacher.get_teacher_by_id(teacher_id)
 

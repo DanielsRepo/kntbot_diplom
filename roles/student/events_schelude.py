@@ -36,7 +36,7 @@ def get_events_schelude(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('schelude_'))
-def get_events_schelude_callback(call):
+def get_event_info(call):
     event_id = call.data.split('_')[1]
     event = Event.get_event(event_id)
 
@@ -67,7 +67,7 @@ def get_events_schelude_callback(call):
 
 # registration
 @bot.callback_query_handler(func=lambda call: call.data.startswith('regon_'))
-def register_on_event_callback(call):
+def register_on_event(call):
     event_id = call.data.split('_')[1]
     chat_id = call.from_user.id
 
@@ -110,7 +110,7 @@ def reg_on_event_other(message, event_id):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('cancelregevent_'))
-def cancel_reg_on_event_callback(call):
+def cancel_reg_on_event(call):
     event_id = call.data.split('_')[1]
 
     EventVisitor.delete_visitor(event_id, call.from_user.id)

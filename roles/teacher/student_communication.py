@@ -14,7 +14,7 @@ student_communication = Blueprint('student_communication', __name__)
 
 @student_communication.route('/student_communication')
 # SEND METHODS FILE
-def send_message_or_file(message):
+def teacher_student_communication(message):
     subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'methodsubject_')
 
     bot.send_message(chat_id=message.from_user.id,
@@ -23,7 +23,7 @@ def send_message_or_file(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('methodsubject_'))
-def choose_methodsubject_callback(call):
+def get_subject_for_share(call):
     subject_id = call.data.split('_')[1]
 
     message = bot.edit_message_text(chat_id=call.from_user.id,
@@ -32,10 +32,10 @@ def choose_methodsubject_callback(call):
                                          'всім студентам цього предмету '
                                          f'{emojize(":incoming_envelope:", use_aliases=True)}')
 
-    bot.register_next_step_handler(message, send_message_or_file_func, subject_id)
+    bot.register_next_step_handler(message, send_message_or_file, subject_id)
 
 
-def send_message_or_file_func(message, subject_id):
+def send_message_or_file(message, subject_id):
     if message.text == '/cancel':
         bot.send_message(chat_id=message.from_user.id,
                          text=f'Дія була скасована {emojize(":white_check_mark:", use_aliases=True)}')
@@ -47,7 +47,7 @@ def send_message_or_file_func(message, subject_id):
                               'Відправте файл/повідомлення боту і він його передасть всім студентам цього предмету\n\n'
                               'Щоб скасувати дію можна скористатися командою /cancel')
 
-        bot.register_next_step_handler(message, send_message_or_file_func, subject_id)
+        bot.register_next_step_handler(message, send_message_or_file, subject_id)
     else:
         subject = Subject.get_subject_by_id(subject_id)
         students = []

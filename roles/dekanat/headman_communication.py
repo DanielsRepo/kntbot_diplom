@@ -7,21 +7,22 @@ from keyboards.keyboard import make_keyboard, make_headman_rate_keyboard, make_r
 from telebot.apihelper import ApiException
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
-
+from helpers.role_helper import restricted_dekanat
 headman_management = Blueprint('headman_management', __name__)
 
 
 @headman_management.route('/headman_management')
 @bot.callback_query_handler(func=lambda call: call.data.startswith('assign_headman'))
+@restricted_dekanat
 def rate_headman(message):
     group_keyboard = make_keyboard(keyboard_type='group', elem_list=Group.get_groups(), marker='rateheadman_')
 
     bot.send_message(chat_id=message.from_user.id, text='Староста групи:', reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(message.from_user.id, rate_headman_callback)
+    bot.register_next_step_handler_by_chat_id(message.from_user.id, get_headman_for_rate)
 
 
-def rate_headman_callback(message):
+def get_headman_for_rate(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
@@ -51,7 +52,7 @@ def rate_headman_callback(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(('rateminus_', 'rateplus_')))
-def rate_headman_sign_callback(call):
+def assign_headman_rating(call):
     group_id = call.data.split('_')[1]
     group = Group.get_group_by_id(group_id)
 
@@ -104,10 +105,10 @@ def remind_one(call):
                      text='Виберіть старосту якої групи:',
                      reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, remind_one_callback)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_headman_for_remind)
 
 
-def remind_one_callback(message):
+def get_headman_for_remind(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
@@ -167,7 +168,7 @@ def remind_all(call):
     bot.send_message(chat_id=374464076, text='#dekanatremindall')
 
 
-def send_message_or_file(message):
+def dekanat_send_message_or_file(message):
     send_file_keyboard = InlineKeyboardMarkup()
 
     send_file_keyboard.add(InlineKeyboardButton(text='Вибрати старосту', callback_data='send_to_one'))
@@ -184,11 +185,11 @@ def send_message_or_file_to_one(call):
 
     bot.send_message(chat_id=call.from_user.id, text='Староста групи:', reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, send_message_or_file_to_one_callback)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_headman_for_message_or_file)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('sendmessagefile_'))
-def send_message_or_file_to_one_callback(message):
+def get_headman_for_message_or_file(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 

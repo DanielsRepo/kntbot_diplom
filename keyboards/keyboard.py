@@ -11,7 +11,7 @@ menu_buttons = [
     f'{emojize(":tada:", use_aliases=True)} Заходи',
     f'{emojize(":page_facing_up:", use_aliases=True)} Контакти',
     f'{emojize(":briefcase:", use_aliases=True)} Меню студдекана',
-    f'{emojize(":clipboard:", use_aliases=True)} Меню деканата',
+    f'{emojize(":clipboard:", use_aliases=True)} Меню деканату',
     f'{emojize(":black_nib:", use_aliases=True)} Меню викладача',
     f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
@@ -36,7 +36,7 @@ teacher_buttons = [
 dekanat_buttons = [
     f'{emojize(":chart_with_upwards_trend:", use_aliases=True)} Рейтинг старости',
     f'{emojize(":sound:", use_aliases=True)} Нагадати про журнали',
-    f'{emojize(":envelope:", use_aliases=True)} Відправити файл/повідомлення',
+    f'{emojize(":envelope:", use_aliases=True)} Відправити повідомлення/файл',
     f'{emojize(":bar_chart:", use_aliases=True)} Рейтинг студентів',
     f'{emojize(":arrow_left:", use_aliases=True)} Назад'
 ]
@@ -57,9 +57,10 @@ def make_menu_keyboard(message, other_fac):
                           menu_buttons[3])
         menu_keyboard.row(menu_buttons[4],
                           menu_buttons[5])
-        menu_keyboard.add(menu_buttons[6],
-                          menu_buttons[7],
-                          menu_buttons[8])
+        menu_keyboard.add(menu_buttons[6])
+        menu_keyboard.add(menu_buttons[7])
+        menu_keyboard.add(menu_buttons[8])
+
     elif message.from_user.id in LIST_OF_DEKANAT:
         menu_keyboard.add(menu_buttons[0],
                           menu_buttons[1],

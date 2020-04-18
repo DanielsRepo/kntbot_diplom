@@ -41,14 +41,14 @@ def get_event_visitors(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('eventvisitor_'))
-def get_event_visitors_callback(call):
+def send_event_visitors_file(call):
     event_id = call.data.split('_')[1]
     event_name = Event.get_event(event_id).name
 
     file_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/tmp/'
 
     stud_dict, otherfac_list = prepare_event_visitors_table(event_id)
-    make_event_visitors_table(stud_dict=stud_dict, otherfac_list=otherfac_list, event_name=event_name, file_path=file_path)
+    make_event_visitors_table(visitors_dict=stud_dict, otherfac_list=otherfac_list, event_name=event_name, file_path=file_path)
 
     doc = open(f'{file_path}{event_name}.xlsx', 'rb')
 
@@ -83,7 +83,7 @@ def prepare_event_visitors_table(event_id):
 # table of group's visitors
 @bot.callback_query_handler(func=lambda call: call.data.startswith('student_events'))
 @restricted_studdekan
-def get_student_events(call):
+def send_student_events_file(call):
     file_name = 'Відвідування заходів'
     file_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/tmp/'
 

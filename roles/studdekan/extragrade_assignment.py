@@ -21,10 +21,10 @@ def add_extragrade(message):
                      text='Вибери групу:',
                      reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(message.from_user.id, extragrade_group_callback)
+    bot.register_next_step_handler_by_chat_id(message.from_user.id, get_group_for_extragrade)
 
 
-def extragrade_group_callback(message):
+def get_group_for_extragrade(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
@@ -43,21 +43,26 @@ def extragrade_group_callback(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('extragradestudent_'))
-def extragrade_student_callback(call):
+def get_student_for_extragrade(call):
     student_id = call.data.split('_')[1]
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
                           text='Введи додатковий бал (1-10)')
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, add_extragrade_func, student_id)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, save_extragrade, student_id)
 
 
-def add_extragrade_func(message, student_id):
+def save_extragrade(message, student_id):
     ExtraGrade.add_extragrade(extra_grade=int(message.text), student_id=student_id)
 
+    student = Student.get_student_by_id(student_id)
+
     bot.send_message(chat_id=message.from_user.id,
-                     text=f'Додатковий бал було поставлено {emojize(":white_check_mark:", use_aliases=True)}')
+                     text=f'Додатковий бал студенту '
+                          f'<a href="t.me/{student.username}">{student.name}</a>'
+                          f' було поставлено {emojize(":white_check_mark:", use_aliases=True)}',
+                     parse_mode='html')
 
     bot.send_message(chat_id=message.from_user.id,
                      text='Вибери пункт меню:',

@@ -16,23 +16,23 @@ from database.extra_grade import ExtraGrade
 
 from roles.student.auditory_search import search_aud
 from roles.student.teachers import teacher_keyboard
-from roles.student.studying import studying_keyboard
+from roles.student.studying import show_studying_keyboard
 from roles.student.univer_info import univer_info_keyboard
 from roles.student.events_schelude import get_events_schelude
 from roles.student.registration import register, add_another_fac
 
 from roles.studdekan.headman_management import headman_keyboard
-from roles.studdekan.profcomdebtor_management import debtor_keyboard
+from roles.studdekan.profcomdebtor_management import profcom_debtor_keyboard
 from roles.studdekan.event_organization import event_organize_keyboard
 from roles.studdekan.getting_eventvisits import event_visits_keyboard
 from roles.studdekan.extragrade_assignment import add_extragrade
 
-from roles.dekanat.headman_communication import rate_headman, remind_journal, send_message_or_file
-from roles.dekanat.rating_formation import create_rating
+from roles.dekanat.headman_communication import rate_headman, remind_journal, dekanat_send_message_or_file
+from roles.dekanat.rating_formation import send_rating_file
 
 from roles.teacher.grade_assignment import assign_grade
 from roles.teacher.subjectdebtor_management import subject_debtor_keyboard
-from roles.teacher.student_communication import send_message_or_file
+from roles.teacher.student_communication import teacher_student_communication
 
 from credentials import bot
 from helpers.role_helper import restricted_studdekan, restricted_dekanat, restricted_teacher, \
@@ -109,7 +109,7 @@ def get_student_messages(message):
                                '8 пара  |  19:45  |  21:05\n'))
         bot.send_message(chat_id=374464076, text='#asked_bells')
     elif message.text == menu_buttons[2]:
-        studying_keyboard(message)
+        show_studying_keyboard(message)
     elif message.text == menu_buttons[3]:
         teacher_keyboard(message)
     elif message.text == menu_buttons[4]:
@@ -149,7 +149,7 @@ def get_studdekan_messages(message):
     if message.text == studdekan_buttons[0]:
         headman_keyboard(message)
     elif message.text == studdekan_buttons[1]:
-        debtor_keyboard(message)
+        profcom_debtor_keyboard(message)
     elif message.text == studdekan_buttons[2]:
         event_organize_keyboard(message)
     elif message.text == studdekan_buttons[3]:
@@ -166,9 +166,9 @@ def get_dekanat_messages(message):
     elif message.text == dekanat_buttons[1]:
         remind_journal(message)
     elif message.text == dekanat_buttons[2]:
-        send_message_or_file(message)
+        dekanat_send_message_or_file(message)
     elif message.text == dekanat_buttons[3]:
-        create_rating(message)
+        send_rating_file(message)
 
 
 @bot.message_handler(func=lambda message: message.content_type == 'text' and message.text in teacher_buttons)
@@ -179,7 +179,7 @@ def get_teacher_messages(message):
     elif message.text == teacher_buttons[1]:
         subject_debtor_keyboard(message)
     elif message.text == teacher_buttons[2]:
-        send_message_or_file(message)
+        teacher_student_communication(message)
 
 
 @bot.message_handler(commands=['help'])

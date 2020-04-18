@@ -24,10 +24,10 @@ class Event(Base):
         if len(Event.get_all_events()) > 0:
             return True
         else:
-            session.add(Event(name='Мистер ЗНТУ', place='ауд. 366', date='12.08.20', time='10:00', over=False))
-            session.add(Event(name='КВН', place='акт зал', date='20.12.20', time='18:00', over=False))
-            session.add(Event(name='Мисс ЗНТУ', place='ауд. 266', date='22.09.20', time='11:00', over=False))
-            session.add(Event(name='Бал выпускников', place='ауд. 777', date='12.12.12', time='12:12', over=False))
+            session.add(Event(name='День донора', place='ауд. 366', date='04.03.20', time='10:30', over=False))
+            session.add(Event(name="Ярмарок кар'єри", place='ауд. 512', date='05.04.20', time='10:00-15:00', over=False))
+            session.add(Event(name='Турнір з міні-футболу', place='спорткомплекс', date='22.06.20', time='11:00', over=False))
+            session.add(Event(name='Бал випускників', place='актовий зал', date='12.07.20', time='12:00', over=False))
 
             session.commit()
 

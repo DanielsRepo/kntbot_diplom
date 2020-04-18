@@ -28,7 +28,7 @@ def subject_debtor_keyboard(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('add_subject_debtor'))
-def add_debtor(call):
+def add_subjectdebtor(call):
     subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'debtorsubject_')
 
     bot.edit_message_text(chat_id=call.from_user.id,
@@ -38,7 +38,7 @@ def add_debtor(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('debtorsubject_'))
-def choose_debtorsubject_callback(call):
+def get_subject_for_subjectdebt(call):
     subject_id = call.data.split('_')[1]
 
     group_keyboard = make_keyboard('student', Group.get_groups()[:4], f'subjectdebtorgroup_{subject_id}_')
@@ -50,7 +50,7 @@ def choose_debtorsubject_callback(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('subjectdebtorgroup_'))
-def debtor_group_callback(call):
+def get_group_for_subjectdebt(call):
     subject_id = call.data.split('_')[1]
     group_id = call.data.split('_')[2]
 
@@ -67,7 +67,7 @@ def debtor_group_callback(call):
 @bot.callback_query_handler(func=lambda call: call.data.startswith('debtorstudent_'))
 def add_debtor_callback(call):
     subject_id = call.data.split('_')[1]
-    group = call.data.split('_')[2]
+    group_id = call.data.split('_')[2]
     debtor_id = call.data.split('_')[3]
 
     if not SubjectDebtor.add_debtor(debtor_id, subject_id):
@@ -80,20 +80,16 @@ def add_debtor_callback(call):
 
         bot.edit_message_text(chat_id=call.from_user.id,
                               message_id=call.message.message_id,
-                              text=f'Студент <a href="t.me/{username}">{name}</a> '
-                                   f'групи {group} занесений до боржників по предмету {Subject.get_subject_by_id(subject_id)} '
+                              text=f'Студент <b><a href="t.me/{username}">{name}</a></b> '
+                                   f'групи <b>{Group.get_group_by_id(group_id)}</b> занесений до боржників по предмету '
+                                   f'<b>{Subject.get_subject_by_id(subject_id)}</b> '
                                    f'{emojize(":white_check_mark:", use_aliases=True)}',
                               parse_mode='html')
-
 
 # delete debtor
 @bot.callback_query_handler(func=lambda call: call.data.startswith('delete_subject_debtor'))
 def delete_debtor(call):
-    subjects_keyboard = InlineKeyboardMarkup(row_width=1)
-    keys_list = []
-    for elem in Subject.get_subjects():
-        keys_list.append(InlineKeyboardButton(text=str(elem.name), callback_data='deldebtorsubject_' + str(elem.id)))
-    subjects_keyboard.add(*keys_list)
+    subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'deldebtorsubject_')
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
@@ -149,10 +145,12 @@ def choose_debtor_delete_callback(call):
 
     SubjectDebtor.delete_debtor(subject_id, student_id)
 
-    student = Student.get_student_by_id(student_id)
+    username = Student.get_student_by_id(student_id).username
+    name = Student.get_student_by_id(student_id).name
+
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
-                          text=f'Студент <b>{student.name}</b> '
+                          text=f'Студент <b><a href="t.me/{username}">{name}</a></b> '
                                f'групи <b>КНТ-{Group.get_group_by_id(group_id)}</b> '
                                f'видалений з боржників по предмету <b>{Subject.get_subject_by_id(subject_id)}</b> '
                                f'{emojize(":white_check_mark:", use_aliases=True)}',
@@ -161,12 +159,8 @@ def choose_debtor_delete_callback(call):
 
 # get debtors
 @bot.callback_query_handler(func=lambda call: call.data.startswith('get_subject_debtors'))
-def get_debtors(call):
-    subjects_keyboard = InlineKeyboardMarkup(row_width=1)
-    keys_list = []
-    for elem in Subject.get_subjects():
-        keys_list.append(InlineKeyboardButton(text=str(elem.name), callback_data='getdebtorsubject_' + str(elem.id)))
-    subjects_keyboard.add(*keys_list)
+def get_debtors_by_subject(call):
+    subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'getdebtorsubject_')
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
@@ -175,7 +169,7 @@ def get_debtors(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('getdebtorsubject_'))
-def get_debtors_callback(call):
+def show_debtors_by_subject(call):
     subject_id = call.data.split('_')[1]
     subject = Subject.get_subject_by_id(subject_id)
 
@@ -193,7 +187,7 @@ def get_debtors_callback(call):
 
         message_text = f'Боржники за предметом <b>{subject}</b>:\n\n'
         for group in debts_dict:
-            message_text += ''.join(f'<b>{group}:</b> {", ".join(debts_dict[group])}\n')
+            message_text += ''.join(f'<b>КНТ-{group}:</b> {", ".join(debts_dict[group])}\n')
 
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,

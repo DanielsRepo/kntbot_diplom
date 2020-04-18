@@ -15,14 +15,14 @@ rating_formation = Blueprint('rating_formation', __name__)
 
 
 @rating_formation.route('/rating_formation')
-@bot.callback_query_handler(func=lambda call: call.data.startswith('create_rating'))
-def create_rating(message):
+@bot.callback_query_handler(func=lambda call: call.data.startswith('send_rating_file'))
+def send_rating_file(message):
     file_name = 'Рейтинг'
     file_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/tmp/'
 
     stud_dict = prepare_student_grades_table()
 
-    make_student_grades_table(stud_dict=stud_dict, file_name=file_name, file_path=file_path)
+    make_student_grades_table(students_dict=stud_dict, file_name=file_name, file_path=file_path)
 
     doc = open(f'{file_path}{file_name}.xlsx', 'rb')
 

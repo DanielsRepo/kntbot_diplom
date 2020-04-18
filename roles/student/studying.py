@@ -13,7 +13,7 @@ studying = Blueprint('studying', __name__)
 
 
 @studying.route('/studying')
-def studying_keyboard(message):
+def show_studying_keyboard(message):
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(InlineKeyboardButton(text=f'Методичні матеріали {emojize(":books:", use_aliases=True)}',
@@ -25,11 +25,11 @@ def studying_keyboard(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('study_methods'))
-def get_study_methods(message):
+def get_subject(call):
     subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'getfilesubject_')
 
-    bot.edit_message_text(chat_id=message.from_user.id,
-                          message_id=message.message.message_id,
+    bot.edit_message_text(chat_id=call.from_user.id,
+                          message_id=call.message.message_id,
                           text='Вибери предмет:',
                           reply_markup=subjects_keyboard)
 
@@ -55,10 +55,10 @@ def get_study_methods(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('my_progress'))
-def get_my_progress(message):
+def get_my_progress(call):
     grades_dict = {}
 
-    for grade in Grade.get_grades_by_student(student_id=message.from_user.id):
+    for grade in Grade.get_grades_by_student(student_id=call.from_user.id):
         subject = Subject.get_subject_by_id(grade.subject_id)
         grade_type = GradeType.get_gradetype_by_id(grade.gradetype_id)
         ects = grade.ects
@@ -73,8 +73,8 @@ def get_my_progress(message):
 
     debts = '<b>Борги</b>: '
     debts += ', '.join([Subject.get_subject_by_id(debt.subject_id)
-                        for debt in SubjectDebtor.get_debt_by_student(student_id=message.from_user.id)])
+                        for debt in SubjectDebtor.get_debt_by_student(student_id=call.from_user.id)])
 
-    bot.edit_message_text(chat_id=message.from_user.id,
-                          message_id=message.message.message_id,
+    bot.edit_message_text(chat_id=call.from_user.id,
+                          message_id=call.message.message_id,
                           text=grades+debts, parse_mode='html')

@@ -22,10 +22,10 @@ def register(message):
     bot.delete_message(chat_id=message.from_user.id, message_id=message.message.message_id)
 
     bot.send_message(chat_id=message.from_user.id, text='Вибери свою групу:', reply_markup=group_keyboard)
-    bot.register_next_step_handler_by_chat_id(message.from_user.id, group_callback)
+    bot.register_next_step_handler_by_chat_id(message.from_user.id, get_group)
 
 
-def group_callback(message):
+def get_group(message):
     group_id = Group.get_id_by_group(message.text)
 
     if group_id is False:
@@ -33,14 +33,14 @@ def group_callback(message):
         bot.send_message(chat_id=message.from_user.id,
                          text='Вибери свою групу:')
 
-        bot.register_next_step_handler_by_chat_id(message.from_user.id, group_callback)
+        bot.register_next_step_handler_by_chat_id(message.from_user.id, get_group)
     else:
         student = Student()
         student.id = message.from_user.id
         student.username = message.from_user.username
         student.group_id = group_id
 
-        message = bot.send_message(chat_id=message.from_user.id, text='Введи Ф.I.O. українською мовою')
+        message = bot.send_message(chat_id=message.from_user.id, text='Введи П.І.Б українською мовою')
         bot.register_next_step_handler(message, get_name, student)
 
 
@@ -61,7 +61,7 @@ def get_name(message, student):
 def get_gradebook_id(message, student):
     gradebook_id = message.text
 
-    if bool(re.search("^\d+(\.\d+)*$", gradebook_id)) == False:
+    if bool(re.search('^\d+(\.\d+)*$', gradebook_id)) is False:
         message = bot.send_message(chat_id=message.from_user.id,
                                    text='Неккоректний ввід\nВведи номер своєї залікової книжки')
         bot.register_next_step_handler(message, get_gradebook_id, student)
@@ -100,7 +100,7 @@ def register_for_admins(message):
         group_keyboard = make_keyboard(keyboard_type='group', elem_list=Group.get_groups(), marker='group_')
 
         bot.send_message(chat_id=message.from_user.id, text='Вибери свою групу:', reply_markup=group_keyboard)
-        bot.register_next_step_handler_by_chat_id(message.from_user.id, group_callback)
+        bot.register_next_step_handler_by_chat_id(message.from_user.id, get_group)
     else:
         bot.send_message(chat_id=message.from_user.id, text='Ти вже зареєстрований')
         bot.clear_step_handler_by_chat_id(chat_id=message.from_user.id)

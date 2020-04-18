@@ -31,7 +31,7 @@ def headman_keyboard(message):
 # add headman
 @bot.callback_query_handler(func=lambda call: call.data.startswith('assign_headman'))
 @restricted_studdekan
-def add_headman(call):
+def headman_assignment(call):
     group_keyboard = make_keyboard(keyboard_type='group',
                                    elem_list=Group.get_groups(),
                                    marker='headmangroup_')
@@ -40,10 +40,10 @@ def add_headman(call):
                      text='Вибери групу:',
                      reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, headman_group_callback)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_group_headman_assign)
 
 
-def headman_group_callback(message):
+def get_group_headman_assign(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
@@ -74,7 +74,7 @@ def headman_group_callback(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('headman_'))
-def add_headman_callback(call):
+def assign_headman(call):
     group = call.data.split('_')[1]
     headman_id = call.data.split('_')[2]
 
@@ -96,7 +96,7 @@ def add_headman_callback(call):
 # change headman
 @bot.callback_query_handler(func=lambda call: call.data.startswith('change_headman'))
 @restricted_studdekan
-def change_headman(call):
+def headman_changing(call):
     group_keyboard = make_keyboard(keyboard_type='group',
                                    elem_list=Group.get_groups(),
                                    marker='chheadgroup_')
@@ -105,10 +105,10 @@ def change_headman(call):
                      text='Змінити старосту групи:',
                      reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, change_headman_group_callback)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_group_headman_change)
 
 
-def change_headman_group_callback(message):
+def get_group_headman_change(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
@@ -128,7 +128,7 @@ def change_headman_group_callback(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('chheadman_'))
-def change_headman_callback(call):
+def change_headman(call):
     group = call.data.split('_')[1]
     new_headman_id = call.data.split('_')[2]
 
@@ -156,10 +156,10 @@ def get_headman(call):
 
     bot.send_message(chat_id=call.from_user.id, text='Вибери группу:', reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_headman_group_callback)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, show_headman_info)
 
 
-def get_headman_group_callback(message):
+def show_headman_info(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
@@ -185,10 +185,12 @@ def get_headman_group_callback(message):
         else:
             username = Student.get_student_by_id(headman.student_id).username
             name = Student.get_student_by_id(headman.student_id).name
+            phone = Student.get_student_by_id(headman.student_id).phone
 
             bot.send_message(chat_id=message.from_user.id,
-                             text=f'Староста групи {group}: <a href="t.me/{username}">{name}</a>',
-                             parse_mode='html')
+                             text=f'Староста групи {group}: <a href="t.me/{username}">{name}</a>\n'
+                                  f'Номер телефону: {phone}',
+                             parse_mode='html', disable_web_page_preview=True)
             bot.send_message(chat_id=message.from_user.id,
                              text='Вибери пункт меню:',
                              reply_markup=make_role_replykeyboard(studdekan_buttons))

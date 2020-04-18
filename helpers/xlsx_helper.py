@@ -9,22 +9,22 @@ def get_fio(full_name):
         return
 
 
-def make_event_visitors_table(stud_dict, otherfac_list, event_name, file_path):
+def make_event_visitors_table(visitors_dict, otherfac_list, event_name, file_path):
     workbook = xlsxwriter.Workbook(f'{file_path}{event_name}.xlsx')
     worksheet = workbook.add_worksheet(name=event_name)
 
     cell_format = workbook.add_format({'bold': True, 'align': 'center'})
 
     col_counter = 1
-    row_number_for_quantity = max([len(stud_dict[group]) for group in stud_dict.keys()]) + 1
+    row_number_for_quantity = max([len(visitors_dict[group]) for group in visitors_dict.keys()]) + 1
 
     worksheet.write(0, 0, "Група", cell_format)
     worksheet.write(row_number_for_quantity, 0, "Кількість", cell_format)
 
-    for group, students in sorted(stud_dict.items(), key=lambda key_value: key_value[0]):
+    for group, students in sorted(visitors_dict.items(), key=lambda key_value: key_value[0]):
         worksheet.write(0, col_counter, group, cell_format)
 
-        stud_list = stud_dict[group]
+        stud_list = visitors_dict[group]
         stud_list.sort()
 
         col_width = max([len(stud_fio) for stud_fio in stud_list]) + 2
@@ -39,8 +39,8 @@ def make_event_visitors_table(stud_dict, otherfac_list, event_name, file_path):
 
     chart = workbook.add_chart({'type': 'column'})
     chart.add_series({
-        'categories': [f'{worksheet.name}', 0, 1, 0, len(stud_dict.keys())],
-        'values':  [f'{worksheet.name}', row_number_for_quantity, 1, row_number_for_quantity, len(stud_dict.keys())]
+        'categories': [f'{worksheet.name}', 0, 1, 0, len(visitors_dict.keys())],
+        'values':  [f'{worksheet.name}', row_number_for_quantity, 1, row_number_for_quantity, len(visitors_dict.keys())]
     })
     chart.set_style(37)
     chart.set_title({'name': 'Гістограма кількості учасників заходу за групами',
@@ -87,7 +87,7 @@ def make_student_events_table(group_dict, file_name, file_path):
     workbook.close()
 
 
-def make_student_grades_table(stud_dict, file_name, file_path):
+def make_student_grades_table(students_dict, file_name, file_path):
     workbook = xlsxwriter.Workbook(f'{file_path}{file_name}.xlsx')
 
     cell_format = workbook.add_format({'bold': True, 'align': 'center'})
@@ -105,7 +105,7 @@ def make_student_grades_table(stud_dict, file_name, file_path):
 
     row_counter = 0
 
-    for student, score in sorted(stud_dict.items(), key=lambda value: (value[1][0], value[1][1],), reverse=True):
+    for student, score in sorted(students_dict.items(), key=lambda value: (value[1][0], value[1][1],), reverse=True):
         worksheet.set_column(row_counter + 1, 0, first_col_width)
         worksheet.write(row_counter + 1, 0, student.split('_')[0])
 

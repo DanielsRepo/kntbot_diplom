@@ -3,7 +3,7 @@ from functools import wraps
 LIST_OF_ADMINS = [374464076]
 LIST_OF_DEKANAT = [374464076]
 LIST_OF_TEACHERS = [374464076]
-#
+# 374464076
 
 
 def restricted_studdekan(func):

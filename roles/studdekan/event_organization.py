@@ -73,7 +73,7 @@ def time_event(message, event_id):
 # deleting
 @bot.callback_query_handler(func=lambda call: call.data.startswith('delete_event'))
 @restricted_studdekan
-def delete_event(call):
+def get_event_for_del(call):
     event_keyboard = make_keyboard(keyboard_type='event',
                                    elem_list=Event.get_all_events(),
                                    marker='eventdelete_')
@@ -85,7 +85,7 @@ def delete_event(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('eventdelete_'))
-def delete_event_callback(call):
+def delete_event(call):
     event_id = call.data.split('_')[1]
 
     bot.edit_message_text(chat_id=call.from_user.id,
@@ -99,7 +99,7 @@ def delete_event_callback(call):
 # changing
 @bot.callback_query_handler(func=lambda call: call.data.startswith('change_event'))
 @restricted_studdekan
-def change_event(call):
+def get_event_for_change(call):
     event_keyboard = make_keyboard(keyboard_type='event',
                                    elem_list=Event.get_all_events(),
                                    marker='eventchange_')
@@ -111,7 +111,7 @@ def change_event(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('eventchange_'))
-def event_callback(call):
+def show_parameters_to_change(call):
     event_id = call.data.split('_')[1]
 
     change_event_keyboard = InlineKeyboardMarkup()
@@ -127,7 +127,7 @@ def event_callback(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(('name_', 'place_', 'date_', 'time_')))
-def change_event_callback(call):
+def get_parameter_to_change(call):
     event_id = call.data.split('_')[1]
 
     if call.data.startswith('name_'):

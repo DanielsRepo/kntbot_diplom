@@ -24,7 +24,7 @@ def assign_grade(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('gradesubject_'))
-def choose_subject_callback(call):
+def choose_subject_for_grade(call):
     subject_id = call.data.split('_')[1]
 
     grade_type_keyboard = make_keyboard('gradetype', GradeType.get_gradetypes(), f'gradetype_{subject_id}_')
@@ -36,7 +36,7 @@ def choose_subject_callback(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('gradetype_'))
-def choose_gradetype_callback(call):
+def choose_grade_type(call):
     subject_id = call.data.split('_')[1]
     grade_type_id = call.data.split('_')[2]
 
@@ -49,7 +49,7 @@ def choose_gradetype_callback(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('studentsgroup_'))
-def choose_group_callback(call):
+def choose_group_for_grade(call):
     subject_id = call.data.split('_')[1]
     grade_type_id = call.data.split('_')[2]
     group_id = call.data.split('_')[3]
@@ -63,7 +63,8 @@ def ask_grade(message, students, grade_type_id, subject_id, group_id):
     student = next(students)
 
     bot.send_message(chat_id=message.from_user.id,
-                     text=f'<b>Предмет:</b> {Subject.get_subject_by_id(subject_id)}\n\n'
+                     text=f'<b>Предмет:</b> {Subject.get_subject_by_id(subject_id)}\n'
+                          f'<b>Тип оцінювання:</b> {GradeType.get_gradetype_by_id(grade_type_id)}\n\n'
                           f'<b>Студент:</b> {student.name}\n'
                           f'<b>Група:</b> КНТ-{Group.get_group_by_id(student.group_id)}\n\n'
                           f'Яка оцінка?\n\n'

@@ -12,7 +12,7 @@ debtors = Blueprint('debtors', __name__)
 
 
 @debtors.route('/debtors')
-def debtor_keyboard(message):
+def profcom_debtor_keyboard(message):
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(InlineKeyboardButton(text=f'Додати боржника {emojize(":heavy_plus_sign:", use_aliases=True)}',
@@ -28,7 +28,7 @@ def debtor_keyboard(message):
 @bot.callback_query_handler(func=lambda call: call.data.startswith('add_debtor'))
 @restricted_studdekan
 # add debtor
-def add_debtor(call):
+def add_profcomdebtor(call):
     group_keyboard = make_keyboard(keyboard_type='group',
                                    elem_list=Group.get_groups(),
                                    marker='debtorgroup_')
@@ -37,10 +37,10 @@ def add_debtor(call):
                      text='Вибери групу:',
                      reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, debtor_group_callback)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_profcomdebtor_for_add)
 
 
-def debtor_group_callback(message):
+def get_profcomdebtor_for_add(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
@@ -59,7 +59,7 @@ def debtor_group_callback(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('debtor_'))
-def add_debtor_callback(call):
+def get_profcomdebtor_for_add(call):
     group = call.data.split('_')[1]
     debtor_id = call.data.split('_')[2]
 
@@ -76,10 +76,10 @@ def add_debtor_callback(call):
                               message_id=call.message.message_id,
                               text='Введи борг студента')
 
-        bot.register_next_step_handler_by_chat_id(call.from_user.id, add_debtor_func, debtor_id, group)
+        bot.register_next_step_handler_by_chat_id(call.from_user.id, save_profcomdebtor, debtor_id, group)
 
 
-def add_debtor_func(message, debtor_id, group):
+def save_profcomdebtor(message, debtor_id, group):
     debt = message.text
 
     ProfcomDebtor.add_debtor(debtor_id, debt)
@@ -101,7 +101,7 @@ def add_debtor_func(message, debtor_id, group):
 # delete debtor
 @bot.callback_query_handler(func=lambda call: call.data.startswith('delete_debtor'))
 @restricted_studdekan
-def delete_debtor(call):
+def delete_profcomdebtor(call):
     group_keyboard = make_keyboard(keyboard_type='group',
                                    elem_list=Group.get_groups(),
                                    marker='deldebtorgroup_')
@@ -175,7 +175,7 @@ def get_debtors_by_group(call):
     bot.register_next_step_handler_by_chat_id(call.from_user.id, get_debtors_by_group_callback)
 
 
-def get_debtors_by_group_callback(message):
+def show_debtors_by_group_callback(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 

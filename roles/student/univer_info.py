@@ -25,7 +25,7 @@ def univer_info_keyboard(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('accounting'))
-def accounting(call):
+def show_accounting_info(call):
     props_keyboard = InlineKeyboardMarkup()
     props_keyboard.add(InlineKeyboardButton(text='Завантажити файл', callback_data='send_props'))
 
@@ -54,7 +54,7 @@ def send_props(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('employment'))
-def employment(call):
+def show_employment_info(call):
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
                           text='<b>Центр сприяння працевлаштуванню студентів та випускників</b>\n\n'
@@ -65,7 +65,7 @@ def employment(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('profcom'))
-def profcom(call):
+def show_profcom_info(call):
     bot.edit_message_text(chat_id=call.from_user.id,
                           message_id=call.message.message_id,
                           text='<b>Профком студентів, аспірантів та докторантів</b>\n\n'

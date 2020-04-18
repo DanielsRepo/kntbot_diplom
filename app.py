@@ -32,6 +32,7 @@ app.register_blueprint(events)
 app.register_blueprint(teachers)
 app.register_blueprint(studying)
 app.register_blueprint(univer_info)
+
 # for studdekan
 app.register_blueprint(event_organize)
 app.register_blueprint(event_visits)
