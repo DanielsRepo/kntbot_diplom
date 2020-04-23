@@ -40,7 +40,7 @@ def add_profcomdebtor(call):
     bot.register_next_step_handler_by_chat_id(call.from_user.id, get_profcomdebtor_for_add)
 
 
-def get_profcomdebtor_for_add(message):
+def get_group_for_profcomdebt(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
@@ -110,10 +110,10 @@ def delete_profcomdebtor(call):
                      text='Вибери групу:',
                      reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, delete_debtor_group_callback)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_group_for_del_profcomdebt)
 
 
-def delete_debtor_group_callback(message):
+def get_group_for_del_profcomdebt(message):
     group = message.text
     group_id = Group.get_id_by_group(group)
 
@@ -139,7 +139,7 @@ def delete_debtor_group_callback(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('deldebtor_'))
-def delete_debtor_callback(call):
+def get_profcomdebtor_for_del(call):
     debtor_id = call.data.split('_')[1]
 
     group = Group.get_group_by_id(Student.get_student_by_id(debtor_id).group_id)
@@ -172,7 +172,7 @@ def get_debtors_by_group(call):
                      text='Вибери групу:',
                      reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_debtors_by_group_callback)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, show_debtors_by_group_callback)
 
 
 def show_debtors_by_group_callback(message):

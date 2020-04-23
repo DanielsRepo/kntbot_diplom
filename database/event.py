@@ -27,7 +27,6 @@ class Event(Base):
             session.add(Event(name='День донора', place='ауд. 366', date='04.03.20', time='10:30', over=False))
             session.add(Event(name="Ярмарок кар'єри", place='ауд. 512', date='05.04.20', time='10:00-15:00', over=False))
             session.add(Event(name='Турнір з міні-футболу', place='спорткомплекс', date='22.06.20', time='11:00', over=False))
-            session.add(Event(name='Бал випускників', place='актовий зал', date='12.07.20', time='12:00', over=False))
 
             session.commit()
 

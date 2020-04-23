@@ -24,7 +24,7 @@ def assign_grade(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('gradesubject_'))
-def choose_subject_for_grade(call):
+def get_subject_for_grade(call):
     subject_id = call.data.split('_')[1]
 
     grade_type_keyboard = make_keyboard('gradetype', GradeType.get_gradetypes(), f'gradetype_{subject_id}_')
@@ -36,7 +36,7 @@ def choose_subject_for_grade(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('gradetype_'))
-def choose_grade_type(call):
+def get_grade_type(call):
     subject_id = call.data.split('_')[1]
     grade_type_id = call.data.split('_')[2]
 
@@ -49,7 +49,7 @@ def choose_grade_type(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('studentsgroup_'))
-def choose_group_for_grade(call):
+def get_group_for_grade(call):
     subject_id = call.data.split('_')[1]
     grade_type_id = call.data.split('_')[2]
     group_id = call.data.split('_')[3]

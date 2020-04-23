@@ -1,5 +1,4 @@
 from database.database import *
-from database.student import Student
 import random
 from sqlalchemy.exc import IntegrityError
 

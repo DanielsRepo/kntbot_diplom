@@ -1,7 +1,6 @@
 from database.database import *
 from database.student import Student
 from database.group import Group
-from database.subject import Subject
 from datetime import date
 import random
 

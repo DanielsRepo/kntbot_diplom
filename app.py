@@ -1,6 +1,7 @@
 from flask import Flask, request
-from roles.student.registration import registration
 from keyboards.menu import menu
+
+from roles.student.registration import registration
 from roles.student.auditory_search import auditory_search
 from roles.student.teachers import teachers
 from roles.student.univer_info import univer_info

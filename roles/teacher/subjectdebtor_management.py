@@ -65,7 +65,7 @@ def get_group_for_subjectdebt(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('debtorstudent_'))
-def add_debtor_callback(call):
+def get_subjectdebtor_for_add(call):
     subject_id = call.data.split('_')[1]
     group_id = call.data.split('_')[2]
     debtor_id = call.data.split('_')[3]
@@ -88,7 +88,7 @@ def add_debtor_callback(call):
 
 # delete debtor
 @bot.callback_query_handler(func=lambda call: call.data.startswith('delete_subject_debtor'))
-def delete_debtor(call):
+def delete_subjectdebtor(call):
     subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'deldebtorsubject_')
 
     bot.edit_message_text(chat_id=call.from_user.id,
@@ -98,7 +98,7 @@ def delete_debtor(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('deldebtorsubject_'))
-def choose_subject_callback(call):
+def get_subject_for_del_subjectdebt(call):
     subject_id = call.data.split('_')[1]
 
     group_keyboard = InlineKeyboardMarkup(row_width=1)
@@ -116,7 +116,7 @@ def choose_subject_callback(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('subjectdeldebtorgroup_'))
-def choose_debtor_group_callback(call):
+def get_group_for_del_subjectdebt(call):
     subject_id = call.data.split('_')[1]
     group_id = call.data.split('_')[2]
 
@@ -138,7 +138,7 @@ def choose_debtor_group_callback(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('delsubjectdebtor_'))
-def choose_debtor_delete_callback(call):
+def get_subjectdebtor_for_del(call):
     subject_id = call.data.split('_')[1]
     group_id = call.data.split('_')[2]
     student_id = call.data.split('_')[3]
