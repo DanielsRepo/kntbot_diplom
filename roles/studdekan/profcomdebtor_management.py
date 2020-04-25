@@ -37,7 +37,7 @@ def add_profcomdebtor(call):
                      text='Вибери групу:',
                      reply_markup=group_keyboard)
 
-    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_profcomdebtor_for_add)
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, get_group_for_profcomdebt)
 
 
 def get_group_for_profcomdebt(message):
@@ -91,7 +91,8 @@ def save_profcomdebtor(message, debtor_id, group):
                      text=f'Студент <a href="t.me/{username}">{name}</a> '
                           f'групи {group} занесений до боржників '
                           f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}',
-                     parse_mode='html')
+                     parse_mode='html',
+                     disable_web_page_preview=True)
 
     bot.send_message(chat_id=message.from_user.id,
                      text='Вибери пункт меню:',
@@ -151,7 +152,8 @@ def get_profcomdebtor_for_del(call):
                           text=f'Студент <a href="t.me/{username}">{name}</a> '
                                f'групи {group} видалений з боржників '
                                f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}',
-                          parse_mode='html')
+                          parse_mode='html',
+                          disable_web_page_preview=True)
 
     ProfcomDebtor.delete_debtor(debtor_id)
 
