@@ -14,7 +14,7 @@ class Event(Base):
 
     @staticmethod
     def add_event(name):
-        event = Event(name=name)
+        event = Event(name=name, over=False)
         session.add(event)
         session.commit()
         return event
@@ -33,7 +33,7 @@ class Event(Base):
         print("events added")
 
     @staticmethod
-    def update_event(event_id, name='', place='', date='', time='', over=''):
+    def update_event(event_id, name='', place='', date='', time=''):
         event = session.query(Event).get(event_id)
 
         if name != '':
@@ -44,8 +44,6 @@ class Event(Base):
             event.date = date
         elif time != '':
             event.time = time
-        elif over != '':
-            event.over = over
 
         session.commit()
 

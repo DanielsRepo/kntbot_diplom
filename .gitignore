@@ -53,3 +53,6 @@ wheels/
 # Flask stuff:
 instance/
 .webassets-cache
+
+.xlsx
+.docx
