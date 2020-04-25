@@ -22,8 +22,8 @@ def headman_keyboard(message):
                                       callback_data='change_headman'))
     keyboard.add(InlineKeyboardButton(text=f'Переглянути старосту {emojize(":bust_in_silhouette:", use_aliases=True)}',
                                       callback_data='get_headman'))
-    keyboard.add(InlineKeyboardButton(text=f'Список старост {emojize(":page_facing_up:", use_aliases=True)}',
-                                      callback_data='list_headman'))
+    # keyboard.add(InlineKeyboardButton(text=f'Список старост {emojize(":page_facing_up:", use_aliases=True)}',
+    #                                   callback_data='list_headman'))
 
     bot.send_message(chat_id=message.from_user.id, text='Вибери дію:', reply_markup=keyboard)
 

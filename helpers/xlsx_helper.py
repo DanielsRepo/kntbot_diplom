@@ -1,5 +1,4 @@
 import xlsxwriter
-from pprint import pprint
 
 
 def get_fio(full_name):

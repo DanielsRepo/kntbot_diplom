@@ -18,7 +18,7 @@ def teacher_keyboard(message):
     keyboard.add(InlineKeyboardButton(text=f'Розклад викладачів {emojize(":clipboard:", use_aliases=True)}',
                                       callback_data='teachers_schelude'))
     keyboard.add(InlineKeyboardButton(text=f'Контактна інформація {emojize(":e-mail:", use_aliases=True)}',
-                                      callback_data='choose_cathedra'))
+                                      callback_data='teachers_info'))
 
     bot.send_message(message.from_user.id, text='Вибери:', reply_markup=keyboard)
 
@@ -32,7 +32,7 @@ def teachers_schelude(call):
 
     bot.send_document(chat_id=call.from_user.id, data=doc)
 
-    bot.send_message(chat_id=374464076, text='#asked_teachers')
+    # bot.send_message(chat_id=374464076, text='#asked_teachers')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('teachers_info'))
@@ -52,7 +52,7 @@ def get_cathedra_info(call):
     cathedra_id = call.data.split('_')[1]
     cathedra = Cathedra.get_cathedra_by_id(cathedra_id)
 
-    bot.send_message(chat_id=374464076, text=f'#asked_cathedra {cathedra.name}')
+    # bot.send_message(chat_id=374464076, text=f'#asked_cathedra {cathedra.name}')
 
     teachers_button = InlineKeyboardMarkup()
     message_text = ''
@@ -183,6 +183,6 @@ def get_teacher_info(call):
                           message_id=call.message.message_id,
                           text=message_text,
                           parse_mode='html', disable_web_page_preview=True)
-    bot.send_message(chat_id=374464076, text=f'#asked_teacher {teacher.name}')
+    # bot.send_message(chat_id=374464076, text=f'#asked_teacher {teacher.name}')
 
 

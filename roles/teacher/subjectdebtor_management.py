@@ -82,7 +82,7 @@ def get_subjectdebtor_for_add(call):
                               message_id=call.message.message_id,
                               text=f'Студент <b><a href="t.me/{username}">{name}</a></b> '
                                    f'групи <b>{Group.get_group_by_id(group_id)}</b> занесений до боржників по предмету '
-                                   f'<b>{Subject.get_subject_by_id(subject_id)}</b> '
+                                   f'<b>{Subject.get_subject_fullname_by_id(subject_id)}</b> '
                                    f'{emojize(":white_check_mark:", use_aliases=True)}',
                               parse_mode='html')
 
@@ -152,7 +152,7 @@ def get_subjectdebtor_for_del(call):
                           message_id=call.message.message_id,
                           text=f'Студент <b><a href="t.me/{username}">{name}</a></b> '
                                f'групи <b>КНТ-{Group.get_group_by_id(group_id)}</b> '
-                               f'видалений з боржників по предмету <b>{Subject.get_subject_by_id(subject_id)}</b> '
+                               f'видалений з боржників по предмету <b>{Subject.get_subject_fullname_by_id(subject_id)}</b> '
                                f'{emojize(":white_check_mark:", use_aliases=True)}',
                           parse_mode='html')
 
@@ -171,7 +171,7 @@ def get_debtors_by_subject(call):
 @bot.callback_query_handler(func=lambda call: call.data.startswith('getdebtorsubject_'))
 def show_debtors_by_subject(call):
     subject_id = call.data.split('_')[1]
-    subject = Subject.get_subject_by_id(subject_id)
+    subject = Subject.get_subject_fullname_by_id(subject_id)
 
     debtors_list = SubjectDebtor.get_debtors_by_subject(subject_id=subject_id)
 

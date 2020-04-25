@@ -36,7 +36,7 @@ def show_accounting_info(call):
                                '<b>тел.:</b> +380(61)7698368\n\n'
                                f'Щоб отримати платіжні реквізити, натисни {emojize(":point_down:", use_aliases=True)}',
                           reply_markup=props_keyboard, parse_mode='html')
-    bot.send_message(chat_id=374464076, text='#asked_accounting')
+    # bot.send_message(chat_id=374464076, text='#asked_accounting')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('send_props'))
@@ -50,7 +50,7 @@ def send_props(call):
 
     bot.send_document(chat_id=call.from_user.id, data=doc)
 
-    bot.send_message(chat_id=374464076, text='#asked_props')
+    # bot.send_message(chat_id=374464076, text='#asked_props')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('employment'))
@@ -61,7 +61,7 @@ def show_employment_info(call):
                                '<b>Начальник:</b> Ігнашова Анастасія Вікторівна\n'
                                '<b>тел.:</b> +380(61)7698599',
                           parse_mode='html')
-    bot.send_message(chat_id=374464076, text='#asked_employment')
+    # bot.send_message(chat_id=374464076, text='#asked_employment')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('profcom'))
@@ -74,7 +74,7 @@ def show_profcom_info(call):
                                '<b>Заступник голови:</b> Зінченко Марина Михайлівна\n'
                                '<b>тел.:</b> +380(61)7698340',
                           parse_mode='html')
-    bot.send_message(chat_id=374464076, text='#asked_profcom')
+    # bot.send_message(chat_id=374464076, text='#asked_profcom')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('show_site'))
@@ -86,5 +86,5 @@ def show_site(call):
                           message_id=call.message.message_id,
                           text='Сайт НУ «ЗП»',
                           reply_markup=site_keyboard)
-    bot.send_message(chat_id=374464076, text="#askedwebsite")
+    # bot.send_message(chat_id=374464076, text="#askedwebsite")
 

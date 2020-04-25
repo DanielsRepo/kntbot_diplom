@@ -37,7 +37,7 @@ def get_subject(call):
 @bot.callback_query_handler(func=lambda call: call.data.startswith('getfilesubject_'))
 def get_study_methods(call):
     subject_id = call.data.split('_')[1]
-    subject_name = Subject.get_subject_by_id(subject_id)
+    subject_name = Subject.get_subject_name_by_id(subject_id)
 
     subject_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + f'/tmp/{subject_name}'
     if os.path.exists(subject_path) and os.listdir(subject_path):
@@ -59,7 +59,7 @@ def get_my_progress(call):
     grades_dict = {}
 
     for grade in Grade.get_grades_by_student(student_id=call.from_user.id):
-        subject = Subject.get_subject_by_id(grade.subject_id)
+        subject = Subject.get_subject_fullname_by_id(grade.subject_id)
         grade_type = GradeType.get_gradetype_by_id(grade.gradetype_id)
         ects = grade.ects
         grade = grade.grade
@@ -72,7 +72,7 @@ def get_my_progress(call):
         grades += ''.join(f'<i>{subject}:</i>\n{"".join(grades_dict[subject])}\n')
 
     debts = '<b>Борги</b>: '
-    debts += ', '.join([Subject.get_subject_by_id(debt.subject_id)
+    debts += ', '.join([Subject.get_subject_fullname_by_id(debt.subject_id)
                         for debt in SubjectDebtor.get_debt_by_student(student_id=call.from_user.id)])
 
     bot.edit_message_text(chat_id=call.from_user.id,

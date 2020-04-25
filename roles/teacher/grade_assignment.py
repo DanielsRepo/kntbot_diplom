@@ -63,7 +63,7 @@ def ask_grade(message, students, grade_type_id, subject_id, group_id):
     student = next(students)
 
     bot.send_message(chat_id=message.from_user.id,
-                     text=f'<b>Предмет:</b> {Subject.get_subject_by_id(subject_id)}\n'
+                     text=f'<b>Предмет:</b> {Subject.get_subject_fullname_by_id(subject_id)}\n'
                           f'<b>Тип оцінювання:</b> {GradeType.get_gradetype_by_id(grade_type_id)}\n\n'
                           f'<b>Студент:</b> {student.name}\n'
                           f'<b>Група:</b> КНТ-{Group.get_group_by_id(student.group_id)}\n\n'

@@ -83,7 +83,7 @@ def assign_headman_rating(call):
                           text=f'Староста групи КНТ-{group} {headman_name}',
                           reply_markup=headman_rate_keyboard)
 
-    bot.send_message(chat_id=374464076, text='#dekanatchangedrate')
+    # bot.send_message(chat_id=374464076, text='#dekanatchangedrate')
 
 
 def remind_journal(message):
@@ -142,7 +142,7 @@ def get_headman_for_remind(message):
                               f'{emojize(":heavy_exclamation_mark:", use_aliases=True)}\n\n'
                               'Заповни журнал')
 
-        bot.send_message(chat_id=374464076, text='#dekanatremindone')
+        # bot.send_message(chat_id=374464076, text='#dekanatremindone')
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('remind_all'))
@@ -165,7 +165,7 @@ def remind_all(call):
                      text='Виберіть пункт меню:',
                      reply_markup=make_role_replykeyboard(dekanat_buttons))
 
-    bot.send_message(chat_id=374464076, text='#dekanatremindall')
+    # bot.send_message(chat_id=374464076, text='#dekanatremindall')
 
 
 def dekanat_send_message_or_file(message):
@@ -314,4 +314,4 @@ def send_message_or_file_func(message, headman_list):
                          text='Виберіть пункт меню:',
                          reply_markup=make_role_replykeyboard(dekanat_buttons))
 
-        bot.send_message(chat_id=374464076, text='#dekanatsentfile')
+        # bot.send_message(chat_id=374464076, text='#dekanatsentfile')

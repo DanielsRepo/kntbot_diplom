@@ -107,7 +107,7 @@ def get_student_messages(message):
                                '6 пара  |  16:45  |  18:05\n'
                                '7 пара  |  18:15  |  19:35\n'
                                '8 пара  |  19:45  |  21:05\n'))
-        bot.send_message(chat_id=374464076, text='#asked_bells')
+        # bot.send_message(chat_id=374464076, text='#asked_bells')
     elif message.text == menu_buttons[2]:
         show_studying_keyboard(message)
     elif message.text == menu_buttons[3]:
@@ -211,7 +211,7 @@ def add_all(message):
 
 
 @bot.message_handler(commands=['del'])
-@restricted_studdekan
+# @restricted_studdekan
 def delete_all(message):
     db.delete()
     bot.send_message(chat_id=message.from_user.id, text="database is cleared")

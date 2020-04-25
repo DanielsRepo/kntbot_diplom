@@ -1,10 +1,10 @@
 from flask import Blueprint
 from credentials import bot
-from database.event import Event
-from database.event_visitor import EventVisitor
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from emoji import emojize
 from keyboards.keyboard import menu_buttons
+from database.event import Event
+from database.event_visitor import EventVisitor
 from database.group import Group
 from database.student import Student
 
@@ -15,7 +15,7 @@ events = Blueprint('events', __name__)
 # get_events_schelude
 def get_events_schelude(message):
     event_list = Event.get_all_events()
-
+    print(event_list)
     if event_list:
         keyboard = InlineKeyboardMarkup(row_width=2)
         keys_list = []
@@ -85,11 +85,11 @@ def register_on_event(call):
                               text=f'Реєстрація пройшла успішно {emojize(":white_check_mark:", use_aliases=True)}')
 
         user = Student.get_student_by_id(chat_id)
-        bot.send_message(chat_id=374464076,
-                         text=f'#regonevent <a href="t.me/{user.username}">{user.name}</a> '
-                              f'КНТ-{Group.get_group_by_id(user.group_id)}',
-                         parse_mode='html',
-                         disable_web_page_preview=True)
+        # bot.send_message(chat_id=374464076,
+        #                  text=f'#regonevent <a href="t.me/{user.username}">{user.name}</a> '
+        #                       f'КНТ-{Group.get_group_by_id(user.group_id)}',
+        #                  parse_mode='html',
+        #                  disable_web_page_preview=True)
 
 
 def reg_on_event_other(message, event_id):
@@ -103,10 +103,10 @@ def reg_on_event_other(message, event_id):
         bot.send_message(chat_id=message.from_user.id,
                          text=f'Реєстрація пройшла успішно {emojize(":white_check_mark:", use_aliases=True)}')
 
-        bot.send_message(chat_id=374464076,
-                         text=f'#regonevent otherfac',
-                         parse_mode='html',
-                         disable_web_page_preview=True)
+        # bot.send_message(chat_id=374464076,
+        #                  text=f'#regonevent otherfac',
+        #                  parse_mode='html',
+        #                  disable_web_page_preview=True)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('cancelregevent_'))
@@ -120,8 +120,8 @@ def cancel_reg_on_event(call):
                           text=f'Реєстрація скасована {emojize(":white_check_mark:", use_aliases=True)}')
 
     user = Student.get_student_by_id(call.from_user.id)
-    bot.send_message(chat_id=374464076,
-                     text=f'#cancelregevent <a href="t.me/{user.username}">{user.name}</a> '
-                          f'КНТ-{Group.get_group_by_id(user.group_id)}',
-                     parse_mode='html',
-                     disable_web_page_preview=True)
+    # bot.send_message(chat_id=374464076,
+    #                  text=f'#cancelregevent <a href="t.me/{user.username}">{user.name}</a> '
+    #                       f'КНТ-{Group.get_group_by_id(user.group_id)}',
+    #                  parse_mode='html',
+    #                  disable_web_page_preview=True)

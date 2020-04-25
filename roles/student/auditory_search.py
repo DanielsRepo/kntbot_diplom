@@ -38,13 +38,13 @@ def get_aud(message):
                          reply_markup=search_again,
                          parse_mode='html')
 
-        bot.send_message(chat_id=374464076, text=f'#found_aud {number}')
+        # bot.send_message(chat_id=374464076, text=f'#found_aud {number}')
     except TypeError:
         bot.send_message(chat_id=message.from_user.id,
                          text=f'Аудиторію не знайдено {emojize(":white_frowning_face:", use_aliases=True)}',
                          reply_markup=search_again)
 
-        bot.send_message(chat_id=374464076, text=f'#no_aud')
+        # bot.send_message(chat_id=374464076, text=f'#no_aud')
 
 
 def get_aud_from_dict(number):

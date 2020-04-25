@@ -32,9 +32,14 @@ class Subject(Base):
         return session.query(Subject).all()
 
     @staticmethod
-    def get_subject_by_id(subject_id):
+    def get_subject_fullname_by_id(subject_id):
         subject = session.query(Subject).get(subject_id)
         return subject.fullname
+
+    @staticmethod
+    def get_subject_name_by_id(subject_id):
+        subject = session.query(Subject).get(subject_id)
+        return subject.name
 
 
 Base.metadata.create_all(conn)

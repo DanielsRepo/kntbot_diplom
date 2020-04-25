@@ -13,7 +13,6 @@ student_communication = Blueprint('student_communication', __name__)
 
 
 @student_communication.route('/student_communication')
-# SEND METHODS FILE
 def teacher_student_communication(message):
     subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'methodsubject_')
 
@@ -49,7 +48,7 @@ def send_message_or_file(message, subject_id):
 
         bot.register_next_step_handler(message, send_message_or_file, subject_id)
     else:
-        subject = Subject.get_subject_by_id(subject_id)
+        subject = Subject.get_subject_fullname_by_id(subject_id)
         students = []
 
         for group in Group.get_groups():
@@ -63,11 +62,11 @@ def send_message_or_file(message, subject_id):
                 try:
                     bot.send_message(chat_id=student.id,
                                      text=f'Повідомлення по предмету {subject}:\n\n{message.text}')
-                    bot.send_message(chat_id=message.from_user.id,
-                                     text=f'Повідомлення було відправлено '
-                                          f'{emojize(":white_check_mark:", use_aliases=True)}')
                 except ApiException:
                     continue
+            bot.send_message(chat_id=message.from_user.id,
+                             text=f'Повідомлення було відправлено '
+                                  f'{emojize(":white_check_mark:", use_aliases=True)}')
         elif message.content_type == 'document':
             for student in students:
                 try:
@@ -75,10 +74,10 @@ def send_message_or_file(message, subject_id):
                                       data=message.document.file_id,
                                       caption=f'Методичний матеріал з предмету {subject} '
                                               f'\n\n{caption}')
-                    bot.send_message(chat_id=message.from_user.id,
-                                     text=f'Файл було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
                 except ApiException:
                     continue
+            bot.send_message(chat_id=message.from_user.id,
+                             text=f'Файл було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
             save_file_to_local(message.document.file_id, subject)
         elif message.content_type == 'photo':
             for student in students:
@@ -87,15 +86,17 @@ def send_message_or_file(message, subject_id):
                                    photo=message.photo[-1].file_id,
                                    caption=f'Методичний матеріал з предмету {subject} '
                                            f'\n\n{caption}')
-                    bot.send_message(chat_id=message.from_user.id,
-                                     text=f'Фото було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
+
                 except ApiException:
                     continue
+            bot.send_message(chat_id=message.from_user.id,
+                             text=f'Фото було відправлено {emojize(":white_check_mark:", use_aliases=True)}')
             save_file_to_local(message.photo[-1].file_id, subject)
 
 
 def save_file_to_local(file_id, subject):
     bot_file_path = bot.get_file(file_id).file_path
+
     downloaded_file = bot.download_file(bot_file_path)
     file_extension = bot_file_path.split('.')[1]
 

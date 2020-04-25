@@ -40,7 +40,7 @@ def get_group(message):
         student.username = message.from_user.username
         student.group_id = group_id
 
-        message = bot.send_message(chat_id=message.from_user.id, text='Введи П.І.Б українською мовою')
+        message = bot.send_message(chat_id=message.from_user.id, text='Введи ПІБ українською мовою')
         bot.register_next_step_handler(message, get_name, student)
 
 
@@ -49,7 +49,7 @@ def get_name(message, student):
 
     if bool(re.search("[^А-ЯҐЄІIЇа-яiієїґ' -]+", name)) or len(name.split(' ')) != 3 or len(name) > 256:
         message = bot.send_message(chat_id=message.from_user.id,
-                                   text='Неккоректний ввід\nВведи Ф.I.O. українською мовою')
+                                   text='Неккоректний ввід\nВведи ПІБ українською мовою')
         bot.register_next_step_handler(message, get_name, student)
     else:
         student.name = name
@@ -87,11 +87,11 @@ def get_phone(message, student):
         bot.send_message(chat_id=message.from_user.id, text=success_message,
                          reply_markup=make_menu_keyboard(message, other_fac=False))
 
-        bot.send_message(chat_id=374464076,
-                         text=f'#registered <a href="t.me/{student.username}">{student.name}</a> '
-                              f'КНТ-{Group.get_group_by_id(student.group_id)}',
-                         parse_mode='html',
-                         disable_web_page_preview=True)
+        # bot.send_message(chat_id=374464076,
+        #                  text=f'#registered <a href="t.me/{student.username}">{student.name}</a> '
+        #                       f'КНТ-{Group.get_group_by_id(student.group_id)}',
+        #                  parse_mode='html',
+        #                  disable_web_page_preview=True)
 
 
 @bot.message_handler(commands=['reg301198'])
