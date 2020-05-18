@@ -8,13 +8,11 @@ from database.grade_type import GradeType
 from keyboards.keyboard import make_keyboard
 from emoji import emojize
 from database.subject_debtor import SubjectDebtor
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 grades = Blueprint('grades', __name__)
 
 
 @grades.route('/grades')
-# ADD GRADE
 def assign_grade(message):
     subjects_keyboard = make_keyboard('subject', Subject.get_subjects(), 'gradesubject_')
 

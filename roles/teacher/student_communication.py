@@ -41,8 +41,8 @@ def send_message_or_file(message, subject_id):
         bot.clear_step_handler_by_chat_id(chat_id=message.from_user.id)
     elif message.content_type not in ['text', 'photo', 'document']:
         bot.send_message(chat_id=message.from_user.id,
-                         text=f'Файл/повідомлення не відправлено {emojize(":x:", use_aliases=True)}\n\n'
-                              'Некорректний формат\n'
+                         text=f'Файл/повідомлення не відправлено {emojize(":x:", use_aliases=True)}\n'
+                              'Некорректний формат\n\n'
                               'Відправте файл/повідомлення боту і він його передасть всім студентам цього предмету\n\n'
                               'Щоб скасувати дію можна скористатися командою /cancel')
 

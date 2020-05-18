@@ -49,7 +49,8 @@ def get_name(message, student):
 
     if bool(re.search("[^А-ЯҐЄІIЇа-яiієїґ' -]+", name)) or len(name.split(' ')) != 3 or len(name) > 256:
         message = bot.send_message(chat_id=message.from_user.id,
-                                   text='Неккоректний ввід\nВведи ПІБ українською мовою')
+                                   text=f'Неккоректний ввід {emojize(":x:", use_aliases=True)}'
+                                        f'\nВведи ПІБ українською мовою')
         bot.register_next_step_handler(message, get_name, student)
     else:
         student.name = name
@@ -77,7 +78,8 @@ def get_phone(message, student):
 
     if bool(re.search("[^0-9+]+", phone)) or len(phone) > 13:
         message = bot.send_message(chat_id=message.from_user.id,
-                                   text='Неккоректний ввід\nВведи свій номер телефону')
+                                   text=f'Неккоректний ввід {emojize(":x:", use_aliases=True)}\n'
+                                        f'Введи свій номер телефону')
         bot.register_next_step_handler(message, get_phone, student)
     else:
         student.phone = phone

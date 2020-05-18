@@ -56,6 +56,7 @@ def shutdown_session(exception=None):
     print('session close')
     session.close()
 
+# https://api.telegram.org/bot1116908541:AAGYKzbGhsYLXTHrSK-bGT8Fq3n8Do_9SIo/setWebhook?url=
 
 @app.route("/", methods=['POST'])
 def webhook():
